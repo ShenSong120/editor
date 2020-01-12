@@ -1,5 +1,6 @@
 # coding:utf-8
 import re
+import sys
 from PyQt5 import QtWidgets
 from PyQt5.QtCore import *
 from PyQt5.Qsci import *
@@ -8,8 +9,8 @@ from PyQt5.QtGui import *
 from threading import Thread
 
 '''感谢https://blog.csdn.net/xiaoyangyang20/article/details/68923133?fps=1&locationNum=4
-，https://blog.csdn.net/tgbus18990140382/article/details/26136661
-，https://qscintilla.com
+,https://blog.csdn.net/tgbus18990140382/article/details/26136661
+,https://qscintilla.com
 。'''
 
 
@@ -103,7 +104,6 @@ class MyQscintilla(QsciScintilla):
         # self.textChanged.connect(self.changed)
         self.cursorPositionChanged.connect(self.cursor_move)
 
-
     def changed(self):
         line_digit = len(str(len(self.text().split('\n'))))
         margin_width = 15 + (line_digit - 1) * 10
@@ -122,7 +122,6 @@ class MyQscintilla(QsciScintilla):
         self.old_text = text
         # Thread(target=self.complete_other, args=()).start()
 
-
     # 光标移动事件
     def cursor_move(self):
         # 调整边栏宽度
@@ -134,14 +133,14 @@ class MyQscintilla(QsciScintilla):
         # 只有新增字符的情况下才允许自动补全
         if len(text) > len(self.old_text):
             line, index = self.getCursorPosition()
-            print(line, index)
-            self.setSelection(line, index-1, line, index)
-            print(self.selectedText())
+            if list(text)[index-1] == '>':
+                print(line, index)
+            # self.setSelection(line, index-1, line, index)
+            # print(self.selectedText())
             # self.insertAt('<>', line, index)
         else:
             pass
         self.old_text = text
-
 
     def complete_other(self):
         # 文本内容
@@ -159,7 +158,6 @@ class MyQscintilla(QsciScintilla):
         else:
             pass
         self.old_text = text
-
 
     # 切换注释
     def toggle_comment(self):
@@ -180,7 +178,6 @@ class MyQscintilla(QsciScintilla):
             # 取消注释
             self.cancel_comment(start_line, end_line)
 
-
     # 获取选中行(注释需要用到, 开始行和结束行)
     def get_selections(self):
         start_position = self.SendScintilla(QsciScintillaBase.SCI_GETSELECTIONSTART)
@@ -188,7 +185,6 @@ class MyQscintilla(QsciScintilla):
         start_line = self.SendScintilla(QsciScintillaBase.SCI_LINEFROMPOSITION, start_position)
         end_line = self.SendScintilla(QsciScintillaBase.SCI_LINEFROMPOSITION, end_position)
         return start_line, end_line
-
 
     # 添加注释
     def add_comment(self, start_line, end_line):
@@ -214,7 +210,6 @@ class MyQscintilla(QsciScintilla):
         replace_text = '\r\n'.join(selected_list)
         self.replaceSelectedText(replace_text)
 
-
     # 取消注释
     def cancel_comment(self, start_line, end_line):
         last_line = end_line
@@ -239,7 +234,6 @@ class MyQscintilla(QsciScintilla):
         replace_text = '\r\n'.join(selected_list)
         self.replaceSelectedText(replace_text)
 
-
     # 这是重写键盘事件
     def keyPressEvent(self, event):
         # Ctrl + / 键 注释or取消注释
@@ -254,7 +248,6 @@ class MyQscintilla(QsciScintilla):
             # 不要破坏原有功能
             QsciScintilla.keyPressEvent(self, event)
 
-
     # 鼠标滚动事件(字体放大缩小)
     def wheelEvent(self, event):
         # Ctrl + 滚轮 控制字体缩放
@@ -267,7 +260,6 @@ class MyQscintilla(QsciScintilla):
                 self.zoomOut(1)
         else:
             super().wheelEvent(event)   # 留点汤给父类，不然滚轮无法翻页
-
 
 
 class MainWindow(QMainWindow):
@@ -288,9 +280,7 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(self.editor)
 
 
-
 def main():
-    import sys
     app = QApplication(sys.argv)
     form = MainWindow(None, 'xml-editor')
     form.show()
