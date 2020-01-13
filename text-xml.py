@@ -1,5 +1,6 @@
 # coding:utf-8
 import re
+import sys
 from PyQt5 import QtWidgets
 from PyQt5.QtCore import *
 from PyQt5.Qsci import *
@@ -281,13 +282,8 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(self.editor)
 
 
-
-def main():
-    import sys
+if __name__=='__main__':
     app = QApplication(sys.argv)
     form = MainWindow(None, 'xml-editor')
     form.show()
     app.exec_()
-
-
-main()
