@@ -7,11 +7,6 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from threading import Thread
 
-'''感谢https://blog.csdn.net/xiaoyangyang20/article/details/68923133?fps=1&locationNum=4
-，https://blog.csdn.net/tgbus18990140382/article/details/26136661
-，https://qscintilla.com
-。'''
-
 
 class MyQscintilla(QsciScintilla):
     def __init__(self, parent):
@@ -94,34 +89,13 @@ class MyQscintilla(QsciScintilla):
         self.lexer.setDefaultFont(QFont('Consolas', 14))
         self.setLexer(self.lexer)
         self.__api = QsciAPIs(self.lexer)
-        auto_completions = ['note', 'shen', 'song']
+        auto_completions = ['note', 'shen', 'song', 'xml', 'version', 'encoding']
         for ac in auto_completions:
             self.__api.add(ac)
         self.__api.prepare()
         # 触发事件
         self.old_text = ''
-        # self.textChanged.connect(self.changed)
         self.cursorPositionChanged.connect(self.cursor_move)
-
-
-    def changed(self):
-        line_digit = len(str(len(self.text().split('\n'))))
-        margin_width = 15 + (line_digit - 1) * 10
-        self.setMarginWidth(0, margin_width)
-        # 文本内容
-        text = self.text()
-        # 只有新增字符的情况下才允许自动补全
-        if len(text) > len(self.old_text):
-            line, index = self.getCursorPosition()
-            self.setSelection(line, index, line, index+1)
-            print(self.selectedText())
-            self.replaceSelectedText('<>')
-            # self.insertAt('<>', line, index + 1)
-        else:
-            pass
-        self.old_text = text
-        # Thread(target=self.complete_other, args=()).start()
-
 
     # 光标移动事件
     def cursor_move(self):
@@ -134,32 +108,16 @@ class MyQscintilla(QsciScintilla):
         # 只有新增字符的情况下才允许自动补全
         if len(text) > len(self.old_text):
             line, index = self.getCursorPosition()
-            print(line, index)
-            self.setSelection(line, index-1, line, index)
-            print(self.selectedText())
-            # self.insertAt('<>', line, index)
-        else:
-            pass
-        self.old_text = text
-
-
-    def complete_other(self):
-        # 文本内容
-        text = self.text()
-        line, index = self.getCursorPosition()
-        # 只有新增字符的情况下才允许自动补全
-        if len(text) > len(self.old_text):
-            index += 1
             current_line_text = self.text(line)
             list_current_line_text = list(current_line_text)
-            if list_current_line_text[index-1] == '>':
-                other_text = re.findall("<.+?>", ''.join(current_line_text[:index]))[0]
-                print(other_text)
-                self.insertAt(other_text, line, 0)
-        else:
-            pass
-        self.old_text = text
-
+            current_char = list_current_line_text[index-1] if index > 0 else None
+            if current_char == '>':
+                for i in range(index-1, -1, -1):
+                    if list_current_line_text[i] == '<' and list_current_line_text[i+1] != '?':
+                        key_words = ''.join(list_current_line_text[i+1:index-1])
+                        self.insertAt('</'+key_words+'>', line, index)
+                        break
+        self.old_text = self.text()
 
     # 切换注释
     def toggle_comment(self):
@@ -180,7 +138,6 @@ class MyQscintilla(QsciScintilla):
             # 取消注释
             self.cancel_comment(start_line, end_line)
 
-
     # 获取选中行(注释需要用到, 开始行和结束行)
     def get_selections(self):
         start_position = self.SendScintilla(QsciScintillaBase.SCI_GETSELECTIONSTART)
@@ -188,7 +145,6 @@ class MyQscintilla(QsciScintilla):
         start_line = self.SendScintilla(QsciScintillaBase.SCI_LINEFROMPOSITION, start_position)
         end_line = self.SendScintilla(QsciScintillaBase.SCI_LINEFROMPOSITION, end_position)
         return start_line, end_line
-
 
     # 添加注释
     def add_comment(self, start_line, end_line):
@@ -202,18 +158,36 @@ class MyQscintilla(QsciScintilla):
         self.setSelection(start_line, 0, end_line, end_index)
         selected_text = self.selectedText()
         selected_list = selected_text.split('\r\n')
-        indent_position = []
-        for line in selected_list:
-            if line:
-                indent_position.append(len(line) - len(line.lstrip()))
-        for i, line in enumerate(selected_list):
-            if line.strip() != '':
-                selected_list[i] = line[:indent_position[i]] + '<!-- ' + line[indent_position[i]:] + ' -->'
-            else:
-                selected_list[i] = line
-        replace_text = '\r\n'.join(selected_list)
-        self.replaceSelectedText(replace_text)
+        if len(selected_list) > 1 and selected_list[-1] == '':
+            selected_list.pop(-1)
 
+        line_separate_list = []
+        # 将一行内容拆解三个部分(1\t or '' 2<note> 3 ''or...)
+        for line in selected_list:
+            # 如果存在line内容
+            if line:
+                line_list = []
+                if '<' in line and '>' in line:
+                    line_list.append(line.split('<')[0])
+                    line_list.append(re.findall('<.*>', line)[0])
+                    line_list.append(line.split('>')[-1])
+                    line_separate_list.append(line_list)
+                elif len(line) > 0:
+                    line_list.append(re.findall('\s*', line)[0])
+                    line_list.append('')
+                    line_list.append('')
+                    line_separate_list.append(line_list)
+                else:
+                    line_list = ['', '', '']
+                    line_separate_list.append(line_list)
+            else:
+                line_list = ['', '', '']
+                line_separate_list.append(line_list)
+        for i in range(len(line_separate_list)):
+            selected_list[i] = line_separate_list[i][0] + '<!-- ' + line_separate_list[i][1] + ' -->' + line_separate_list[i][2]
+
+        replace_text = '\r\n'.join(selected_list) + '\r\n'
+        self.replaceSelectedText(replace_text)
 
     # 取消注释
     def cancel_comment(self, start_line, end_line):
@@ -232,28 +206,48 @@ class MyQscintilla(QsciScintilla):
             if line:
                 indent_position.append(len(line) - len(line.lstrip()))
         for i, line in enumerate(selected_list):
-            if line.strip() != '':
-                selected_list[i] = line.replace('<!-- ', '', 1).replace(' -->', '', 1)
-            else:
-                selected_list[i] = line
+            selected_list[i] = line.replace('<!-- ', '', 1).replace(' -->', '', 1)
         replace_text = '\r\n'.join(selected_list)
         self.replaceSelectedText(replace_text)
-
 
     # 这是重写键盘事件
     def keyPressEvent(self, event):
         # Ctrl + / 键 注释or取消注释
         if (event.key() == Qt.Key_Slash):
             if QApplication.keyboardModifiers() == Qt.ControlModifier:
+                # 注释的时候先关闭自动补全后半部分功能
+                self.cursorPositionChanged.disconnect(self.cursor_move)
                 # 切换注释
                 self.toggle_comment()
+                self.cursorPositionChanged.connect(self.cursor_move)
+                self.old_text = self.text()
             else:
                 # 不要破坏原有功能
                 QsciScintilla.keyPressEvent(self, event)
+        # Ctrl + D 键(需要更新old_text)
+        elif (event.key() == Qt.Key_D):
+            if QApplication.keyboardModifiers() == Qt.ControlModifier:
+                # 不要破坏原有功能
+                QsciScintilla.keyPressEvent(self, event)
+                self.old_text = self.text()
+            else:
+                # 不要破坏原有功能
+                QsciScintilla.keyPressEvent(self, event)
+        # 单引号处理
+        elif (event.key() == Qt.Key_Apostrophe):
+            QsciScintilla.keyPressEvent(self, event)
+            self.insert("'")
+            self.old_text = self.text()
+        # 双引号处理
+        elif (event.key() == Qt.Key_QuoteDbl):
+            QsciScintilla.keyPressEvent(self, event)
+            self.insert('"')
+            self.old_text = self.text()
+        # 删除单/双引号处理
+        # pass
         else:
             # 不要破坏原有功能
             QsciScintilla.keyPressEvent(self, event)
-
 
     # 鼠标滚动事件(字体放大缩小)
     def wheelEvent(self, event):
@@ -268,8 +262,7 @@ class MyQscintilla(QsciScintilla):
         else:
             super().wheelEvent(event)   # 留点汤给父类，不然滚轮无法翻页
 
-
-
+# 窗口app
 class MainWindow(QMainWindow):
     def __init__(self, parent=None, title='未命名'):
         super(MainWindow, self).__init__(parent)
