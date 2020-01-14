@@ -112,38 +112,38 @@ class MyQscintilla(QsciScintilla):
         self.menu.setStyleSheet(menu_qss)
         # 撤销上一操作
         self.undo_action = QAction('撤消上一次操作(Ctrl+Z)', self)
-        self.undo_action.triggered.connect(self.undo)
+        self.undo_action.triggered.connect(self.undo_operate)
         if self.isUndoAvailable() is False:
             self.undo_action.setEnabled(False)
         # 恢复上一操作
         self.redo_action = QAction('恢复上一次操作(Ctrl+Y)', self)
-        self.redo_action.triggered.connect(self.redo)
+        self.redo_action.triggered.connect(self.redo_operate)
         if self.isRedoAvailable() is False:
             self.redo_action.setEnabled(False)
         # 剪切
         self.cut_action = QAction('剪切(Ctrl+X)', self)
-        self.cut_action.triggered.connect(self.cut)
+        self.cut_action.triggered.connect(self.cut_operate)
         if self.selectedText() == '':
             self.cut_action.setEnabled(False)
         # 复制
         self.copy_action = QAction('复制(Ctrl+C)', self)
-        self.copy_action.triggered.connect(self.copy)
+        self.copy_action.triggered.connect(self.copy_operate)
         if self.selectedText() == '':
             self.copy_action.setEnabled(False)
         # 粘贴
         self.paste_action = QAction('粘贴(Ctrl+V)', self)
-        self.paste_action.triggered.connect(self.paste)
+        self.paste_action.triggered.connect(self.paste_operate)
         # 删除
         self.delete_action = QAction('删除', self)
-        self.delete_action.triggered.connect(self.removeSelectedText)
+        self.delete_action.triggered.connect(self.delete_operate)
         if self.selectedText() == '':
             self.delete_action.setEnabled(False)
         # 全部选中
         self.select_all_action = QAction('选中全部(Ctrl+A)', self)
-        self.select_all_action.triggered.connect(lambda : self.selectAll(True))
+        self.select_all_action.triggered.connect(self.select_all_operate)
         # 添加/去除-注释
         self.comment_action = QAction('添加/去除-注释(Ctrl+L)', self)
-        self.comment_action.triggered.connect(self.toggle_comment)
+        self.comment_action.triggered.connect(self.comment_operate)
         # 菜单添加action
         self.menu.addAction(self.undo_action)
         self.menu.addAction(self.redo_action)
@@ -154,6 +154,70 @@ class MyQscintilla(QsciScintilla):
         self.menu.addAction(self.select_all_action)
         self.menu.addAction(self.comment_action)
         self.menu.exec(self.mapToGlobal(point))
+
+    def undo_operate(self):
+        # 注释的时候先关闭自动补全后半部分功能
+        self.cursorPositionChanged.disconnect(self.cursor_move)
+        # 切换注释
+        self.undo()
+        self.cursorPositionChanged.connect(self.cursor_move)
+        self.old_text = self.text()
+
+    def redo_operate(self):
+        # 注释的时候先关闭自动补全后半部分功能
+        self.cursorPositionChanged.disconnect(self.cursor_move)
+        # 切换注释
+        self.redo()
+        self.cursorPositionChanged.connect(self.cursor_move)
+        self.old_text = self.text()
+
+    def cut_operate(self):
+        # 注释的时候先关闭自动补全后半部分功能
+        self.cursorPositionChanged.disconnect(self.cursor_move)
+        # 切换注释
+        self.cut()
+        self.cursorPositionChanged.connect(self.cursor_move)
+        self.old_text = self.text()
+
+    def copy_operate(self):
+        # 注释的时候先关闭自动补全后半部分功能
+        self.cursorPositionChanged.disconnect(self.cursor_move)
+        # 切换注释
+        self.copy()
+        self.cursorPositionChanged.connect(self.cursor_move)
+        self.old_text = self.text()
+
+    def paste_operate(self):
+        # 注释的时候先关闭自动补全后半部分功能
+        self.cursorPositionChanged.disconnect(self.cursor_move)
+        # 切换注释
+        self.paste()
+        self.cursorPositionChanged.connect(self.cursor_move)
+        self.old_text = self.text()
+
+    def delete_operate(self):
+        # 注释的时候先关闭自动补全后半部分功能
+        self.cursorPositionChanged.disconnect(self.cursor_move)
+        # 切换注释
+        self.removeSelectedText()
+        self.cursorPositionChanged.connect(self.cursor_move)
+        self.old_text = self.text()
+
+    def select_all_operate(self):
+        # 注释的时候先关闭自动补全后半部分功能
+        self.cursorPositionChanged.disconnect(self.cursor_move)
+        # 切换注释
+        self.selectAll(True)
+        self.cursorPositionChanged.connect(self.cursor_move)
+        self.old_text = self.text()
+
+    def comment_operate(self):
+        # 注释的时候先关闭自动补全后半部分功能
+        self.cursorPositionChanged.disconnect(self.cursor_move)
+        # 切换注释
+        self.toggle_comment()
+        self.cursorPositionChanged.connect(self.cursor_move)
+        self.old_text = self.text()
 
     # 光标移动事件
     def cursor_move(self):
@@ -292,36 +356,49 @@ class MyQscintilla(QsciScintilla):
         # Ctrl + / 键 注释or取消注释
         if (event.key() == Qt.Key_Slash):
             if QApplication.keyboardModifiers() == Qt.ControlModifier:
-                # 注释的时候先关闭自动补全后半部分功能
-                self.cursorPositionChanged.disconnect(self.cursor_move)
-                # 切换注释
-                self.toggle_comment()
-                self.cursorPositionChanged.connect(self.cursor_move)
-                self.old_text = self.text()
+                self.comment_operate()
             else:
                 # 不要破坏原有功能
                 QsciScintilla.keyPressEvent(self, event)
         # Ctrl + Z 键 撤销上一步操作
-        if (event.key() == Qt.Key_Z):
+        elif (event.key() == Qt.Key_Z):
             if QApplication.keyboardModifiers() == Qt.ControlModifier:
-                # 撤销上一步操作的时候先关闭自动补全后半部分功能
-                self.cursorPositionChanged.disconnect(self.cursor_move)
-                # 撤销上一次操作
-                self.undo()
-                self.cursorPositionChanged.connect(self.cursor_move)
-                self.old_text = self.text()
+                self.undo_operate()
             else:
                 # 不要破坏原有功能
                 QsciScintilla.keyPressEvent(self, event)
         # Ctrl + Y 键 恢复上一步操作
-        if (event.key() == Qt.Key_Y):
+        elif (event.key() == Qt.Key_Y):
             if QApplication.keyboardModifiers() == Qt.ControlModifier:
-                # 恢复上一步操作的时候先关闭自动补全后半部分功能
-                self.cursorPositionChanged.disconnect(self.cursor_move)
-                # 恢复上一次操作
-                self.redo()
-                self.cursorPositionChanged.connect(self.cursor_move)
-                self.old_text = self.text()
+                self.redo_operate()
+            else:
+                # 不要破坏原有功能
+                QsciScintilla.keyPressEvent(self, event)
+        # Ctrl + X 键 剪切
+        elif (event.key() == Qt.Key_X):
+            if QApplication.keyboardModifiers() == Qt.ControlModifier:
+                self.cut_operate()
+            else:
+                # 不要破坏原有功能
+                QsciScintilla.keyPressEvent(self, event)
+        # Ctrl + C 键 复制
+        elif (event.key() == Qt.Key_C):
+            if QApplication.keyboardModifiers() == Qt.ControlModifier:
+                self.copy_operate()
+            else:
+                # 不要破坏原有功能
+                QsciScintilla.keyPressEvent(self, event)
+        # Ctrl + V 键 粘贴
+        elif (event.key() == Qt.Key_V):
+            if QApplication.keyboardModifiers() == Qt.ControlModifier:
+                self.paste_operate()
+            else:
+                # 不要破坏原有功能
+                QsciScintilla.keyPressEvent(self, event)
+        # Ctrl + A 键 全部选中
+        elif (event.key() == Qt.Key_A):
+            if QApplication.keyboardModifiers() == Qt.ControlModifier:
+                self.select_all_operate()
             else:
                 # 不要破坏原有功能
                 QsciScintilla.keyPressEvent(self, event)
