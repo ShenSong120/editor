@@ -108,8 +108,10 @@ class MyQscintilla(QsciScintilla):
         menu_qss = "QMenu{color: #242424; background: #F0F0F0; margin: 2px;}\
                     QMenu::item{padding:3px 20px 3px 20px;}\
                     QMenu::indicator{width:13px; height:13px;}\
-                    QMenu::item:selected{color:#242424; border:0px solid #575757; background:#1E90FF;}\
-                    QMenu::item:!enabled{color: grey;}\
+                    QMenu::item:selected:enabled{color:#242424; border:0px solid #575757; background:#1E90FF;}\
+                    QMenu::item:selected:!enabled{color:#969696; border:0px solid #575757; background:#99CCFF;}\
+                    QMenu::item:!enabled{color: #969696;}\
+                    QMenu::item:enabled{color: #242424;}\
                     QMenu::separator{height:1px; background:#757575;}"
         self.menu = QMenu(self)
         self.menu.setStyleSheet(menu_qss)
