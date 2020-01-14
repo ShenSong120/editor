@@ -94,9 +94,69 @@ class MyQscintilla(QsciScintilla):
         for ac in auto_completions:
             self.__api.add(ac)
         self.__api.prepare()
-        # 触发事件
+        # 右键菜单
+        self.setContextMenuPolicy(Qt.CustomContextMenu)
+        self.customContextMenuRequested.connect(self.show_menu)
+        # 保存每一次操作后的text
         self.old_text = ''
+        # 触发事件
         self.cursorPositionChanged.connect(self.cursor_move)
+
+    # 右键菜单展示
+    def show_menu(self, point):
+        # 菜单样式(整体背景#4D4D4D,选中背景#1E90FF,选中字体#E8E8E8,选中边界#575757,分离器背景#757575)
+        menu_qss = "QMenu{color: #242424; background: #F0F0F0; margin: 2px;}\
+                    QMenu::item{padding:3px 20px 3px 20px;}\
+                    QMenu::indicator{width:13px; height:13px;}\
+                    QMenu::item:selected{color:#242424; border:0px solid #575757; background:#1E90FF;}\
+                    QMenu::item:!enabled{color: grey;}\
+                    QMenu::separator{height:1px; background:#757575;}"
+        self.menu = QMenu(self)
+        self.menu.setStyleSheet(menu_qss)
+        # 撤销上一操作
+        self.undo_action = QAction('撤消上一次操作(Ctrl+Z)', self)
+        self.undo_action.triggered.connect(self.undo)
+        if self.isUndoAvailable() is False:
+            self.undo_action.setEnabled(False)
+        # 恢复上一操作
+        self.redo_action = QAction('恢复上一次操作(Ctrl+Y)', self)
+        self.redo_action.triggered.connect(self.redo)
+        if self.isRedoAvailable() is False:
+            self.redo_action.setEnabled(False)
+        # 剪切
+        self.cut_action = QAction('剪切(Ctrl+X)', self)
+        self.cut_action.triggered.connect(self.cut)
+        if self.selectedText() == '':
+            self.cut_action.setEnabled(False)
+        # 复制
+        self.copy_action = QAction('复制(Ctrl+C)', self)
+        self.copy_action.triggered.connect(self.copy)
+        if self.selectedText() == '':
+            self.copy_action.setEnabled(False)
+        # 粘贴
+        self.paste_action = QAction('粘贴(Ctrl+V)', self)
+        self.paste_action.triggered.connect(self.paste)
+        # 删除
+        self.delete_action = QAction('删除', self)
+        self.delete_action.triggered.connect(self.removeSelectedText)
+        if self.selectedText() == '':
+            self.delete_action.setEnabled(False)
+        # 全部选中
+        self.select_all_action = QAction('选中全部(Ctrl+A)', self)
+        self.select_all_action.triggered.connect(lambda : self.selectAll(True))
+        # 添加/去除-注释
+        self.comment_action = QAction('添加/去除-注释(Ctrl+L)', self)
+        self.comment_action.triggered.connect(self.toggle_comment)
+        # 菜单添加action
+        self.menu.addAction(self.undo_action)
+        self.menu.addAction(self.redo_action)
+        self.menu.addAction(self.cut_action)
+        self.menu.addAction(self.copy_action)
+        self.menu.addAction(self.paste_action)
+        self.menu.addAction(self.delete_action)
+        self.menu.addAction(self.select_all_action)
+        self.menu.addAction(self.comment_action)
+        self.menu.exec(self.mapToGlobal(point))
 
     # 光标移动事件
     def cursor_move(self):
@@ -230,7 +290,6 @@ class MyQscintilla(QsciScintilla):
             # 不要破坏原有功能
             QsciScintilla.keyPressEvent(self, event)
 
-
     # 这是重写键盘事件
     def keyPressEvent(self, event):
         # Ctrl + / 键 注释or取消注释
@@ -257,8 +316,8 @@ class MyQscintilla(QsciScintilla):
             else:
                 # 不要破坏原有功能
                 QsciScintilla.keyPressEvent(self, event)
-        # Ctrl + R 键 恢复上一步操作
-        if (event.key() == Qt.Key_R):
+        # Ctrl + Y 键 恢复上一步操作
+        if (event.key() == Qt.Key_Y):
             if QApplication.keyboardModifiers() == Qt.ControlModifier:
                 # 恢复上一步操作的时候先关闭自动补全后半部分功能
                 self.cursorPositionChanged.disconnect(self.cursor_move)
