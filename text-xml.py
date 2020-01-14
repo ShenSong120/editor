@@ -245,6 +245,30 @@ class MyQscintilla(QsciScintilla):
             else:
                 # 不要破坏原有功能
                 QsciScintilla.keyPressEvent(self, event)
+        # Ctrl + Z 键 撤销上一步操作
+        if (event.key() == Qt.Key_Z):
+            if QApplication.keyboardModifiers() == Qt.ControlModifier:
+                # 撤销上一步操作的时候先关闭自动补全后半部分功能
+                self.cursorPositionChanged.disconnect(self.cursor_move)
+                # 撤销上一次操作
+                self.undo()
+                self.cursorPositionChanged.connect(self.cursor_move)
+                self.old_text = self.text()
+            else:
+                # 不要破坏原有功能
+                QsciScintilla.keyPressEvent(self, event)
+        # Ctrl + R 键 恢复上一步操作
+        if (event.key() == Qt.Key_R):
+            if QApplication.keyboardModifiers() == Qt.ControlModifier:
+                # 恢复上一步操作的时候先关闭自动补全后半部分功能
+                self.cursorPositionChanged.disconnect(self.cursor_move)
+                # 恢复上一次操作
+                self.redo()
+                self.cursorPositionChanged.connect(self.cursor_move)
+                self.old_text = self.text()
+            else:
+                # 不要破坏原有功能
+                QsciScintilla.keyPressEvent(self, event)
         # Ctrl + D 键(需要更新old_text)
         elif (event.key() == Qt.Key_D):
             if QApplication.keyboardModifiers() == Qt.ControlModifier:
