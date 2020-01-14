@@ -13,12 +13,7 @@ class MyQscintilla(QsciScintilla):
     def __init__(self, parent):
         super(MyQscintilla, self).__init__(parent)
         # 字体设置
-        self.font = QFont()
-        # font.setFamily('Courier')
-        self.font.setFamily('Consolas')
-        self.font.setPointSize(14)
-        # 设置字体宽度相等
-        self.font.setFixedPitch(True)
+        self.font = QFont('Consolas', 14)
         self.setFont(self.font)
         self.setUtf8(True)
         self.setMarginsFont(self.font)
@@ -87,7 +82,7 @@ class MyQscintilla(QsciScintilla):
         self.autoCompleteFromAll()
         # 定义语言为xml语言
         self.lexer = QsciLexerXML(self)
-        self.lexer.setDefaultFont(QFont('Consolas', 14))
+        self.lexer.setDefaultFont(self.font)
         self.setLexer(self.lexer)
         self.__api = QsciAPIs(self.lexer)
         auto_completions = ['note', 'shen', 'song', 'xml', 'version', 'encoding']
@@ -376,17 +371,10 @@ class MainWindow(QMainWindow):
         super(MainWindow, self).__init__(parent)
         self.setGeometry(100, 100, 1000, 700)
         self.setWindowTitle(title)
-        # 字体设置
-        font = QFont()
-        # font.setFamily('Courier')
-        font.setFamily('Consolas')
-        font.setPointSize(14)
-        # 设置字体宽度相等
-        font.setFixedPitch(True)
-        self.setFont(font)
         # 编辑器设置
         self.editor = MyQscintilla(self.centralWidget())
         self.setCentralWidget(self.editor)
+        self.setFont(self.editor.font)
 
 
 if __name__=='__main__':
