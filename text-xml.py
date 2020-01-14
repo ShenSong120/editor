@@ -211,6 +211,26 @@ class MyQscintilla(QsciScintilla):
         replace_text = '\r\n'.join(selected_list)
         self.replaceSelectedText(replace_text)
 
+    # 删除单/双引号操作
+    def delete_quotation_marks(self, event):
+        line, index = self.getCursorPosition()
+        current_line_text = self.text(line)
+        current_line_text_list = list(current_line_text)
+        # 当前光标肯定不是行末('')
+        if len(current_line_text) > index:
+            current_char = current_line_text_list[index-1]
+            next_char = current_line_text_list[index]
+            if current_char == next_char and current_char in ["'", '"']:
+                self.setSelection(line, index-1, line, index+1)
+                self.replaceSelectedText('')
+            else:
+                # 不要破坏原有功能
+                QsciScintilla.keyPressEvent(self, event)
+        else:
+            # 不要破坏原有功能
+            QsciScintilla.keyPressEvent(self, event)
+
+
     # 这是重写键盘事件
     def keyPressEvent(self, event):
         # Ctrl + / 键 注释or取消注释
@@ -245,7 +265,9 @@ class MyQscintilla(QsciScintilla):
             self.insert('"')
             self.old_text = self.text()
         # 删除单/双引号处理
-        # pass
+        elif (event.key() == Qt.Key_Backspace):
+            self.delete_quotation_marks(event)
+            self.old_text = self.text()
         else:
             # 不要破坏原有功能
             QsciScintilla.keyPressEvent(self, event)
@@ -278,7 +300,7 @@ class MainWindow(QMainWindow):
         font.setFixedPitch(True)
         self.setFont(font)
         # 编辑器设置
-        self.editor = MyQscintilla(self)
+        self.editor = MyQscintilla(self.centralWidget())
         self.setCentralWidget(self.editor)
 
 
