@@ -8,6 +8,12 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from threading import Thread
 
+'''
+需要增加的功能:
+1.块导入
+2.点击跳转
+'''
+
 
 class MyQscintilla(QsciScintilla):
     def __init__(self, parent):
