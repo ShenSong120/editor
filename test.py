@@ -18,7 +18,7 @@ from threading import Thread
 class MyQscintilla(QsciScintilla):
     def __init__(self, parent):
         super(MyQscintilla, self).__init__(parent)
-        self.font = QFont('Consolas', 14)
+        self.font = QFont('Consolas', 14, QFont.Bold)
         # self.font = QFont('Ubuntu Mono', 14)
         # self.font = QFont('Arial ', 14)
         self.setFont(self.font)
