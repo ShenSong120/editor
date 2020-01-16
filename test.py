@@ -263,8 +263,9 @@ class MyQscintilla(QsciScintilla):
         selected_list = selected_text.split('\r\n')
         if len(selected_list) > 1 and selected_list[-1] == '':
             selected_list.pop(-1)
-
         line_separate_list = []
+        # 注释结束后光标位置
+        cursor_position = 0
         # 将一行内容拆解三个部分(1\t or '' 2<note> 3 ''or...)
         for line in selected_list:
             # 如果存在line内容
@@ -275,22 +276,30 @@ class MyQscintilla(QsciScintilla):
                     line_list.append(re.findall('<.*>', line)[0])
                     line_list.append(line.split('>')[-1])
                     line_separate_list.append(line_list)
+                    # 光标位置需要加上'<!---->'
+                    cursor_position = len(line) + 7
                 elif len(line) > 0:
                     line_list.append(re.findall('\s*', line)[0])
                     line_list.append('')
                     line_list.append('')
                     line_separate_list.append(line_list)
+                    cursor_position = len(line) + 4
                 else:
                     line_list = ['', '', '']
                     line_separate_list.append(line_list)
+                    cursor_position =  4
             else:
                 line_list = ['', '', '']
                 line_separate_list.append(line_list)
+                cursor_position = 4
         for i in range(len(line_separate_list)):
-            selected_list[i] = line_separate_list[i][0] + '<!-- ' + line_separate_list[i][1] + ' -->' + line_separate_list[i][2]
-
-        replace_text = '\r\n'.join(selected_list) + '\r\n'
+            selected_list[i] = line_separate_list[i][0] + '<!--' + line_separate_list[i][1] + '-->' + line_separate_list[i][2]
+        if self.text(end_line).endswith('\r\n'):
+            replace_text = '\r\n'.join(selected_list) + '\r\n'
+        else:
+            replace_text = '\r\n'.join(selected_list)
         self.replaceSelectedText(replace_text)
+        self.setCursorPosition(end_line, cursor_position)
 
     # 取消注释
     def cancel_comment(self, start_line, end_line):
@@ -309,7 +318,7 @@ class MyQscintilla(QsciScintilla):
             if line:
                 indent_position.append(len(line) - len(line.lstrip()))
         for i, line in enumerate(selected_list):
-            selected_list[i] = line.replace('<!-- ', '', 1).replace(' -->', '', 1)
+            selected_list[i] = line.replace('<!--', '', 1).replace('-->', '', 1)
         replace_text = '\r\n'.join(selected_list)
         self.replaceSelectedText(replace_text)
 
