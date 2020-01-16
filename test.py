@@ -15,6 +15,18 @@ from threading import Thread
 '''
 
 
+class MyLexerXML(QsciLexerXML):
+    def __init__(self, parent):
+        super(MyLexerXML, self).__init__(parent)
+        # 设置标签大小写不敏感
+        self.setCaseSensitiveTags(False)
+        # 设置自动缩进样式
+        self.setAutoIndentStyle(QsciScintilla.AiMaintain)
+        # self.setAutoIndentStyle(QsciScintilla.AiOpening)
+        # self.setAutoIndentStyle(QsciScintilla.AiClosing)
+
+
+
 class MyQscintilla(QsciScintilla):
     def __init__(self, parent):
         super(MyQscintilla, self).__init__(parent)
@@ -61,7 +73,8 @@ class MyQscintilla(QsciScintilla):
         self.setAutoCompletionUseSingle(QsciScintilla.AcusExplicit)
         self.autoCompleteFromAll()
         # 定义语言为xml语言
-        self.lexer = QsciLexerXML(self)
+        # self.lexer = QsciLexerXML(self)
+        self.lexer = MyLexerXML(self)
         # self.lexer.setDefaultFont(self.font)
         self.lexer.setFont(self.font)
         self.setLexer(self.lexer)
