@@ -25,7 +25,7 @@ class MyQscintilla(QsciScintilla):
         self.setUtf8(True)
         # self.setMarginsFont(self.font)
         self.setMarginsFont(QFont('Arial ', 14))
-        self.setMarginWidth(0, 15)
+        self.setMarginWidth(0, 20)
         # 设置行号
         self.setMarginLineNumbers(0, True)
         # 设置换行符为(\r\n)
@@ -204,7 +204,7 @@ class MyQscintilla(QsciScintilla):
     def cursor_move(self):
         # 调整边栏宽度
         line_digit = len(str(len(self.text().split('\n'))))
-        margin_width = 15 + (line_digit - 1) * 10
+        margin_width = 20 + (line_digit - 1) * 13
         self.setMarginWidth(0, margin_width)
         # 文本内容
         text = self.text()
