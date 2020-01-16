@@ -58,7 +58,7 @@ class MyQscintilla(QsciScintilla):
         self.setAutoIndent(True)
         self.setBackspaceUnindents(True)
         # tab宽度设置为8, 也就是四个字符
-        self.setTabWidth(8)
+        self.setTabWidth(4)
         # 设置缩进的显示方式(用tab缩进时, 在缩进位置上显示一个竖点线)
         self.setIndentationGuides(True)
         # 设置折叠样式
@@ -88,7 +88,8 @@ class MyQscintilla(QsciScintilla):
         self.autoCompleteFromAll()
         # 定义语言为xml语言
         self.lexer = QsciLexerXML(self)
-        self.lexer.setDefaultFont(self.font)
+        # self.lexer.setDefaultFont(self.font)
+        self.lexer.setFont(self.font)
         self.setLexer(self.lexer)
         self.__api = QsciAPIs(self.lexer)
         auto_completions = ['note', 'shen', 'song', 'xml', 'version', 'encoding', 'utf-8']
