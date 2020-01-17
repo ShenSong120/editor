@@ -79,7 +79,7 @@ class MyQscintilla(QsciScintilla):
         self.lexer.setFont(self.font)
         self.setLexer(self.lexer)
         self.__api = QsciAPIs(self.lexer)
-        auto_completions = ['note', 'shen', 'song', 'xml', 'version', 'encoding', 'utf-8']
+        auto_completions = ['note', 'shen', 'song', 'xml', 'version', 'encoding', 'utf-8', 'shensong is a ...']
         for ac in auto_completions:
             self.__api.add(ac)
         self.__api.prepare()
