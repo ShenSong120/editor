@@ -15,29 +15,33 @@ from threading import Thread
 '''
 
 
+class MyLexerXML(QsciLexerXML):
+    def __init__(self, parent):
+        super(MyLexerXML, self).__init__(parent)
+        # 设置标签大小写不敏感
+        self.setCaseSensitiveTags(False)
+        # 设置自动缩进样式
+        self.setAutoIndentStyle(QsciScintilla.AiMaintain)
+        # self.setAutoIndentStyle(QsciScintilla.AiOpening)
+        # self.setAutoIndentStyle(QsciScintilla.AiClosing)
+
+
+
 class MyQscintilla(QsciScintilla):
     def __init__(self, parent):
         super(MyQscintilla, self).__init__(parent)
-        # 字体设置
-        self.font = QFont('Consolas', 14)
+        self.font = QFont('Consolas', 14, QFont.Bold)
+        # self.font = QFont('Ubuntu Mono', 14)
+        # self.font = QFont('Arial ', 14)
         self.setFont(self.font)
         self.setUtf8(True)
-        self.setMarginsFont(self.font)
-        self.setMarginWidth(0, 15)
-        # 设置空格为点, \t为箭头
-        # self.editor.setWhitespaceVisibility(QsciScintilla.WsVisible)
-        # 设置换行符为(\r\n)
-        self.setEolMode(QsciScintilla.EolWindows)
-        # 设置换行符不可见
-        self.setEolVisibility(False)
-        # 设置空格点大小
-        self.setWhitespaceSize(2)
+        # self.setMarginsFont(self.font)
+        self.setMarginsFont(QFont('Arial ', 14))
+        self.setMarginWidth(0, 20)
         # 设置行号
         self.setMarginLineNumbers(0, True)
-        # 文本编辑框中间有一条竖线
-        # self.editor.setEdgeMode(QsciScintilla.EdgeLine)
-        self.setEdgeColumn(80)
-        self.setEdgeColor(QColor(0, 0, 0))
+        # 设置换行符为(\r\n)
+        self.setEolMode(QsciScintilla.EolWindows)
         # 设置光标宽度(0不显示光标)
         self.setCaretWidth(2)
         # 设置光标颜色
@@ -46,35 +50,17 @@ class MyQscintilla(QsciScintilla):
         self.setCaretLineVisible(True)
         # 选中行背景色
         self.setCaretLineBackgroundColor(QColor('#F0F0F0'))
-        # 设置括号匹配(不设置)
-        # self.setBraceMatching(QsciScintilla.StrictBraceMatch)
-        # True:\t代表tab/False:\t代表空格
-        self.setIndentationsUseTabs(True)
-        # 如果在行首部空格位置tab，缩进的宽度字符数，并且不会转换为空格
-        self.setIndentationWidth(0)
-        # True:如果行前空格数少于tabwidth,补齐空格数, False:如果在文字前tab同true，如果在行首tab，则直接增加tabwidth个空格
-        self.setTabIndents(True)
+        # tab宽度设置为8, 也就是四个字符
+        self.setTabWidth(4)
         # 换行后自动缩进
         self.setAutoIndent(True)
         self.setBackspaceUnindents(True)
-        # tab宽度设置为8, 也就是四个字符
-        self.setTabWidth(4)
         # 设置缩进的显示方式(用tab缩进时, 在缩进位置上显示一个竖点线)
         self.setIndentationGuides(True)
         # 设置折叠样式
         self.setFolding(QsciScintilla.PlainFoldStyle)
         # 设置折叠栏颜色
         self.setFoldMarginColors(Qt.gray, Qt.lightGray)
-        # 设置2边栏宽度
-        self.setMarginWidth(2, 12)
-        self.markerDefine(QsciScintilla.Minus, QsciScintilla.SC_MARKNUM_FOLDEROPEN)
-        self.markerDefine(QsciScintilla.Plus, QsciScintilla.SC_MARKNUM_FOLDER)
-        self.markerDefine(QsciScintilla.Minus, QsciScintilla.SC_MARKNUM_FOLDEROPENMID)
-        self.markerDefine(QsciScintilla.Plus, QsciScintilla.SC_MARKNUM_FOLDEREND)
-        self.setMarkerBackgroundColor(QColor("#FFFFFF"), QsciScintilla.SC_MARKNUM_FOLDEREND)
-        self.setMarkerForegroundColor(QColor("#272727"), QsciScintilla.SC_MARKNUM_FOLDEREND)
-        self.setMarkerBackgroundColor(QColor("#FFFFFF"), QsciScintilla.SC_MARKNUM_FOLDEROPENMID)
-        self.setMarkerForegroundColor(QColor("#272727"), QsciScintilla.SC_MARKNUM_FOLDEROPENMID)
         # 当前文档中出现的名称以及xml自带的都自动补全提示
         # self.setAutoCompletionSource(QsciScintilla.AcsDocument)
         self.setAutoCompletionSource(QsciScintilla.AcsAll)
@@ -87,12 +73,13 @@ class MyQscintilla(QsciScintilla):
         self.setAutoCompletionUseSingle(QsciScintilla.AcusExplicit)
         self.autoCompleteFromAll()
         # 定义语言为xml语言
-        self.lexer = QsciLexerXML(self)
+        # self.lexer = QsciLexerXML(self)
+        self.lexer = MyLexerXML(self)
         # self.lexer.setDefaultFont(self.font)
         self.lexer.setFont(self.font)
         self.setLexer(self.lexer)
         self.__api = QsciAPIs(self.lexer)
-        auto_completions = ['note', 'shen', 'song', 'xml', 'version', 'encoding', 'utf-8']
+        auto_completions = ['note', 'shen', 'song', 'xml', 'version', 'encoding', 'utf-8', 'shensong is a ...']
         for ac in auto_completions:
             self.__api.add(ac)
         self.__api.prepare()
@@ -230,7 +217,7 @@ class MyQscintilla(QsciScintilla):
     def cursor_move(self):
         # 调整边栏宽度
         line_digit = len(str(len(self.text().split('\n'))))
-        margin_width = 15 + (line_digit - 1) * 10
+        margin_width = 20 + (line_digit - 1) * 13
         self.setMarginWidth(0, margin_width)
         # 文本内容
         text = self.text()
@@ -289,8 +276,10 @@ class MyQscintilla(QsciScintilla):
         selected_list = selected_text.split('\r\n')
         if len(selected_list) > 1 and selected_list[-1] == '':
             selected_list.pop(-1)
-
+        # 保存将每一行切为的三个部分(三个部分为一个list)
         line_separate_list = []
+        # 注释结束后光标位置(默认-1,此时不需要设置光标位置)
+        cursor_position = -1
         # 将一行内容拆解三个部分(1\t or '' 2<note> 3 ''or...)
         for line in selected_list:
             # 如果存在line内容
@@ -303,20 +292,29 @@ class MyQscintilla(QsciScintilla):
                     line_separate_list.append(line_list)
                 elif len(line) > 0:
                     line_list.append(re.findall('\s*', line)[0])
-                    line_list.append('')
+                    line_list.append(line.strip())
                     line_list.append('')
                     line_separate_list.append(line_list)
+                    if line.strip() == '':
+                        cursor_position = len(line) + 4
                 else:
                     line_list = ['', '', '']
                     line_separate_list.append(line_list)
+                    cursor_position =  4
             else:
                 line_list = ['', '', '']
                 line_separate_list.append(line_list)
+                cursor_position = 4
         for i in range(len(line_separate_list)):
-            selected_list[i] = line_separate_list[i][0] + '<!-- ' + line_separate_list[i][1] + ' -->' + line_separate_list[i][2]
-
-        replace_text = '\r\n'.join(selected_list) + '\r\n'
+            if '<!--' not in selected_list[i] and '-->' not in selected_list[i]:
+                selected_list[i] = line_separate_list[i][0] + '<!--' + line_separate_list[i][1] + '-->' + line_separate_list[i][2]
+        if self.text(end_line).endswith('\r\n'):
+            replace_text = '\r\n'.join(selected_list) + '\r\n'
+        else:
+            replace_text = '\r\n'.join(selected_list)
         self.replaceSelectedText(replace_text)
+        if cursor_position != -1:
+            self.setCursorPosition(end_line, cursor_position)
 
     # 取消注释
     def cancel_comment(self, start_line, end_line):
@@ -330,12 +328,9 @@ class MyQscintilla(QsciScintilla):
         self.setSelection(start_line, 0, end_line, end_index)
         selected_text = self.selectedText()
         selected_list = selected_text.split('\r\n')
-        indent_position = []
         for line in selected_list:
-            if line:
-                indent_position.append(len(line) - len(line.lstrip()))
-        for i, line in enumerate(selected_list):
-            selected_list[i] = line.replace('<!-- ', '', 1).replace(' -->', '', 1)
+            if '<!--' in line and '-->' in line:
+                selected_list[selected_list.index(line)] = line.replace('<!--', '', 1).replace('-->', '', 1)
         replace_text = '\r\n'.join(selected_list)
         self.replaceSelectedText(replace_text)
 
@@ -448,6 +443,7 @@ class MyQscintilla(QsciScintilla):
                 self.zoomOut(1)
         else:
             super().wheelEvent(event)   # 留点汤给父类，不然滚轮无法翻页
+
 
 # 窗口app
 class MainWindow(QMainWindow):
