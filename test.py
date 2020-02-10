@@ -1,6 +1,7 @@
 # coding:utf-8
 import re
 import sys
+import configparser
 from PyQt5 import QtWidgets
 from PyQt5.QtCore import *
 from PyQt5.Qsci import *
@@ -71,27 +72,8 @@ class MyQscintilla(QsciScintilla):
         # 输入一个字符就会出现自动补全的提示
         self.setAutoCompletionThreshold(1)
         self.setAutoCompletionUseSingle(QsciScintilla.AcusExplicit)
+        # self.setAutoCompletionUseSingle(QsciScintilla.AcusAlways)
         self.autoCompleteFromAll()
-        # 定义语言为xml语言
-        # self.lexer = QsciLexerXML(self)
-        self.lexer = MyLexerXML(self)
-        # self.lexer.setDefaultFont(self.font)
-        self.lexer.setFont(self.font)
-        self.setLexer(self.lexer)
-        self.__api = QsciAPIs(self.lexer)
-        auto_completions = ['note',
-                            'shen',
-                            'song',
-                            'xml',
-                            'version',
-                            'encoding',
-                            'utf-8',
-                            'function_one(float arg_1) add a param!',
-                            'function_two(float arg_1)',
-                            'shensong( is a big shuaige!)']
-        for ac in auto_completions:
-            self.__api.add(ac)
-        self.__api.prepare()
         # 右键菜单
         self.setContextMenuPolicy(Qt.CustomContextMenu)
         self.customContextMenuRequested.connect(self.show_menu)
@@ -99,6 +81,43 @@ class MyQscintilla(QsciScintilla):
         self.old_text = ''
         # 触发事件
         self.cursorPositionChanged.connect(self.cursor_move)
+        # 提示框选项图标(单词和函数的区分)
+        word_image = QPixmap('word.png')
+        function_image = QPixmap('function.png')
+        self.registerImage(1, word_image)
+        self.registerImage(2, function_image)
+        # 获取配置文件
+        self.cf = configparser.ConfigParser()
+        self.cf.read('config.ini', encoding='utf-8')
+        self.begin_line_label = self.cf.get('begin_line', 'label')
+        self.key_words = eval(self.cf.get('keywords', 'word_list'))
+        self.function_dict = {}
+        for key in self.cf.options('function'):
+            function = str(self.cf.get('function', key))
+            function = function.replace('\\r', '\r')
+            function = function.replace('\\n', '\n')
+            function = function.replace('\\t', '\t')
+            self.function_dict[key] = function
+        # 定义语言为xml语言
+        # self.lexer = QsciLexerXML(self)
+        self.lexer = MyLexerXML(self)
+        # self.lexer.setDefaultFont(self.font)
+        self.lexer.setFont(self.font)
+        self.setLexer(self.lexer)
+        self.__api = QsciAPIs(self.lexer)
+        auto_completions = self.key_words + list(self.function_dict.keys())
+        for item in auto_completions:
+            # 如果是函数(图标显示function)
+            if item in list(self.function_dict.keys()):
+                auto_completions[auto_completions.index(item)] = item + '?2'
+            # 如果是单词(图标显示word)
+            else:
+                auto_completions[auto_completions.index(item)] = item + '?1'
+        for ac in auto_completions:
+            self.__api.add(ac)
+        self.__api.prepare()
+        # 默认第一行内容
+        self.setText(self.begin_line_label)
 
     # 右键菜单展示
     def show_menu(self, point):
@@ -230,18 +249,23 @@ class MyQscintilla(QsciScintilla):
         self.setMarginWidth(0, margin_width)
         # 文本内容
         text = self.text()
-        # 只有新增字符的情况下才允许自动补全
-        if len(text) > len(self.old_text):
-            line, index = self.getCursorPosition()
-            current_line_text = self.text(line)
-            list_current_line_text = list(current_line_text)
-            current_char = list_current_line_text[index-1] if index > 0 else None
-            if current_char == '>':
-                for i in range(index-1, -1, -1):
-                    if list_current_line_text[i] == '<' and list_current_line_text[i+1] != '?':
-                        key_words = ''.join(list_current_line_text[i+1:index-1])
-                        self.insertAt('</'+key_words+'>', line, index)
-                        break
+        # 当前文本长度和上次文本长度
+        text_length = len(text)
+        old_text_length = len(self.old_text)
+        # 只有新增字符的情况下才执行如下代码(删除文本不需要执行)
+        if text_length > old_text_length:
+            # 通过键盘键入字符
+            if (text_length - old_text_length) == 1:
+                line, index = self.getCursorPosition()
+                current_line_text = self.text(line)
+                list_current_line_text = list(current_line_text)
+                current_char = list_current_line_text[index-1] if index > 0 else None
+                if current_char == '>':
+                    for i in range(index-1, -1, -1):
+                        if list_current_line_text[i] == '<' and list_current_line_text[i+1] != '?':
+                            key_words = ''.join(list_current_line_text[i+1:index-1])
+                            self.insertAt('</'+key_words+'>', line, index)
+                            break
         self.old_text = self.text()
 
     # 切换注释
@@ -362,6 +386,24 @@ class MyQscintilla(QsciScintilla):
             # 不要破坏原有功能
             QsciScintilla.keyPressEvent(self, event)
 
+    # 敲回车自动补全处理函数
+    def auto_completion(self, event):
+        line_before, index_before = self.getCursorPosition()
+        QsciScintilla.keyPressEvent(self, event)
+        line_after, index_after = self.getCursorPosition()
+        # 获取当前鼠标位置单词(此处可以重新获取这个词,只以空格为分割)
+        current_word = self.wordAtLineIndex(line_after, index_after)
+        if current_word != '':
+            print('自动补全: ', current_word)
+            # 选中补全的单词(后面会用段落代替)
+            self.setSelection(line_after, index_after-len(current_word), line_after, index_after)
+            # 替换为函数块
+            if current_word in self.function_dict.keys():
+                self.replaceSelectedText(self.function_dict[current_word])
+            else:
+                # 此处可以添加更改(将函数名代替为函数)
+                self.setCursorPosition(line_after, index_after)
+
     # 这是重写键盘事件
     def keyPressEvent(self, event):
         # Ctrl + / 键 注释or取消注释
@@ -436,6 +478,9 @@ class MyQscintilla(QsciScintilla):
         elif (event.key() == Qt.Key_Backspace):
             self.delete_quotation_marks(event)
             self.old_text = self.text()
+        # 回车自动补全处理
+        elif (event.key() == Qt.Key_Return):
+            self.auto_completion(event)
         else:
             # 不要破坏原有功能
             QsciScintilla.keyPressEvent(self, event)
