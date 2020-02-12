@@ -594,6 +594,7 @@ class EditWidget(QTabWidget):
         if os.path.exists(file):
             with open(file, 'w+', encoding='utf-8') as f:
                 f.write(editor.text())
+            return True
         else:
             file_name, file_type = QFileDialog.getSaveFileName(self, '保存文件', './', 'Xml file(*.xml)', options=QFileDialog.DontUseNativeDialog)
             if file_name:
@@ -605,6 +606,9 @@ class EditWidget(QTabWidget):
                 self.setTabText(index, tab_name)
                 self.setTabToolTip(index, file_name)
                 self.signal.emit('file_path>' + file_name)
+                return True
+            else:
+                return False
 
     # 获取编辑器信号
     def get_editor_signal(self, signal_str):
@@ -617,12 +621,54 @@ class EditWidget(QTabWidget):
 
     # 关闭标签页(需要判断)
     def close_tab(self, index):
+        save_file_flag = False
         file_name = self.file_list[index]
+        current_text = self.currentWidget().text()
+        if os.path.exists(file_name):
+            with open(file_name, 'r', encoding='utf-8') as f:
+                file_text = f.read()
+            if current_text == file_text:
+                save_file_flag = False
+            else:
+                save_file_flag = True
+        else:
+            save_file_flag = True
+        if save_file_flag is True:
+            reply = QMessageBox.question(self, '当前文件未保存', '是否保存当前文件', QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel, QMessageBox.Yes)
+            if reply == QMessageBox.Yes:
+                save_status = self.save_edit_tab()
+                if save_status is True:
+                    self.removeTab(index)
+                    self.file_list.pop(index)
+                else:
+                    pass
+            elif reply == QMessageBox.No:
+                self.removeTab(index)
+                self.file_list.pop(index)
+            elif reply == QMessageBox.Cancel:
+                pass
+            else:
+                pass
+        else:
+            self.removeTab(index)
+            self.file_list.pop(index)
+        # 处理tab_name
         if file_name in self.new_file_list:
             tab_index = self.new_file_list.index(file_name)
             self.new_file_list[tab_index] = None
-        self.removeTab(index)
-        self.file_list.pop(index)
+        # 删除完tab后需要修改状态栏
+        tab_counts = self.count()
+        if tab_counts > 0:
+            new_index = self.currentIndex()
+            file_path = self.file_list[new_index]
+            cursor_position = '[0:0]'
+            self.signal.emit('file_path>' + file_path)
+            self.signal.emit('cursor_position>' + cursor_position)
+        else:
+            file_path = 'None'
+            cursor_position = '[0:0]'
+            self.signal.emit('file_path>' + file_path)
+            self.signal.emit('cursor_position>' + cursor_position)
 
 
 # 窗口app
@@ -702,7 +748,6 @@ class MainWindow(QMainWindow):
             self.cursor_label.setText(cursor_position)
         else:
             pass
-
 
     # 新建文件
     def connect_new_file(self):
