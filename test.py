@@ -1,5 +1,6 @@
 # coding:utf-8
 import re
+import os
 import sys
 import configparser
 from PyQt5 import QtWidgets
@@ -8,6 +9,7 @@ from PyQt5.Qsci import *
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from threading import Thread
+from glv import Icon
 
 '''
 需要增加的功能:
@@ -29,7 +31,7 @@ class MyLexerXML(QsciLexerXML):
 
 
 class MyQscintilla(QsciScintilla):
-    def __init__(self, parent):
+    def __init__(self, parent, file=None):
         super(MyQscintilla, self).__init__(parent)
         self.font = QFont('Consolas', 14, QFont.Bold)
         # self.font = QFont('Ubuntu Mono', 14)
@@ -82,8 +84,8 @@ class MyQscintilla(QsciScintilla):
         # 触发事件
         self.cursorPositionChanged.connect(self.cursor_move)
         # 提示框选项图标(单词和函数的区分)
-        word_image = QPixmap('word.png')
-        function_image = QPixmap('function.png')
+        word_image = QPixmap(Icon.word)
+        function_image = QPixmap(Icon.function)
         self.registerImage(1, word_image)
         self.registerImage(2, function_image)
         # 获取配置文件
@@ -116,8 +118,14 @@ class MyQscintilla(QsciScintilla):
         for ac in auto_completions:
             self.__api.add(ac)
         self.__api.prepare()
-        # 默认第一行内容
-        self.setText(self.begin_line_label)
+        # 新建文件还是导入文件
+        if file is None:
+            # 默认第一行内容
+            self.setText(self.begin_line_label)
+        else:
+            with open(file, 'r', encoding='utf-8') as f:
+                editor_text = f.read()
+            self.setText(editor_text)
 
     # 右键菜单展示
     def show_menu(self, point):
@@ -499,16 +507,163 @@ class MyQscintilla(QsciScintilla):
             super().wheelEvent(event)   # 留点汤给父类，不然滚轮无法翻页
 
 
+# 编辑器分页器
+class EditWidget(QTabWidget):
+
+    signal = pyqtSignal(str)
+
+    def __init__(self, parent):
+        super(EditWidget, self).__init__(parent)
+        self.parent = parent
+        # 打开的文件列表(第一个默认视频tab)
+        self.file_list = ['new.xml']
+        # 存储新建文件name(如new.xml, new1.xml)
+        self.new_file_list = ['new.xml']
+        # 设置tab可以关闭
+        self.setTabsClosable(True)
+        # 样式设置
+        style_sheet = 'QTabWidget:pane{ border: 1px solid #7A7A7A; top: -1px;}\
+                       QTabWidget:tab-bar{border: 1px solid blue; top: 0px; alignment:left; background: blue}\
+                       QTabBar::tab{height: 23px; margin-right: 0px; margin-bottom:-3px; padding-left: 5px; padding-right: 5px;}\
+                       QTabBar::tab:selected{border: 1px solid #0099FF; color: #0099FF; background-color: white; border-top: 1px solid #0099FF; border-bottom: 5px solid #0099FF;}\
+                       QTabBar::tab:!selected{border: 1px solid #7A7A7A;}\
+                       QTabBar::tab:!selected:hover{border: 1px solid #7A7A7A; color: #0099CC;}\
+                       QTabBar::close-button {image: url(' + Icon.close_tab + '); subcontrol-position: bottom right;}\
+                       QTabBar::close-button:hover {image: url(' + Icon.close_tab_hover + ');}'
+        self.setStyleSheet(style_sheet)
+        # 关闭tab触发事件
+        self.tabCloseRequested.connect(self.close_tab)
+        # 标签位置放在底部
+        # self.setTabPosition(self.South)
+        # 设置某一栏不可关闭
+        # self.tabBar().setTabButton(0, QTabBar.RightSide, None)
+        # tab_bar不自动隐藏
+        self.tabBar().setAutoHide(False)
+        # 默认打开一个新文件
+        editor = MyQscintilla(self)
+        self.addTab(editor, 'new.xml')
+        self.setTabToolTip(0, 'new.xml')
+
+    # 新建文件
+    def new_edit_tab(self):
+        if None not in self.new_file_list:
+            # 新增占位符
+            self.new_file_list.append(None)
+        tab_name = 'new.xml'
+        for index in range(len(self.new_file_list)):
+            if self.new_file_list[index] is None:
+                if index > 0:
+                    tab_name = 'new' + str(index) + '.xml'
+                    self.new_file_list[index] = tab_name
+                break
+        self.file_list.append(tab_name)
+        editor = MyQscintilla(self)
+        self.addTab(editor, tab_name)
+        self.setCurrentWidget(editor)
+        index = self.indexOf(editor)
+        self.setTabToolTip(index, tab_name)
+
+    # 打开文件
+    def open_edit_tab(self):
+        file, file_type = QFileDialog.getOpenFileName(self, "选取文件", "./", "Xml Files (*.xml)", options=QFileDialog.DontUseNativeDialog) # 设置文件扩展名过滤,注意用双分号间隔
+        if file:
+            self.file_list.append(file)
+            tab_name = os.path.split(file)[1]
+            editor = MyQscintilla(self, file=file)
+            self.addTab(editor, tab_name)
+            self.setCurrentWidget(editor)
+            index = self.indexOf(editor)
+            self.setTabToolTip(index, file)
+
+    # 保存文件
+    def save_edit_tab(self):
+        index = self.currentIndex()
+        editor = self.currentWidget()
+        file = str(self.file_list[index])
+        if os.path.exists(file):
+            with open(file, 'w+', encoding='utf-8') as f:
+                f.write(editor.text())
+        else:
+            file_name, file_type = QFileDialog.getSaveFileName(self, '保存文件', './', 'Xml file(*.xml)', options=QFileDialog.DontUseNativeDialog)
+            if file_name:
+                with open(file_name, 'w+', encoding='utf-8') as f:
+                    f.write(editor.text())
+                self.file_list[index] = file_name
+                tab_name = os.path.split(file_name)[1]
+                self.new_file_list[self.new_file_list.index(file)] = None
+                self.setTabText(index, tab_name)
+                self.setTabToolTip(index, file_name)
+
+    # 关闭标签页(需要判断)
+    def close_tab(self, index):
+        file_name = self.file_list[index]
+        if file_name in self.new_file_list:
+            tab_index = self.new_file_list.index(file_name)
+            self.new_file_list[tab_index] = None
+        self.removeTab(index)
+        self.file_list.pop(index)
+
+
 # 窗口app
 class MainWindow(QMainWindow):
     def __init__(self, parent=None, title='未命名'):
         super(MainWindow, self).__init__(parent)
         self.setGeometry(100, 100, 1000, 700)
         self.setWindowTitle(title)
+        self.setFont(QFont('Consolas', 14, QFont.Bold))
         # 编辑器设置
-        self.editor = MyQscintilla(self.centralWidget())
-        self.setCentralWidget(self.editor)
-        self.setFont(self.editor.font)
+        # self.editor = MyQscintilla(self.centralWidget())
+        # self.setCentralWidget(self.editor)
+        self.editor_widget = EditWidget(self.centralWidget())
+        self.setCentralWidget(self.editor_widget)
+        # 菜单栏
+        # 菜单栏
+        self.menu_bar = QMenuBar(self)
+        self.menu_bar.setObjectName('menu_bar')
+        # 设置菜单栏样式
+        menu_style = 'QMenu::item {background-color: transparent; padding-left: 5px; padding-right: 5px;}\
+                              QMenu::item:selected {background-color: #2DABF9;}'
+        self.menu_bar.setStyleSheet(menu_style)
+        self.setMenuBar(self.menu_bar)
+        # 文件菜单栏
+        self.file_bar = self.menu_bar.addMenu('文件')
+        self.new_file_action_menu = QAction('新建文件', self)
+        self.new_file_action_menu.triggered.connect(self.connect_new_file)
+        self.open_file_action_menu = QAction('打开文件', self)
+        self.open_file_action_menu.triggered.connect(self.connect_open_file)
+        self.save_file_action_menu = QAction('保存文件', self)
+        self.save_file_action_menu.triggered.connect(self.connect_save_file)
+        self.file_bar.addAction(self.new_file_action_menu)
+        self.file_bar.addAction(self.open_file_action_menu)
+        self.file_bar.addAction(self.save_file_action_menu)
+        # 帮助菜单栏
+        self.help_bar = self.menu_bar.addMenu('帮助')
+        self.help_action_menu = QAction('操作说明', self)
+        # self.help_action_menu.triggered.connect(self.connect_open_file)
+        self.help_bar.addAction(self.help_action_menu)
+        # 工具栏
+        self.tool_bar = self.addToolBar('tool_bar')
+        self.new_file_action = QAction(QIcon(Icon.new_file), '新建文件', self)
+        self.new_file_action.triggered.connect(self.connect_new_file)
+        self.open_file_action = QAction(QIcon(Icon.open_file), '打开文件', self)
+        self.open_file_action.triggered.connect(self.connect_open_file)
+        self.save_file_action = QAction(QIcon(Icon.save_file), '保存文件', self)
+        self.save_file_action.triggered.connect(self.connect_save_file)
+        self.tool_bar.addAction(self.new_file_action)
+        self.tool_bar.addAction(self.open_file_action)
+        self.tool_bar.addAction(self.save_file_action)
+
+    # 新建文件
+    def connect_new_file(self):
+        self.editor_widget.new_edit_tab()
+
+    # 打开文件
+    def connect_open_file(self):
+        self.editor_widget.open_edit_tab()
+
+    # 保存文件
+    def connect_save_file(self):
+        self.editor_widget.save_edit_tab()
 
 
 if __name__=='__main__':

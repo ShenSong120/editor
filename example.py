@@ -1,3 +1,4 @@
+import os
 import configparser
 
 # cf = configparser.ConfigParser()
@@ -6,6 +7,6 @@ import configparser
 # print(cf.get('begin_line', 'label'))
 
 
-a = [1, 2, 4, 6]
-b = a.index(4)
-print(b)
+file = 'D:/Code/arm_fluency/case/电台启动.xml'
+tab_name = os.path.split(file)[1]
+print(tab_name)
