@@ -6,3 +6,4 @@ class Icon:
     new_file = 'icon/new_file.png'
     open_file = 'icon/open_file.png'
     save_file = 'icon/save_file.png'
+    file = 'icon/file.png'
