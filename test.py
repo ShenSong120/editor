@@ -125,6 +125,22 @@ class MainWindow(QMainWindow):
     def connect_save_file(self):
         self.editor_widget.save_edit_tab()
 
+    # 窗口关闭事件
+    def closeEvent(self, event):
+        close_flag = True
+        for file in self.editor_widget.file_list:
+            if os.path.exists(file) is False:
+                close_flag = False
+                break
+        if close_flag is True:
+            event.accept()
+        else:
+            reply = QMessageBox.question(self, '当前工程还有未保存文件', '是否先保存文件？', QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel, QMessageBox.No)
+            if reply == QMessageBox.No:
+                event.accept()
+            else:
+                event.ignore()
+
 
 if __name__=='__main__':
     app = QApplication(sys.argv)
