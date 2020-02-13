@@ -7,6 +7,9 @@ import configparser
 # print(cf.get('begin_line', 'label'))
 
 
-file = 'D:/Code/arm_fluency/case/电台启动.xml'
-tab_name = os.path.split(file)[1]
-print(tab_name)
+file = 'D:\\Code\\arm_fluency\\case\\电台启动.xml'
+# file = 'D:/Code/arm_fluency/case/电台启动.xml'
+aaa = file.split(os.path.sep)
+print(aaa)
+
+print(os.path.sep)
