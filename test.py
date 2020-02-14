@@ -4,7 +4,7 @@ import sys
 from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
-from glv import Icon, MergePath
+from glv import Icon, MergePath, BeautifyStyle
 from ui_class.ProjectBar import ProjectBar
 from ui_class.EditorTab import EditorTab
 
@@ -21,7 +21,9 @@ class MainWindow(QMainWindow):
         super(MainWindow, self).__init__(parent)
         self.setGeometry(100, 100, 1000, 700)
         self.setWindowTitle(title)
-        self.setFont(QFont('Consolas', 14, QFont.Bold))
+        # 样式美化
+        main_ui_style = BeautifyStyle.font_family + BeautifyStyle.font_size + BeautifyStyle.file_dialog_qss
+        self.setStyleSheet(main_ui_style)
         # 中间widget区域
         self.central_widget = QWidget(self)
         self.setCentralWidget(self.central_widget)
@@ -56,17 +58,25 @@ class MainWindow(QMainWindow):
                               QMenu::item:selected {background-color: #2DABF9;}'
         self.menu_bar.setStyleSheet(menu_style)
         self.setMenuBar(self.menu_bar)
+        # 菜单和工具--功能action
+        self.new_file_action = QAction(QIcon(Icon.new_file), '新建文件(N)', self)
+        self.new_file_action.setShortcut('ctrl+n')
+        self.new_file_action.triggered.connect(self.connect_new_file)
+        self.open_file_action = QAction(QIcon(Icon.open_file), '打开文件(O)', self)
+        self.open_file_action.setShortcut('ctrl+o')
+        self.open_file_action.triggered.connect(self.connect_open_file)
+        self.save_file_action = QAction(QIcon(Icon.save_file), '保存文件(S)', self)
+        self.save_file_action.setShortcut('ctrl+s')
+        self.save_file_action.triggered.connect(self.connect_save_file)
+        self.save_as_file_action = QAction(QIcon(Icon.save_as_file), '另存文件为(Alt+S)', self)
+        self.save_as_file_action.setShortcut('ctrl+alt+s')
+        self.save_as_file_action.triggered.connect(self.connect_save_as_file)
         # 文件菜单栏
         self.file_bar = self.menu_bar.addMenu('文件')
-        self.new_file_action_menu = QAction('新建文件', self)
-        self.new_file_action_menu.triggered.connect(self.connect_new_file)
-        self.open_file_action_menu = QAction('打开文件', self)
-        self.open_file_action_menu.triggered.connect(self.connect_open_file)
-        self.save_file_action_menu = QAction('保存文件', self)
-        self.save_file_action_menu.triggered.connect(self.connect_save_file)
-        self.file_bar.addAction(self.new_file_action_menu)
-        self.file_bar.addAction(self.open_file_action_menu)
-        self.file_bar.addAction(self.save_file_action_menu)
+        self.file_bar.addAction(self.new_file_action)
+        self.file_bar.addAction(self.open_file_action)
+        self.file_bar.addAction(self.save_file_action)
+        self.file_bar.addAction(self.save_as_file_action)
         # 帮助菜单栏
         self.help_bar = self.menu_bar.addMenu('帮助')
         self.help_action_menu = QAction('操作说明', self)
@@ -74,15 +84,10 @@ class MainWindow(QMainWindow):
         self.help_bar.addAction(self.help_action_menu)
         # 工具栏
         self.tool_bar = self.addToolBar('tool_bar')
-        self.new_file_action = QAction(QIcon(Icon.new_file), '新建文件', self)
-        self.new_file_action.triggered.connect(self.connect_new_file)
-        self.open_file_action = QAction(QIcon(Icon.open_file), '打开文件', self)
-        self.open_file_action.triggered.connect(self.connect_open_file)
-        self.save_file_action = QAction(QIcon(Icon.save_file), '保存文件', self)
-        self.save_file_action.triggered.connect(self.connect_save_file)
         self.tool_bar.addAction(self.new_file_action)
         self.tool_bar.addAction(self.open_file_action)
         self.tool_bar.addAction(self.save_file_action)
+        self.tool_bar.addAction(self.save_as_file_action)
         # 状态栏 & 状态栏显示
         self.status_bar = QStatusBar(self)
         self.status_bar.setObjectName('status_bar')
@@ -123,6 +128,10 @@ class MainWindow(QMainWindow):
     # 保存文件
     def connect_save_file(self):
         self.editor_widget.save_edit_tab()
+
+    # 另存文件为
+    def connect_save_as_file(self):
+        pass
 
     # 窗口关闭事件
     def closeEvent(self, event):

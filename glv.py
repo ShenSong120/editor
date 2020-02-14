@@ -6,7 +6,18 @@ class Icon:
     new_file = 'icon/new_file.png'
     open_file = 'icon/open_file.png'
     save_file = 'icon/save_file.png'
+    save_as_file = 'icon/save_as_file.png'
     file = 'icon/file.png'
+
+
+# 样式
+class BeautifyStyle:
+    font_family = 'font-family: Times New Roman;'
+    font_size = 'font-size: 13pt;'
+    file_dialog_qss = 'QFileDialog {background-color: beige;}'
+    # font_family = 'font-family: Consolas;'
+    # font_size = 'font-size: 14pt;'
+    # file_dialog_qss = 'QFileDialog {background-color: beige;}'
 
 
 # 文件格式统一
