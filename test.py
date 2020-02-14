@@ -4,7 +4,7 @@ import sys
 from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
-from glv import Icon, MergePath, BeautifyStyle
+from glv import Icon, Param, MergePath, BeautifyStyle
 from ui_class.ProjectBar import ProjectBar
 from ui_class.EditorTab import EditorTab
 
@@ -151,7 +151,17 @@ class MainWindow(QMainWindow):
 
 
 if __name__=='__main__':
+    '''将QFileDialog转为中文'''
+    tran = QTranslator()
+    tran.load(Param.translator_file)
     app = QApplication(sys.argv)
+    app.installTranslator(tran)
     form = MainWindow(None, 'xml-editor')
     form.show()
     app.exec_()
+
+    '''未将QFileDialog转为中文'''
+    # app = QApplication(sys.argv)
+    # form = MainWindow(None, 'xml-editor')
+    # form.show()
+    # app.exec_()

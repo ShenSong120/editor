@@ -4,7 +4,7 @@ from PyQt5.QtCore import *
 from PyQt5.Qsci import *
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
-from glv import Icon
+from glv import Icon, Param
 from ui_class.Lexer import MyLexerXML
 
 
@@ -72,7 +72,7 @@ class Editor(QsciScintilla):
         self.registerImage(2, function_image)
         # 获取配置文件
         self.cf = configparser.ConfigParser()
-        self.cf.read('config.ini', encoding='utf-8')
+        self.cf.read(Param.config_file, encoding='utf-8')
         self.begin_line_label = self.cf.get('begin_line', 'label')
         self.key_words = eval(self.cf.get('keywords', 'word_list'))
         self.function_dict = {}
