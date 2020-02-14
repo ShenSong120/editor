@@ -62,6 +62,8 @@ class Editor(QsciScintilla):
         self.customContextMenuRequested.connect(self.show_menu)
         # 保存每一次操作后的text
         self.old_text = ''
+        # 点击跳转标志位
+        self.click_dump_flag = False
         # 触发事件
         self.cursorPositionChanged.connect(self.cursor_move)
         # 提示框选项图标(单词和函数的区分)
@@ -489,4 +491,22 @@ class Editor(QsciScintilla):
             elif da.y() < 0:
                 self.zoomOut(1)
         else:
-            super().wheelEvent(event)   # 留点汤给父类，不然滚轮无法翻页
+            # 留点汤给父类，不然滚轮无法翻页
+            super().wheelEvent(event)
+
+    # 鼠标点击事件
+    def mousePressEvent(self, event):
+        # 继承原有功能
+        super().mousePressEvent(event)
+        # Ctrl+左键按下(点击跳转标志位)
+        if event.buttons() == Qt.LeftButton:
+            if QApplication.keyboardModifiers() == Qt.ControlModifier:
+                self.click_dump_flag = True
+
+    # 鼠标释放事件
+    def mouseReleaseEvent(self, event):
+        # 继承原有功能
+        super().mouseReleaseEvent(event)
+        if self.click_dump_flag is True:
+            print('点击跳转')
+        self.click_dump_flag = False
