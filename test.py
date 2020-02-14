@@ -15,7 +15,6 @@ from ui_class.EditorTab import EditorTab
 '''
 
 
-
 # 窗口app
 class MainWindow(QMainWindow):
     def __init__(self, parent=None, title='未命名'):
@@ -95,7 +94,7 @@ class MainWindow(QMainWindow):
         self.file_path_label = QLabel(self)
         self.file_path_label.setText('new.xml')
         self.cursor_label = QLabel(self)
-        self.cursor_label.setText('0:0')
+        self.cursor_label.setText('[1:1]')
         # 状态栏布局
         self.status_bar.addPermanentWidget(self.file_icon, stretch=0)
         self.status_bar.addPermanentWidget(self.file_path_label, stretch=5)

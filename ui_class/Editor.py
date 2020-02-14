@@ -260,7 +260,7 @@ class Editor(QsciScintilla):
                             break
         self.old_text = self.text()
         # 获取当前光标
-        cursor_position = '[' + str(line) + ':' + str(index) + ']'
+        cursor_position = '[' + str(line+1) + ':' + str(index+1) + ']'
         self.signal.emit('cursor_position>' + cursor_position)
 
     # 切换注释
@@ -508,5 +508,11 @@ class Editor(QsciScintilla):
         # 继承原有功能
         super().mouseReleaseEvent(event)
         if self.click_dump_flag is True:
-            print('点击跳转')
+            self.indicator_clicked()
         self.click_dump_flag = False
+
+    # 点击跳转功能处理
+    def indicator_clicked(self):
+        line, index = self.getCursorPosition()
+        indicator_word = self.wordAtLineIndex(line, index)
+        print(indicator_word)
