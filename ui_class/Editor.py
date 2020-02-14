@@ -19,7 +19,6 @@ class Editor(QsciScintilla):
         # self.font = QFont('Arial ', 14)
         self.setFont(self.font)
         self.setUtf8(True)
-        # self.setMarginsFont(self.font)
         self.setMarginsFont(QFont('Arial ', 14))
         self.setMarginWidth(0, 20)
         # 设置行号
@@ -86,7 +85,6 @@ class Editor(QsciScintilla):
         # 定义语言为xml语言
         # self.lexer = QsciLexerXML(self)
         self.lexer = MyLexerXML(self)
-        # self.lexer.setDefaultFont(self.font)
         self.lexer.setFont(self.font)
         self.setLexer(self.lexer)
         self.__api = QsciAPIs(self.lexer)
@@ -260,7 +258,7 @@ class Editor(QsciScintilla):
                             break
         self.old_text = self.text()
         # 获取当前光标
-        cursor_position = '[' + str(line+1) + ':' + str(index+1) + ']'
+        cursor_position = '[' + str(line+1) + ':' + str(index) + ']'
         self.signal.emit('cursor_position>' + cursor_position)
 
     # 切换注释

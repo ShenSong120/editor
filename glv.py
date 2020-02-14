@@ -12,16 +12,13 @@ class Icon:
 
 # 样式
 class BeautifyStyle:
-    font_family = 'font-family: Times New Roman;'
+    # font_family = 'font-family: Times New Roman;'
+    font_family = 'font-family: Consolas;'
     font_size = 'font-size: 13pt;'
-    file_dialog_qss = 'QFileDialog {background-color: beige;}'
-    # font_family = 'font-family: Consolas;'
-    # font_size = 'font-size: 14pt;'
-    # file_dialog_qss = 'QFileDialog {background-color: beige;}'
+    file_dialog_qss = 'QFileDialog {font-family: Times New Roman; background-color: beige;}'
 
 
 # 文件格式统一
-import os
 class MergePath:
     merged_path = None
 
