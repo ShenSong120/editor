@@ -59,9 +59,6 @@ class MainWindow(QMainWindow):
         self.menu_bar.setStyleSheet(menu_style)
         self.setMenuBar(self.menu_bar)
         # 菜单和工具--功能action
-        self.new_file_action = QAction(QIcon(Icon.new_file), '新建文件(N)', self)
-        self.new_file_action.setShortcut('ctrl+n')
-        self.new_file_action.triggered.connect(self.connect_new_file)
         self.open_file_action = QAction(QIcon(Icon.open_file), '打开文件(O)', self)
         self.open_file_action.setShortcut('ctrl+o')
         self.open_file_action.triggered.connect(self.connect_open_file)
@@ -73,7 +70,6 @@ class MainWindow(QMainWindow):
         self.save_as_file_action.triggered.connect(self.connect_save_as_file)
         # 文件菜单栏
         self.file_bar = self.menu_bar.addMenu('文件')
-        self.file_bar.addAction(self.new_file_action)
         self.file_bar.addAction(self.open_file_action)
         self.file_bar.addAction(self.save_file_action)
         self.file_bar.addAction(self.save_as_file_action)
@@ -84,7 +80,6 @@ class MainWindow(QMainWindow):
         self.help_bar.addAction(self.help_action_menu)
         # 工具栏
         self.tool_bar = self.addToolBar('tool_bar')
-        self.tool_bar.addAction(self.new_file_action)
         self.tool_bar.addAction(self.open_file_action)
         self.tool_bar.addAction(self.save_file_action)
         self.tool_bar.addAction(self.save_as_file_action)
