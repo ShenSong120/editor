@@ -78,8 +78,21 @@ class EditorTab(QTabWidget):
         file = str(self.file_list[index])
         if os.path.exists(file):
             with open(file, 'w+', encoding='utf-8') as f:
-                f.write(editor.text())
+                text = editor.text()
+                f.write(text)
             return True
+
+    # 文件另存
+    def save_file_as_tab(self):
+        index = self.currentIndex()
+        editor = self.currentWidget()
+        file = str(self.file_list[index])
+        current_root_path = os.path.dirname(file)
+        file_name, file_type = QFileDialog.getSaveFileName(self, '文件另存', current_root_path, 'Xml Files (*.xml);;All Files (*)', options=QFileDialog.DontUseNativeDialog)
+        if file_name:
+            with open(file_name, 'w', encoding='utf-8') as f:
+                text = editor.text()
+                f.write(text)
 
     # 获取编辑器信号
     def get_editor_signal(self, signal_str):

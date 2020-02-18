@@ -2,7 +2,7 @@ import os
 import functools
 import configparser
 
-def add(a, b, c):
-    return a+b+c
-
-p = functools.partial(add, 12)
+file = 'D:/Code/editor/new.xml'
+with open(file, 'r') as  f:
+    text = f.read()
+    print(text)

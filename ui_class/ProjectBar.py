@@ -141,7 +141,6 @@ class ProjectBar(QWidget):
     def paste(self):
         clipboard = QApplication.clipboard()
         copy_path = clipboard.text()
-
         title, prompt_text, default_name = '新建文件', '请输入文件名', os.path.split(copy_path)[1]
         file_name, ok = QInputDialog.getText(self, title, prompt_text, QLineEdit.Normal, default_name)
         if ok:

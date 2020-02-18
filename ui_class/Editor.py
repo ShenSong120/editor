@@ -106,6 +106,7 @@ class Editor(QsciScintilla):
         else:
             with open(file, 'r', encoding='utf-8') as f:
                 editor_text = f.read()
+                editor_text = editor_text.replace('\n\n', '\r\n')
             self.setText(editor_text)
 
     # 右键菜单展示

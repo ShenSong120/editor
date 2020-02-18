@@ -143,7 +143,7 @@ class MainWindow(QMainWindow):
 
     # 另存文件为
     def connect_save_as_file(self):
-        pass
+        self.editor_widget.save_file_as_tab()
 
     # 窗口关闭事件
     def closeEvent(self, event):
