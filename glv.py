@@ -22,6 +22,12 @@ class BeautifyStyle:
     file_dialog_qss = 'QFileDialog {font-family: Times New Roman; background-color: beige;}'
 
 
+# 文件状态
+class FileStatus:
+    save_status = '已保存'
+    not_save_status = '未保存'
+
+
 # 文件格式统一
 class MergePath:
     merged_path = None

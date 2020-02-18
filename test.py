@@ -4,7 +4,7 @@ import sys
 from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
-from glv import Icon, Param, MergePath, BeautifyStyle
+from glv import Icon, Param, MergePath, BeautifyStyle, FileStatus
 from ui_class.ProjectBar import ProjectBar
 from ui_class.EditorTab import EditorTab
 
@@ -96,23 +96,33 @@ class MainWindow(QMainWindow):
         self.file_icon = QToolButton(self)
         self.file_icon.setStyleSheet('QToolButton{border-image: url(' + Icon.file + ')}')
         self.file_path_label = QLabel(self)
-        self.file_path_label.setText('new.xml')
+        self.file_path_label.setText('')
+        self.file_status_label = QLabel(self)
+        self.file_status_label.setText('')
         self.cursor_label = QLabel(self)
-        self.cursor_label.setText('[1:1]')
+        self.cursor_label.setText('')
         # 状态栏布局
         self.status_bar.addPermanentWidget(self.file_icon, stretch=0)
-        self.status_bar.addPermanentWidget(self.file_path_label, stretch=5)
+        self.status_bar.addPermanentWidget(self.file_path_label, stretch=0)
+        self.status_bar.addPermanentWidget(self.file_status_label, stretch=1)
         self.status_bar.addPermanentWidget(self.cursor_label, stretch=1)
 
     # 获取编辑器文本中发出的信号
     def get_signal_from_editor(self, signal_str):
         flag = signal_str.split('>')[0]
+        # 状态-文件路径
         if flag == 'file_path':
             file_path = signal_str.split('>')[1]
             self.file_path_label.setText(file_path)
+        # 状态-光标位置
         elif flag == 'cursor_position':
             cursor_position = signal_str.split('>')[1]
             self.cursor_label.setText(cursor_position)
+        # 状态-文件保存状态
+        elif flag == 'file_status':
+            index = self.editor_widget.currentIndex()
+            file_status = self.editor_widget.file_status_list[index]
+            self.file_status_label.setText(file_status)
         else:
             pass
 
@@ -134,6 +144,7 @@ class MainWindow(QMainWindow):
         # 删除tab栏
         self.editor_widget.removeTab(index)
         self.editor_widget.file_list.pop(index)
+        self.editor_widget.file_status_list.pop(index)
         # 删除完tab后需要修改状态栏
         tab_counts = self.editor_widget.count()
         if tab_counts > 0:
@@ -163,16 +174,25 @@ class MainWindow(QMainWindow):
     # 窗口关闭事件
     def closeEvent(self, event):
         close_flag = True
-        for file in self.editor_widget.file_list:
-            if os.path.exists(file) is False:
+        for file_status in self.editor_widget.file_status_list:
+            if file_status == FileStatus.not_save_status:
                 close_flag = False
+                index = self.editor_widget.file_status_list.index(file_status)
+                file = self.editor_widget.file_list[index]
                 break
         if close_flag is True:
             event.accept()
         else:
-            reply = QMessageBox.question(self, '当前工程还有未保存文件', '是否先保存文件？', QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel, QMessageBox.No)
+            reply = QMessageBox.question(self, '有文件未保存', file+'未保存\n是否先保存文件？', QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel, QMessageBox.No)
             if reply == QMessageBox.No:
                 event.accept()
+            elif reply == QMessageBox.Cancel:
+                event.ignore()
+            elif reply == QMessageBox.Yes:
+                with open(file, 'w', encoding='utf-8') as f:
+                    text = self.editor_widget.widget(index).text()
+                    f.write(text)
+                    event.accept()
             else:
                 event.ignore()
 

@@ -4,7 +4,7 @@ from PyQt5.QtCore import *
 from PyQt5.Qsci import *
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
-from glv import Icon, Param
+from glv import Icon, Param, FileStatus
 from ui_class.Lexer import MyLexerXML
 
 
@@ -100,6 +100,7 @@ class Editor(QsciScintilla):
             self.__api.add(ac)
         self.__api.prepare()
         # 新建文件还是导入文件
+        self.file = file
         if file is None:
             # 默认第一行内容
             self.setText(self.begin_line_label)
@@ -231,6 +232,16 @@ class Editor(QsciScintilla):
         self.cursorPositionChanged.connect(self.cursor_move)
         self.old_text = self.text()
 
+    # 文件状态更新
+    def file_status_update(self):
+        with open(self.file, 'r', encoding='utf-8') as f:
+            text = f.read()
+            text = text.replace('\n\n', '\r\n')
+        if self.text() == text:
+            self.signal.emit('file_status>' + FileStatus.save_status)
+        else:
+            self.signal.emit('file_status>' + FileStatus.not_save_status)
+
     # 光标移动事件
     def cursor_move(self):
         # 调整边栏宽度
@@ -261,6 +272,8 @@ class Editor(QsciScintilla):
         # 获取当前光标
         cursor_position = '[' + str(line+1) + ':' + str(index) + ']'
         self.signal.emit('cursor_position>' + cursor_position)
+        # 文件状态更新
+        self.file_status_update()
 
     # 切换注释
     def toggle_comment(self):
