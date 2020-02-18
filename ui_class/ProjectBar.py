@@ -6,6 +6,7 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from threading import Thread
 from glv import MergePath
+from ui_class.FileTreeView import FileTreeView
 
 
 # 侧边工程栏
@@ -19,6 +20,11 @@ class ProjectBar(QWidget):
         self.setStyleSheet('background-color: #F0F0F0;')
         self.parent = parent
         self.path = path
+        # 文件树状态标志(初始为None)
+        self.node_path = self.path
+        self.node_name = 'new.xml'
+        self.index = None
+        self.blank_click_flag = True
         # 文件模型
         self.model = QFileSystemModel(self)
         # 改表头名字(无效)
@@ -32,7 +38,9 @@ class ProjectBar(QWidget):
         self.model.setNameFilters(filters)
         self.model.setNameFilterDisables(False)
         # 树形视图
-        self.tree = QTreeView(self)  # 2
+        # self.tree = QTreeView(self)
+        self.tree = FileTreeView(self)
+        self.tree.signal[str].connect(self.get_signal_from_file_tree)
         # 右键菜单
         self.tree.setContextMenuPolicy(Qt.CustomContextMenu)
         self.tree.customContextMenuRequested.connect(self.show_menu)
@@ -43,8 +51,7 @@ class ProjectBar(QWidget):
         self.tree.setColumnHidden(3, True)
         self.tree.setHeaderHidden(True)
         self.tree.setRootIndex(self.model.index(self.path))
-        self.tree.clicked.connect(self.show_info)
-        self.tree.doubleClicked.connect(lambda : self.operation_file(None))
+        # self.tree.doubleClicked.connect(lambda : self.operation_file(None))
         # 工程栏路径信息展示
         self.info_label = QLineEdit(self)
         self.info_label.setReadOnly(True)
@@ -140,8 +147,9 @@ class ProjectBar(QWidget):
         if ok:
             if os.path.isdir(self.node_path) is True:
                 root_path = self.node_path
-                # 展开文件夹
-                self.tree.setExpanded(self.index, True)
+                if self.index is not None:
+                    # 展开文件夹
+                    self.tree.setExpanded(self.index, True)
             else:
                 root_path = os.path.dirname(self.node_path)
             paste_path = MergePath(root_path, file_name).merged_path
@@ -156,21 +164,38 @@ class ProjectBar(QWidget):
 
     # 新建文件
     def new_file_dialog(self):
-        title, prompt_text, default_name = '新建文件', '请输入文件名', ''
+        title, prompt_text, default_name = '新建文件', '请输入文件名', 'new.xml'
         file_name, ok = QInputDialog.getText(self, title, prompt_text, QLineEdit.Normal, default_name)
         if ok:
             if os.path.isdir(self.node_path) is True:
                 root_path = self.node_path
-                # 展开文件夹
-                self.tree.setExpanded(self.index, True)
+                if self.index is not None:
+                    # 展开文件夹
+                    self.tree.setExpanded(self.index, True)
             else:
                 root_path = os.path.dirname(self.node_path)
             file_path = MergePath(root_path, file_name).merged_path
-            f = open(file_path, 'w', encoding='utf-8')
-            f.close()
-            print('新建文件: %s' % file_path)
-            # 更新选中item
-            Thread(target=self.update_select_item, args=(file_path,)).start()
+            # 如果文件存在
+            if os.path.exists(file_path):
+                reply = QMessageBox.question(self, '新建此文件已经存在', '是否替换已经存在的文件？', QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel, QMessageBox.No)
+                if reply == QMessageBox.No:
+                    self.new_file_dialog()
+                elif reply == QMessageBox.Yes:
+                    f = open(file_path, 'w', encoding='utf-8')
+                    f.close()
+                    print('新建文件: %s' % file_path)
+                    # 更新选中item
+                    Thread(target=self.update_select_item, args=(file_path,)).start()
+                    self.signal.emit('new_xml>' + str(file_path))
+                elif reply == QMessageBox.Cancel:
+                    pass
+            else:
+                f = open(file_path, 'w', encoding='utf-8')
+                f.close()
+                print('新建文件: %s' % file_path)
+                # 更新选中item
+                Thread(target=self.update_select_item, args=(file_path,)).start()
+                self.signal.emit('new_xml>' + str(file_path))
 
     # 新建文件夹
     def new_folder_dialog(self):
@@ -179,16 +204,26 @@ class ProjectBar(QWidget):
         if ok:
             if os.path.isdir(self.node_path) is True:
                 root_path = self.node_path
-                # 展开文件夹
-                self.tree.setExpanded(self.index, True)
+                if self.index is not None:
+                    # 展开文件夹
+                    self.tree.setExpanded(self.index, True)
             else:
                 root_path = os.path.dirname(self.node_path)
             folder_path = MergePath(root_path, folder_name).merged_path
-            os.makedirs(folder_path)
-            print('新建文件夹: %s' % folder_path)
-            # 更新选中item
-            Thread(target=self.update_select_item, args=(folder_path,)).start()
-
+            # 如果目录存在
+            if os.path.exists(folder_path):
+                reply = QMessageBox.question(self, '新建此目录已经存在', '是否将新建目录和已存在目录合并？', QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel, QMessageBox.No)
+                if reply == QMessageBox.No:
+                    self.new_folder_dialog()
+                elif reply == QMessageBox.Yes:
+                    pass
+                elif reply == QMessageBox.Cancel:
+                    pass
+            else:
+                os.makedirs(folder_path)
+                print('新建文件夹: %s' % folder_path)
+                # 更新选中item
+                Thread(target=self.update_select_item, args=(folder_path,)).start()
 
     # 重命名
     def rename_dialog(self):
@@ -199,9 +234,21 @@ class ProjectBar(QWidget):
         if ok:
             root_path = os.path.dirname(self.node_path)
             new_name_path = MergePath(root_path, new_name).merged_path
-            os.rename(self.node_path, new_name_path)
-            print('重命名 %s 为: %s' % (self.node_path, new_name_path))
-            Thread(target=self.update_select_item, args=(new_name_path,)).start()
+            # 如果新命名文件存在
+            if os.path.exists(new_name_path):
+                reply = QMessageBox.question(self, '新命名文件已经存在', '是否替换已经存在的文件？', QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel, QMessageBox.No)
+                if reply == QMessageBox.No:
+                    self.rename_dialog()
+                elif reply == QMessageBox.Yes:
+                    os.rename(self.node_path, new_name_path)
+                    print('重命名 %s 为: %s' % (self.node_path, new_name_path))
+                    Thread(target=self.update_select_item, args=(new_name_path,)).start()
+                elif reply == QMessageBox.Cancel:
+                    pass
+            else:
+                os.rename(self.node_path, new_name_path)
+                print('重命名 %s 为: %s' % (self.node_path, new_name_path))
+                Thread(target=self.update_select_item, args=(new_name_path,)).start()
 
 
     # 删除文件
@@ -230,6 +277,7 @@ class ProjectBar(QWidget):
             if file_flag is True:
                 os.remove(self.node_path)
                 print('删除文件: %s' % self.node_path)
+                self.signal.emit('delete>' + self.node_path)
             else:
                 shutil.rmtree(self.node_path)
                 print('删除文件夹: %s' % self.node_path)
@@ -241,23 +289,36 @@ class ProjectBar(QWidget):
         self.tree.setCurrentIndex(new_index)
         self.info_label.setText(path)
 
-    # 更新文件名字显示
-    def show_info(self):  # 4
-
-        self.index = self.tree.currentIndex()
-        # 如果点击的非空白区域
-        if self.index.isValid():
-            # 当前节点路径以及名字
-            # index = self.tree.currentIndex()
-            self.node_name = self.model.fileName(self.index)
-            self.node_path = self.model.filePath(self.index)
-            self.blank_click_flag = False
-        # 点击空白区域
-        else:
-            self.tree.clearSelection()
-            self.node_name = os.path.split(self.path)[1]
-            self.node_path = self.path
-            self.blank_click_flag = True
+    # 获取从文件树获取到的信号
+    def get_signal_from_file_tree(self, signal_str):
+        flag = signal_str.split('>')[0]
+        signal = eval(signal_str.split('>')[1])
+        # 接受到的point信息
+        if flag == 'click_point':
+            point = QPoint(signal[0], signal[1])
+            self.index = self.tree.indexAt(point)
+            if self.index.isValid():
+                self.node_name = self.model.fileName(self.index)
+                self.node_path = self.model.filePath(self.index)
+                self.blank_click_flag = False
+            else:
+                self.tree.clearSelection()
+                self.node_name = os.path.split(self.path)[1]
+                self.node_path = self.path
+                self.blank_click_flag = False
+        elif flag == 'double_click_point':
+            point = QPoint(signal[0], signal[1])
+            self.index = self.tree.indexAt(point)
+            if self.index.isValid():
+                self.node_name = self.model.fileName(self.index)
+                self.node_path = self.model.filePath(self.index)
+                self.blank_click_flag = False
+                self.operation_file()
+            else:
+                self.tree.clearSelection()
+                self.node_name = os.path.split(self.path)[1]
+                self.node_path = self.path
+                self.blank_click_flag = False
         # 更新显示标签
         self.info_label.setText(self.node_path)
 
@@ -270,23 +331,11 @@ class ProjectBar(QWidget):
             file_path = file_path
         # 判断双击是否为文件(只对文件操作)
         if os.path.isfile(file_path) is True:
-            # 展示图片
-            if file_path.endswith('.jpg') or file_path.endswith('.png') or file_path.endswith('.bmp'):
-                self.signal.emit('open_picture>' + str(file_path))
-            # 展示报告
-            elif file_path.endswith('.html'):
-                self.signal.emit('open_report>' + str(file_path))
-            # 展示text
-            elif file_path.split('.')[1] in ['txt', 'py', 'xml', 'md', 'ini']:
-                self.signal.emit('open_text>' + str(file_path))
-            # 播放视频
-            elif file_path.split('.')[1] in ['mp4', 'MP4', 'avi', 'AVI', 'mov', 'MOV', 'flv', 'FLV']:
-                self.signal.emit('open_video>' + str(file_path))
-            # 展示excel文件
-            elif file_path.split('.')[1] in ['xls', 'xlsx', 'XLS', 'XLSX']:
-                self.signal.emit('open_excel>' + str(file_path))
+            # 打开xml文件
+            if file_path.endswith('.xml') or file_path.endswith('.XML'):
+                self.signal.emit('open_xml>' + str(file_path))
             else:
-                print('暂不支持此类型文件!!!')
+                print('暂不支持打开此类型文件!!!')
         else:
             pass
 

@@ -30,6 +30,7 @@ class MainWindow(QMainWindow):
         # 工程栏
         self.project_path = MergePath(os.getcwd()).merged_path
         self.project_bar = ProjectBar(self.central_widget, self.project_path)
+        self.project_bar.signal[str].connect(self.get_signal_from_project_bar)
         # 编辑器设置
         # self.editor = MyQscintilla(self.centralWidget())
         # self.setCentralWidget(self.editor)
@@ -44,8 +45,11 @@ class MainWindow(QMainWindow):
         self.splitter_h_general.setHandleWidth(0)
         self.splitter_h_general.addWidget(self.project_bar)
         self.splitter_h_general.addWidget(self.editor_widget)
-        self.splitter_h_general.setStretchFactor(0, 1)
-        self.splitter_h_general.setStretchFactor(1, 4)
+        # 按比例分割
+        # self.splitter_h_general.setStretchFactor(0, 1)
+        # self.splitter_h_general.setStretchFactor(1, 4)
+        # 按尺寸分割
+        self.splitter_h_general.setSizes([200, 800])
         self.general_v_layout.addWidget(self.splitter_h_general)
         self.setLayout(self.general_v_layout)
 
@@ -111,6 +115,19 @@ class MainWindow(QMainWindow):
             self.cursor_label.setText(cursor_position)
         else:
             pass
+
+    # 获取工程栏发出的信号
+    def get_signal_from_project_bar(self, signal_str):
+        flag = signal_str.split('>')[0]
+        file_path = signal_str.split('>')[1]
+        if flag == 'open_xml':
+            self.editor_widget.open_edit_tab(file_path)
+        elif flag == 'new_xml':
+            self.editor_widget.new_edit_tab(file_path)
+        elif flag == 'delete':
+            if file_path in self.editor_widget.file_list:
+                index = self.editor_widget.file_list.index(file_path)
+                self.editor_widget.close_tab(index)
 
     # 新建文件
     def connect_new_file(self):

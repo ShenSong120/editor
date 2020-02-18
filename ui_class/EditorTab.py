@@ -13,10 +13,8 @@ class EditorTab(QTabWidget):
     def __init__(self, parent):
         super(EditorTab, self).__init__(parent)
         self.parent = parent
-        # 打开的文件列表(第一个默认视频tab)
-        self.file_list = ['new.xml']
-        # 存储新建文件name(如new.xml, new1.xml)
-        self.new_file_list = ['new.xml']
+        # 打开的文件列表(保存文件列表)
+        self.file_list = []
         # 设置tab可以关闭
         self.setTabsClosable(True)
         # 样式设置
@@ -39,44 +37,39 @@ class EditorTab(QTabWidget):
         # self.tabBar().setTabButton(0, QTabBar.RightSide, None)
         # tab_bar不自动隐藏
         self.tabBar().setAutoHide(False)
-        # 默认打开一个新文件
-        editor = Editor(self)
-        editor.signal[str].connect(self.get_editor_signal)
-        self.addTab(editor, 'new.xml')
-        self.setTabToolTip(0, 'new.xml')
 
     # 新建文件
-    def new_edit_tab(self):
-        if None not in self.new_file_list:
-            # 新增占位符
-            self.new_file_list.append(None)
-        tab_name = 'new.xml'
-        for index in range(len(self.new_file_list)):
-            if self.new_file_list[index] is None:
-                if index > 0:
-                    tab_name = 'new' + str(index) + '.xml'
-                    self.new_file_list[index] = tab_name
-                break
-        self.file_list.append(tab_name)
-        editor = Editor(self)
-        editor.signal[str].connect(self.get_editor_signal)
-        self.addTab(editor, tab_name)
-        self.setCurrentWidget(editor)
-        index = self.indexOf(editor)
-        self.setTabToolTip(index, tab_name)
-
-    # 打开文件
-    def open_edit_tab(self):
-        file, file_type = QFileDialog.getOpenFileName(self, "选取文件", "./", "Xml Files (*.xml)", options=QFileDialog.DontUseNativeDialog) # 设置文件扩展名过滤,注意用双分号间隔
-        if file:
+    def new_edit_tab(self, file):
+        if file in self.file_list:
+            index = self.file_list.index(file)
+            self.setCurrentIndex(index)
+        else:
             self.file_list.append(file)
             tab_name = os.path.split(file)[1]
-            editor = Editor(self, file=file)
+            editor = Editor(self)
             editor.signal[str].connect(self.get_editor_signal)
             self.addTab(editor, tab_name)
             self.setCurrentWidget(editor)
             index = self.indexOf(editor)
-            self.setTabToolTip(index, file)
+            self.setTabToolTip(index, tab_name)
+
+    # 打开文件
+    def open_edit_tab(self, file=None):
+        if file is None:
+            file, file_type = QFileDialog.getOpenFileName(self, "选取文件", "./", "Xml Files (*.xml)", options=QFileDialog.DontUseNativeDialog) # 设置文件扩展名过滤,注意用双分号间隔
+        if file:
+            if file in self.file_list:
+                index = self.file_list.index(file)
+                self.setCurrentIndex(index)
+            else:
+                self.file_list.append(file)
+                tab_name = os.path.split(file)[1]
+                editor = Editor(self, file=file)
+                editor.signal[str].connect(self.get_editor_signal)
+                self.addTab(editor, tab_name)
+                self.setCurrentWidget(editor)
+                index = self.indexOf(editor)
+                self.setTabToolTip(index, file)
 
     # 保存文件
     def save_edit_tab(self):
@@ -87,20 +80,6 @@ class EditorTab(QTabWidget):
             with open(file, 'w+', encoding='utf-8') as f:
                 f.write(editor.text())
             return True
-        else:
-            file_name, file_type = QFileDialog.getSaveFileName(self, '保存文件', './', 'Xml file(*.xml)', options=QFileDialog.DontUseNativeDialog)
-            if file_name:
-                with open(file_name, 'w+', encoding='utf-8') as f:
-                    f.write(editor.text())
-                self.file_list[index] = file_name
-                tab_name = os.path.split(file_name)[1]
-                self.new_file_list[self.new_file_list.index(file)] = None
-                self.setTabText(index, tab_name)
-                self.setTabToolTip(index, file_name)
-                self.signal.emit('file_path>' + file_name)
-                return True
-            else:
-                return False
 
     # 获取编辑器信号
     def get_editor_signal(self, signal_str):
@@ -144,10 +123,6 @@ class EditorTab(QTabWidget):
         else:
             self.removeTab(index)
             self.file_list.pop(index)
-        # 处理tab_name
-        if file_name in self.new_file_list:
-            tab_index = self.new_file_list.index(file_name)
-            self.new_file_list[tab_index] = None
         # 删除完tab后需要修改状态栏
         tab_counts = self.count()
         if tab_counts > 0:
