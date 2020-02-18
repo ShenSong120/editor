@@ -180,18 +180,20 @@ class ProjectBar(QWidget):
                 if reply == QMessageBox.No:
                     self.new_file_dialog()
                 elif reply == QMessageBox.Yes:
-                    f = open(file_path, 'w', encoding='utf-8')
-                    f.close()
-                    print('新建文件: %s' % file_path)
+                    with open(file_path, 'w', encoding='utf-8') as f:
+                        text = "<?xml version='1.0' encoding='utf-8' ?>"
+                        f.write(text)
+                        print('新建文件: %s' % file_path)
                     # 更新选中item
                     Thread(target=self.update_select_item, args=(file_path,)).start()
                     self.signal.emit('new_xml>' + str(file_path))
                 elif reply == QMessageBox.Cancel:
                     pass
             else:
-                f = open(file_path, 'w', encoding='utf-8')
-                f.close()
-                print('新建文件: %s' % file_path)
+                with open(file_path, 'w', encoding='utf-8') as f:
+                    text = "<?xml version='1.0' encoding='utf-8' ?>"
+                    f.write(text)
+                    print('新建文件: %s' % file_path)
                 # 更新选中item
                 Thread(target=self.update_select_item, args=(file_path,)).start()
                 self.signal.emit('new_xml>' + str(file_path))

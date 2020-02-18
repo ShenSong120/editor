@@ -127,11 +127,26 @@ class MainWindow(QMainWindow):
         elif flag == 'delete':
             if file_path in self.editor_widget.file_list:
                 index = self.editor_widget.file_list.index(file_path)
-                self.editor_widget.close_tab(index)
+                self.close_tab(index)
 
-    # 新建文件
-    def connect_new_file(self):
-        self.editor_widget.new_edit_tab()
+    # 删除文件后关闭tab页面
+    def close_tab(self, index):
+        # 删除tab栏
+        self.editor_widget.removeTab(index)
+        self.editor_widget.file_list.pop(index)
+        # 删除完tab后需要修改状态栏
+        tab_counts = self.editor_widget.count()
+        if tab_counts > 0:
+            new_index = self.editor_widget.currentIndex()
+            file_path = self.editor_widget.file_list[new_index]
+            cursor_position = '[0:0]'
+            self.get_signal_from_editor('file_path>' + file_path)
+            self.get_signal_from_editor('cursor_position>' + cursor_position)
+        else:
+            file_path = 'None'
+            cursor_position = '[0:0]'
+            self.get_signal_from_editor('file_path>' + file_path)
+            self.get_signal_from_editor('cursor_position>' + cursor_position)
 
     # 打开文件
     def connect_open_file(self):

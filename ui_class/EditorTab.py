@@ -111,6 +111,7 @@ class EditorTab(QTabWidget):
         if os.path.exists(file_name):
             with open(file_name, 'r', encoding='utf-8') as f:
                 file_text = f.read()
+                file_text = file_text.replace('\n\n', '\r\n')
             if current_text == file_text:
                 save_file_flag = False
             else:
