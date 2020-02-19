@@ -1,7 +1,8 @@
+import os
 from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
-from glv import Icon
+from glv import Icon, MergePath
 
 
 class NewFile(QDialog):
@@ -32,8 +33,10 @@ class NewFile(QDialog):
         self.form_layout.addRow('文件名字:', self.file_name_text)
         # 确定和取消按钮
         self.sure_button = QPushButton('确定', self)
+        self.sure_button.clicked.connect(self.click_sure)
         self.sure_button.setFixedWidth(100)
         self.cancel_button = QPushButton('取消', self)
+        self.cancel_button.clicked.connect(self.click_cancel)
         self.cancel_button.setFixedWidth(100)
         self.button_layout = QHBoxLayout()
         self.button_layout.addWidget(self.sure_button)
@@ -53,7 +56,35 @@ class NewFile(QDialog):
     def select_path(self):
         dir_choose = QFileDialog.getExistingDirectory(self, '选取文件夹', self.path, options=QFileDialog.DontUseNativeDialog)
         if dir_choose:
-            print(dir_choose)
+            self.path_text.setText(dir_choose)
+
+    def click_sure(self):
+        self.setHidden(True)
+        file_name = self.file_name_text.text()
+        file_path = MergePath(self.path_text.text(), file_name).merged_path
+        if os.path.exists(file_path):
+            self.deal_existed_file(file_path)
+        else:
+            self.deal_not_existed_file(file_path)
+
+    def click_cancel(self):
+        self.setHidden(True)
+
+    # 处理已经存在的文件(需要先添加警告)
+    def deal_existed_file(self, file):
+        reply = QMessageBox.question(self, '新建此文件已经存在', '是否替换已经存在的文件？',
+                                     QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel, QMessageBox.No)
+        if reply == QMessageBox.No:
+            self.setHidden(False)
+        elif reply == QMessageBox.Yes:
+            with open(file, 'w', encoding='utf-8') as f:
+                f.write('')
+        else:
+            pass
+
+    def deal_not_existed_file(self, file):
+        with open(file, 'w', encoding='utf-8') as f:
+            f.write('')
 
 
 class NewFolder(QDialog):
@@ -77,15 +108,17 @@ class NewFolder(QDialog):
         self.select_path_action.setIcon(QIcon(Icon.path))
         self.select_path_action.triggered.connect(self.select_path)
         self.path_text.addAction(self.select_path_action, QLineEdit.TrailingPosition)
-        self.file_name_text = QLineEdit(self)
+        self.folder_name_text = QLineEdit(self)
         self.form_layout = QFormLayout()
         self.form_layout.setSpacing(20)
         self.form_layout.addRow('文件夹路径:', self.path_text)
-        self.form_layout.addRow('文件夹名字:', self.file_name_text)
+        self.form_layout.addRow('文件夹名字:', self.folder_name_text)
         # 确定和取消按钮
         self.sure_button = QPushButton('确定', self)
+        self.sure_button.clicked.connect(self.click_sure)
         self.sure_button.setFixedWidth(100)
         self.cancel_button = QPushButton('取消', self)
+        self.cancel_button.clicked.connect(self.click_cancel)
         self.cancel_button.setFixedWidth(100)
         self.button_layout = QHBoxLayout()
         self.button_layout.addWidget(self.sure_button)
@@ -104,7 +137,33 @@ class NewFolder(QDialog):
     def select_path(self):
         dir_choose = QFileDialog.getExistingDirectory(self, '选取文件夹', self.path, options=QFileDialog.DontUseNativeDialog)
         if dir_choose:
-            print(dir_choose)
+            self.path_text.setText(dir_choose)
+
+    def click_sure(self):
+        self.setHidden(True)
+        folder_name = self.folder_name_text.text()
+        folder_path = MergePath(self.path_text.text(), folder_name).merged_path
+        if os.path.exists(folder_path):
+            self.deal_existed_folder(folder_path)
+        else:
+            self.deal_not_existed_folder(folder_path)
+
+    def click_cancel(self):
+        self.setHidden(True)
+
+    # 处理已经存在的文件(需要先添加警告)
+    def deal_existed_folder(self, folder):
+        reply = QMessageBox.question(self, '新建此文件夹已经存在', '是否将此文件夹和已经存在的文件夹合并？',
+                                     QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel, QMessageBox.No)
+        if reply == QMessageBox.No:
+            self.setHidden(False)
+        elif reply == QMessageBox.Yes:
+            pass
+        else:
+            pass
+
+    def deal_not_existed_folder(self, folder):
+        os.makedirs(folder)
 
 
 class NewXmlFile(QDialog):
@@ -128,15 +187,17 @@ class NewXmlFile(QDialog):
         self.select_path_action.setIcon(QIcon(Icon.path))
         self.select_path_action.triggered.connect(self.select_path)
         self.path_text.addAction(self.select_path_action, QLineEdit.TrailingPosition)
-        self.file_name_text = QLineEdit(self)
+        self.xml_file_name_text = QLineEdit(self)
         self.form_layout = QFormLayout()
         self.form_layout.setSpacing(20)
         self.form_layout.addRow('xml文件路径:', self.path_text)
-        self.form_layout.addRow('xml文件名字:', self.file_name_text)
+        self.form_layout.addRow('xml文件名字:', self.xml_file_name_text)
         # 确定和取消按钮
         self.sure_button = QPushButton('确定', self)
+        self.sure_button.clicked.connect(self.click_sure)
         self.sure_button.setFixedWidth(100)
         self.cancel_button = QPushButton('取消', self)
+        self.cancel_button.clicked.connect(self.click_cancel)
         self.cancel_button.setFixedWidth(100)
         self.button_layout = QHBoxLayout()
         self.button_layout.addWidget(self.sure_button)
@@ -155,4 +216,32 @@ class NewXmlFile(QDialog):
     def select_path(self):
         dir_choose = QFileDialog.getExistingDirectory(self, '选取文件夹', self.path, options=QFileDialog.DontUseNativeDialog)
         if dir_choose:
-            print(dir_choose)
+            self.path_text.setText(dir_choose)
+
+    def click_sure(self):
+        self.setHidden(True)
+        file_name = self.xml_file_name_text.text()
+        file_path = MergePath(self.path_text.text(), file_name).merged_path
+        if os.path.exists(file_path):
+            self.deal_existed_file(file_path)
+        else:
+            self.deal_not_existed_file(file_path)
+
+    def click_cancel(self):
+        self.setHidden(True)
+
+    # 处理已经存在的文件(需要先添加警告)
+    def deal_existed_file(self, file):
+        reply = QMessageBox.question(self, '新建此文件已经存在', '是否替换已经存在的文件？',
+                                     QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel, QMessageBox.No)
+        if reply == QMessageBox.No:
+            self.setHidden(False)
+        elif reply == QMessageBox.Yes:
+            with open(file, 'w', encoding='utf-8') as f:
+                f.write('')
+        else:
+            pass
+
+    def deal_not_existed_file(self, file):
+        with open(file, 'w', encoding='utf-8') as f:
+            f.write('')

@@ -42,13 +42,19 @@ class New(QDialog):
             self.new_xml_file()
 
     def new_file(self):
+        self.new_file_dialog.path_text.setText(self.new_file_dialog.path)
+        self.new_file_dialog.file_name_text.setText('')
         self.new_file_dialog.exec()
         self.signal.emit('new_file>')
 
     def new_folder(self):
+        self.new_folder_dialog.path_text.setText(self.new_folder_dialog.path)
+        self.new_folder_dialog.folder_name_text.setText('')
         self.new_folder_dialog.exec()
         self.signal.emit('new_folder>')
 
     def new_xml_file(self):
+        self.new_xml_file_dialog.path_text.setText(self.new_xml_file_dialog.path)
+        self.new_xml_file_dialog.xml_file_name_text.setText('')
         self.new_xml_file_dialog.exec()
         self.signal.emit('new_xml_file>')
