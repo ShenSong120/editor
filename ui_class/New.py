@@ -16,10 +16,6 @@ class New(QDialog):
         self.title = QLabel(self)
         self.title.setAlignment(Qt.AlignCenter)
         self.title.setText('新建')
-        # 选中的 New子Dialog
-        self.new_file_dialog = NewFile(self, self.path)
-        self.new_folder_dialog = NewFolder(self, self.path)
-        self.new_xml_file_dialog = NewXmlFile(self, self.path)
         # listWidget
         self.list_widget = QListWidget(self)
         self.new_items = ['文件', '文件夹', 'Xml文件']
@@ -42,19 +38,16 @@ class New(QDialog):
             self.new_xml_file()
 
     def new_file(self):
-        self.new_file_dialog.path_text.setText(self.new_file_dialog.path)
-        self.new_file_dialog.file_name_text.setText('')
+        self.new_file_dialog = NewFile(self, self.path)
         self.new_file_dialog.exec()
         self.signal.emit('new_file>')
 
     def new_folder(self):
-        self.new_folder_dialog.path_text.setText(self.new_folder_dialog.path)
-        self.new_folder_dialog.folder_name_text.setText('')
+        self.new_folder_dialog = NewFolder(self, self.path)
         self.new_folder_dialog.exec()
         self.signal.emit('new_folder>')
 
     def new_xml_file(self):
-        self.new_xml_file_dialog.path_text.setText(self.new_xml_file_dialog.path)
-        self.new_xml_file_dialog.xml_file_name_text.setText('')
+        self.new_xml_file_dialog = NewXmlFile(self, self.path)
         self.new_xml_file_dialog.exec()
         self.signal.emit('new_xml_file>')

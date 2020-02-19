@@ -61,9 +61,6 @@ class MainWindow(QMainWindow):
                       QMenu::item:selected {background-color: #2DABF9;}'
         self.menu_bar.setStyleSheet(menu_style)
         self.setMenuBar(self.menu_bar)
-        # 新建菜单(可新建 文件/文件夹/xml文件)
-        self.new_dialog = New(self, os.getcwd())
-        self.new_dialog.signal[str].connect(self.get_signal_from_new)
         # 菜单和工具--功能action
         self.new_action = QAction(QIcon(Icon.new), '打开文件夹(Alt+N)', self)
         self.new_action.setShortcut('ctrl+alt+n')
@@ -163,6 +160,9 @@ class MainWindow(QMainWindow):
 
     # 新建(可以选择文件/文件夹)
     def connect_new(self):
+        # 新建菜单(可新建 文件/文件夹/xml文件)
+        self.new_dialog = New(self, os.getcwd())
+        self.new_dialog.signal[str].connect(self.get_signal_from_new)
         self.new_dialog.exec()
 
     # 打开文件夹
