@@ -8,10 +8,13 @@ class Icon:
     function = 'config/icon/function.png'
     word = 'config/icon/word.png'
     new_file = 'config/icon/new_file.png'
+    open_folder = 'config/icon/open_folder.png'
+    new = 'config/icon/new.png'
     open_file = 'config/icon/open_file.png'
     save_file = 'config/icon/save_file.png'
     save_as_file = 'config/icon/save_as_file.png'
     file = 'config/icon/file.png'
+    path = 'config/icon/path.png'
 
 
 # 样式

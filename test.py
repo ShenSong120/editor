@@ -7,6 +7,7 @@ from PyQt5.QtGui import *
 from glv import Icon, Param, MergePath, BeautifyStyle, FileStatus
 from ui_class.ProjectBar import ProjectBar
 from ui_class.EditorTab import EditorTab
+from ui_class.New import New
 
 '''
 需要增加的功能:
@@ -52,28 +53,37 @@ class MainWindow(QMainWindow):
         self.splitter_h_general.setSizes([200, 800])
         self.general_v_layout.addWidget(self.splitter_h_general)
         self.setLayout(self.general_v_layout)
-
-        # 菜单栏
         # 菜单栏
         self.menu_bar = QMenuBar(self)
         self.menu_bar.setObjectName('menu_bar')
         # 设置菜单栏样式
         menu_style = 'QMenu::item {background-color: transparent; padding-left: 5px; padding-right: 5px;}\
-                              QMenu::item:selected {background-color: #2DABF9;}'
+                      QMenu::item:selected {background-color: #2DABF9;}'
         self.menu_bar.setStyleSheet(menu_style)
         self.setMenuBar(self.menu_bar)
+        # 新建菜单(可新建 文件/文件夹/xml文件)
+        self.new_dialog = New(self, os.getcwd())
+        self.new_dialog.signal[str].connect(self.get_signal_from_new)
         # 菜单和工具--功能action
+        self.new_action = QAction(QIcon(Icon.new), '打开文件夹(Alt+N)', self)
+        self.new_action.setShortcut('ctrl+alt+n')
+        self.new_action.triggered.connect(self.connect_new)
+        self.open_folder_action = QAction(QIcon(Icon.open_folder), '打开文件夹(Shift+O)', self)
+        self.open_folder_action.setShortcut('ctrl+shift+o')
+        self.open_folder_action.triggered.connect(self.connect_open_folder)
         self.open_file_action = QAction(QIcon(Icon.open_file), '打开文件(O)', self)
         self.open_file_action.setShortcut('ctrl+o')
         self.open_file_action.triggered.connect(self.connect_open_file)
         self.save_file_action = QAction(QIcon(Icon.save_file), '保存文件(S)', self)
         self.save_file_action.setShortcut('ctrl+s')
         self.save_file_action.triggered.connect(self.connect_save_file)
-        self.save_as_file_action = QAction(QIcon(Icon.save_as_file), '另存文件为(Alt+S)', self)
-        self.save_as_file_action.setShortcut('ctrl+alt+s')
+        self.save_as_file_action = QAction(QIcon(Icon.save_as_file), '另存文件为(Shift+S)', self)
+        self.save_as_file_action.setShortcut('ctrl+shift+s')
         self.save_as_file_action.triggered.connect(self.connect_save_as_file)
         # 文件菜单栏
         self.file_bar = self.menu_bar.addMenu('文件')
+        self.file_bar.addAction(self.new_action)
+        self.file_bar.addAction(self.open_folder_action)
         self.file_bar.addAction(self.open_file_action)
         self.file_bar.addAction(self.save_file_action)
         self.file_bar.addAction(self.save_as_file_action)
@@ -84,6 +94,8 @@ class MainWindow(QMainWindow):
         self.help_bar.addAction(self.help_action_menu)
         # 工具栏
         self.tool_bar = self.addToolBar('tool_bar')
+        self.tool_bar.addAction(self.new_action)
+        self.tool_bar.addAction(self.open_folder_action)
         self.tool_bar.addAction(self.open_file_action)
         self.tool_bar.addAction(self.save_file_action)
         self.tool_bar.addAction(self.save_as_file_action)
@@ -139,6 +151,36 @@ class MainWindow(QMainWindow):
                 index = self.editor_widget.file_list.index(file_path)
                 self.close_tab(index)
 
+    # 获取New发出的信号
+    def get_signal_from_new(self, signal_str):
+        flag = signal_str.split('>')[0]
+        if flag == 'new_file':
+            print('新建文件')
+        elif flag == 'new_folder':
+            print('新建文件夹')
+        elif flag == 'new_xml_file':
+            print('新建xml文件')
+
+    # 新建(可以选择文件/文件夹)
+    def connect_new(self):
+        self.new_dialog.exec()
+
+    # 打开文件夹
+    def connect_open_folder(self):
+        print('打开文件夹')
+
+    # 打开文件
+    def connect_open_file(self):
+        self.editor_widget.open_edit_tab()
+
+    # 保存文件
+    def connect_save_file(self):
+        self.editor_widget.save_edit_tab()
+
+    # 另存文件为
+    def connect_save_as_file(self):
+        self.editor_widget.save_file_as_tab()
+
     # 删除文件后关闭tab页面
     def close_tab(self, index):
         # 删除tab栏
@@ -158,18 +200,6 @@ class MainWindow(QMainWindow):
             cursor_position = '[0:0]'
             self.get_signal_from_editor('file_path>' + file_path)
             self.get_signal_from_editor('cursor_position>' + cursor_position)
-
-    # 打开文件
-    def connect_open_file(self):
-        self.editor_widget.open_edit_tab()
-
-    # 保存文件
-    def connect_save_file(self):
-        self.editor_widget.save_edit_tab()
-
-    # 另存文件为
-    def connect_save_as_file(self):
-        self.editor_widget.save_file_as_tab()
 
     # 窗口关闭事件
     def closeEvent(self, event):

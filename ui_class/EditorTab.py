@@ -59,7 +59,7 @@ class EditorTab(QTabWidget):
     # 打开文件
     def open_edit_tab(self, file=None):
         if file is None:
-            file, file_type = QFileDialog.getOpenFileName(self, "选取文件", "./", "Xml Files (*.xml)", options=QFileDialog.DontUseNativeDialog) # 设置文件扩展名过滤,注意用双分号间隔
+            file, file_type = QFileDialog.getOpenFileName(self, "选取文件", "./", "Xml Files (*.xml)", options=QFileDialog.DontUseNativeDialog)
         if file:
             if file in self.file_list:
                 index = self.file_list.index(file)
