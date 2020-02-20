@@ -8,6 +8,7 @@ from threading import Thread
 from glv import MergePath
 from ui_class.FileTreeView import FileTreeView
 from ui_class.FileDialog import Paste, NewFolder, NewFile, Rename, Delete
+from ui_class.New import New
 
 
 # 侧边工程栏
@@ -107,13 +108,9 @@ class ProjectBar(QWidget):
         self.copy_path_action.setShortcut('ctrl+shift+c')
         self.copy_path_action.triggered.connect(self.copy_path)
         # 新建文件
-        self.new_file_action = QAction('新建文件', self)
-        self.new_file_action.setShortcut('ctrl+n')
-        self.new_file_action.triggered.connect(self.new_file)
-        # 新建文件夹
-        self.new_folder_action = QAction('新建文件夹', self)
-        self.new_folder_action.setShortcut('ctrl+shift+n')
-        self.new_folder_action.triggered.connect(self.new_folder)
+        self.new_action = QAction('新建', self)
+        self.new_action.setShortcut('ctrl+n')
+        self.new_action.triggered.connect(self.new)
         # 重命名
         self.rename_action = QAction('重命名', self)
         self.rename_action.setShortcut('f2')
@@ -126,11 +123,17 @@ class ProjectBar(QWidget):
         self.menu.addAction(self.copy_action)
         self.menu.addAction(self.paste_action)
         self.menu.addAction(self.copy_path_action)
-        self.menu.addAction(self.new_file_action)
-        self.menu.addAction(self.new_folder_action)
+        self.menu.addAction(self.new_action)
         self.menu.addAction(self.rename_action)
         self.menu.addAction(self.delete_action)
         self.menu.exec(self.tree.mapToGlobal(point))
+
+    # 新建(可以选择文件/文件夹等)
+    def new(self):
+        # 新建菜单(可新建 文件/文件夹/xml文件)
+        self.new_dialog = New(self, self.node_path)
+        self.new_dialog.signal[str].connect(self.get_signal_from_file_dialog)
+        self.new_dialog.exec()
 
     # 复制文件
     def copy(self):
@@ -153,26 +156,6 @@ class ProjectBar(QWidget):
     def copy_path(self):
         clipboard = QApplication.clipboard()
         clipboard.setText(self.node_path)
-
-    # 新建文件
-    def new_file(self):
-        if os.path.isdir(self.node_path):
-            start_path = self.node_path
-        else:
-            start_path = os.path.dirname(self.node_path)
-        self.new_file_dialog = NewFile(self, start_path)
-        self.new_file_dialog.signal[str].connect(self.get_signal_from_file_dialog)
-        self.new_file_dialog.exec()
-
-    # 新建文件夹
-    def new_folder(self):
-        if os.path.isdir(self.node_path):
-            start_path = self.node_path
-        else:
-            start_path = os.path.dirname(self.node_path)
-        self.new_folder_dialog = NewFolder(self, start_path)
-        self.new_folder_dialog.signal[str].connect(self.get_signal_from_file_dialog)
-        self.new_folder_dialog.exec()
 
     # 重命名
     def rename(self):
@@ -281,16 +264,10 @@ class ProjectBar(QWidget):
                 self.copy_path()
             else:
                 QWidget.keyPressEvent(self, event)
-        # Ctrl + N 新建文件
+        # Ctrl + N 新建文件、文件夹等等
         if (event.key() == Qt.Key_N):
             if event.modifiers() == Qt.ControlModifier:
-                self.new_file()
-            else:
-                QWidget.keyPressEvent(self, event)
-        # Ctrl + Shift + N 新建文件夹
-        if (event.key() == Qt.Key_N):
-            if event.modifiers() == Qt.ControlModifier | Qt.ShiftModifier:
-                self.new_folder()
+                self.new()
             else:
                 QWidget.keyPressEvent(self, event)
         # Shift + F2 重命名
