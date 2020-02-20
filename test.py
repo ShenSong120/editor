@@ -221,10 +221,8 @@ class MainWindow(QMainWindow):
             elif reply == QMessageBox.Cancel:
                 event.ignore()
             elif reply == QMessageBox.Yes:
-                with open(file, 'w', encoding='utf-8') as f:
-                    text = self.editor_widget.widget(index).text()
-                    f.write(text)
-                    event.accept()
+                self.editor_widget.save_edit_tab(file)
+                event.accept()
             else:
                 event.ignore()
 

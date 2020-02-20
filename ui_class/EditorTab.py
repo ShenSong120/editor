@@ -76,10 +76,15 @@ class EditorTab(QTabWidget):
                 self.setTabToolTip(index, file)
 
     # 保存文件
-    def save_edit_tab(self):
-        index = self.currentIndex()
-        editor = self.currentWidget()
-        file = str(self.file_list[index])
+    def save_edit_tab(self, file=None):
+        if file is None:
+            index = self.currentIndex()
+            editor = self.currentWidget()
+            file = str(self.file_list[index])
+        else:
+            index = self.file_list.index(file)
+            editor = self.widget(index)
+            file = file
         self.file_status_list[index] = FileStatus.save_status
         self.signal.emit('file_status>')
         if os.path.exists(file):
@@ -123,27 +128,15 @@ class EditorTab(QTabWidget):
     def close_tab(self, index):
         save_file_flag = False
         file_name = self.file_list[index]
-        current_text = self.currentWidget().text()
-        if os.path.exists(file_name):
-            with open(file_name, 'r', encoding='utf-8') as f:
-                file_text = f.read()
-                file_text = file_text.replace('\n\n', '\r\n')
-            if current_text == file_text:
-                save_file_flag = False
-            else:
-                save_file_flag = True
-        else:
-            save_file_flag = True
-        if save_file_flag is True:
-            reply = QMessageBox.question(self, '当前文件未保存', '是否保存当前文件', QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel, QMessageBox.Yes)
+        if self.file_status_list[index] == FileStatus.not_save_status:
+            reply = QMessageBox.question(self, '文件保存', '%s未保存'%file_name+'\n是否保存此文件?',
+                                         QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel, QMessageBox.Yes)
             if reply == QMessageBox.Yes:
-                save_status = self.save_edit_tab()
+                save_status = self.save_edit_tab(file_name)
                 if save_status is True:
                     self.removeTab(index)
                     self.file_list.pop(index)
                     self.file_status_list.pop(index)
-                else:
-                    pass
             elif reply == QMessageBox.No:
                 self.removeTab(index)
                 self.file_list.pop(index)
@@ -156,7 +149,7 @@ class EditorTab(QTabWidget):
             self.removeTab(index)
             self.file_list.pop(index)
             self.file_status_list.pop(index)
-        # 删除完tab后需要修改状态栏
+            # 删除完tab后需要修改状态栏
         tab_counts = self.count()
         if tab_counts > 0:
             new_index = self.currentIndex()

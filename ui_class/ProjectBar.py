@@ -7,7 +7,7 @@ from PyQt5.QtGui import *
 from threading import Thread
 from glv import MergePath
 from ui_class.FileTreeView import FileTreeView
-from ui_class.FileDialog import Paste, NewXmlFile, NewFolder, NewFile, Rename, Delete
+from ui_class.FileDialog import Paste, NewFolder, NewFile, Rename, Delete
 
 
 # 侧边工程栏
@@ -204,8 +204,11 @@ class ProjectBar(QWidget):
     # 更新选中item(也就是等待文件model更新完成, 延时时间不能太短)
     def update_select_item(self, path):
         time.sleep(0.04)
-        new_index = self.model.index(path)
-        self.tree.setCurrentIndex(new_index)
+        self.node_path = path
+        self.node_name = os.path.split(path)[1]
+        self.index = self.model.index(path)
+        self.blank_click_flag = False
+        self.tree.setCurrentIndex(self.index)
         self.info_label.setText(path)
 
     # 获取从文件树获取到的信号
@@ -254,7 +257,7 @@ class ProjectBar(QWidget):
             if file_path.endswith('.xml') or file_path.endswith('.XML'):
                 self.signal.emit('open_xml>' + str(file_path))
             else:
-                print('暂不支持打开此类型文件!!!')
+                pass
         else:
             pass
 
@@ -264,48 +267,41 @@ class ProjectBar(QWidget):
         if (event.key() == Qt.Key_C):
             if event.modifiers() == Qt.ControlModifier:
                 self.copy()
-                print('复制')
             else:
                 QWidget.keyPressEvent(self, event)
         # Ctrl + V 粘贴
         if (event.key() == Qt.Key_V):
             if event.modifiers() == Qt.ControlModifier:
                 self.paste()
-                print('粘贴')
             else:
                 QWidget.keyPressEvent(self, event)
         # Ctrl + Shift + C 复制路径
         if (event.key() == Qt.Key_C):
             if event.modifiers() == Qt.ControlModifier | Qt.ShiftModifier:
                 self.copy_path()
-                print('复制路径')
             else:
                 QWidget.keyPressEvent(self, event)
         # Ctrl + N 新建文件
         if (event.key() == Qt.Key_N):
             if event.modifiers() == Qt.ControlModifier:
                 self.new_file()
-                print('新建文件')
             else:
                 QWidget.keyPressEvent(self, event)
         # Ctrl + Shift + N 新建文件夹
         if (event.key() == Qt.Key_N):
             if event.modifiers() == Qt.ControlModifier | Qt.ShiftModifier:
                 self.new_folder()
-                print('新建文件夹')
             else:
                 QWidget.keyPressEvent(self, event)
         # Shift + F2 重命名
         if (event.key() == Qt.Key_F2):
             if event.modifiers() == Qt.ShiftModifier:
                 self.rename()
-                print('重命名')
             else:
                 QWidget.keyPressEvent(self, event)
         # Delete 删除
         if (event.key() == Qt.Key_Delete):
             self.delete()
-            print('删除')
         # 其余情况
         else:
             QWidget.keyPressEvent(self, event)

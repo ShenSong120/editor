@@ -1,7 +1,7 @@
 from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
-from ui_class.FileDialog import NewFile, NewFolder, NewXmlFile
+from ui_class.FileDialog import NewFile, NewFolder
 
 
 class New(QDialog):
@@ -18,7 +18,7 @@ class New(QDialog):
         self.title.setText('新建')
         # listWidget
         self.list_widget = QListWidget(self)
-        self.new_items = ['文件', '文件夹', 'Xml文件']
+        self.new_items = ['文件夹', '文件', 'xml文件']
         self.list_widget.addItems(self.new_items)
         self.list_widget.setCurrentRow(0)
         self.list_widget.itemClicked.connect(self.item_clicked_action)
@@ -35,7 +35,7 @@ class New(QDialog):
             self.new_file()
         elif item.text() == '文件夹':
             self.new_folder()
-        elif item.text() == 'Xml文件':
+        elif item.text() == 'xml文件':
             self.new_xml_file()
 
     def new_file(self):
@@ -49,10 +49,18 @@ class New(QDialog):
         self.new_folder_dialog.exec()
 
     def new_xml_file(self):
-        self.new_xml_file_dialog = NewXmlFile(self, self.path)
+        self.new_xml_file_dialog = NewFile(self, self.path, type='xml')
         self.new_xml_file_dialog.signal[str].connect(self.get_signal_from_file_dialog)
         self.new_xml_file_dialog.exec()
 
     def get_signal_from_file_dialog(self, signal_str):
-
         self.signal.emit(signal_str)
+
+    # 键盘事件重写
+    def keyPressEvent(self, event):
+        # 回车进入
+        if (event.key() == Qt.Key_Return):
+            item = self.list_widget.currentItem()
+            self.item_clicked_action(item)
+        else:
+            pass
