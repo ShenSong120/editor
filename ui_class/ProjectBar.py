@@ -7,6 +7,7 @@ from PyQt5.QtGui import *
 from threading import Thread
 from glv import MergePath
 from ui_class.FileTreeView import FileTreeView
+from ui_class.FileDialog import Paste, NewXmlFile, NewFolder, NewFile, Rename, Delete
 
 
 # 侧边工程栏
@@ -108,19 +109,19 @@ class ProjectBar(QWidget):
         # 新建文件
         self.new_file_action = QAction('新建文件', self)
         self.new_file_action.setShortcut('ctrl+n')
-        self.new_file_action.triggered.connect(self.new_file_dialog)
+        self.new_file_action.triggered.connect(self.new_file)
         # 新建文件夹
         self.new_folder_action = QAction('新建文件夹', self)
         self.new_folder_action.setShortcut('ctrl+shift+n')
-        self.new_folder_action.triggered.connect(self.new_folder_dialog)
+        self.new_folder_action.triggered.connect(self.new_folder)
         # 重命名
         self.rename_action = QAction('重命名', self)
         self.rename_action.setShortcut('f2')
-        self.rename_action.triggered.connect(self.rename_dialog)
+        self.rename_action.triggered.connect(self.rename)
         # 删除
         self.delete_action = QAction('删除', self)
         self.delete_action.setShortcut('delete')
-        self.delete_action.triggered.connect(self.delete_dialog)
+        self.delete_action.triggered.connect(self.delete)
         # 菜单添加action
         self.menu.addAction(self.copy_action)
         self.menu.addAction(self.paste_action)
@@ -135,26 +136,17 @@ class ProjectBar(QWidget):
     def copy(self):
         clipboard = QApplication.clipboard()
         clipboard.setText(self.node_path)
-        print(self.node_path)
 
     # 粘贴文件
     def paste(self):
         clipboard = QApplication.clipboard()
         copy_path = clipboard.text()
-        title, prompt_text, default_name = '新建文件', '请输入文件名', os.path.split(copy_path)[1]
-        file_name, ok = QInputDialog.getText(self, title, prompt_text, QLineEdit.Normal, default_name)
-        if ok:
-            if os.path.isdir(self.node_path) is True:
-                root_path = self.node_path
-                if self.index is not None:
-                    # 展开文件夹
-                    self.tree.setExpanded(self.index, True)
-            else:
-                root_path = os.path.dirname(self.node_path)
-            paste_path = MergePath(root_path, file_name).merged_path
-            shutil.copy(copy_path, paste_path)
-            Thread(target=self.update_select_item, args=(paste_path,)).start()
-            print(paste_path)
+        if os.path.isdir(self.node_path):
+            start_path = self.node_path
+        else:
+            start_path = os.path.dirname(self.node_path)
+        self.paste_dialog = Paste(self, copy_path, start_path)
+        self.paste_dialog.exec()
 
     # 复制路径
     def copy_path(self):
@@ -162,126 +154,37 @@ class ProjectBar(QWidget):
         clipboard.setText(self.node_path)
 
     # 新建文件
-    def new_file_dialog(self):
-        title, prompt_text, default_name = '新建文件', '请输入文件名', 'new.xml'
-        file_name, ok = QInputDialog.getText(self, title, prompt_text, QLineEdit.Normal, default_name)
-        if ok:
-            if os.path.isdir(self.node_path) is True:
-                root_path = self.node_path
-                if self.index is not None:
-                    # 展开文件夹
-                    self.tree.setExpanded(self.index, True)
-            else:
-                root_path = os.path.dirname(self.node_path)
-            file_path = MergePath(root_path, file_name).merged_path
-            # 如果文件存在
-            if os.path.exists(file_path):
-                reply = QMessageBox.question(self, '新建此文件已经存在', '是否替换已经存在的文件？', QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel, QMessageBox.No)
-                if reply == QMessageBox.No:
-                    self.new_file_dialog()
-                elif reply == QMessageBox.Yes:
-                    with open(file_path, 'w', encoding='utf-8') as f:
-                        text = "<?xml version='1.0' encoding='utf-8' ?>"
-                        f.write(text)
-                        print('新建文件: %s' % file_path)
-                    # 更新选中item
-                    Thread(target=self.update_select_item, args=(file_path,)).start()
-                    self.signal.emit('new_xml>' + str(file_path))
-                elif reply == QMessageBox.Cancel:
-                    pass
-            else:
-                with open(file_path, 'w', encoding='utf-8') as f:
-                    text = "<?xml version='1.0' encoding='utf-8' ?>"
-                    f.write(text)
-                    print('新建文件: %s' % file_path)
-                # 更新选中item
-                Thread(target=self.update_select_item, args=(file_path,)).start()
-                self.signal.emit('new_xml>' + str(file_path))
+    def new_file(self):
+        if os.path.isdir(self.node_path):
+            start_path = self.node_path
+        else:
+            start_path = os.path.dirname(self.node_path)
+        self.new_file_dialog = NewFile(self, start_path)
+        self.new_file_dialog.exec()
+        # self.signal.emit('new_xml>' + str(file_path))
 
     # 新建文件夹
-    def new_folder_dialog(self):
-        title, prompt_text, default_name = '新建文件夹', '请输入文件夹名', ''
-        folder_name, ok = QInputDialog.getText(self, title, prompt_text, QLineEdit.Normal, default_name)
-        if ok:
-            if os.path.isdir(self.node_path) is True:
-                root_path = self.node_path
-                if self.index is not None:
-                    # 展开文件夹
-                    self.tree.setExpanded(self.index, True)
-            else:
-                root_path = os.path.dirname(self.node_path)
-            folder_path = MergePath(root_path, folder_name).merged_path
-            # 如果目录存在
-            if os.path.exists(folder_path):
-                reply = QMessageBox.question(self, '新建此目录已经存在', '是否将新建目录和已存在目录合并？', QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel, QMessageBox.No)
-                if reply == QMessageBox.No:
-                    self.new_folder_dialog()
-                elif reply == QMessageBox.Yes:
-                    pass
-                elif reply == QMessageBox.Cancel:
-                    pass
-            else:
-                os.makedirs(folder_path)
-                print('新建文件夹: %s' % folder_path)
-                # 更新选中item
-                Thread(target=self.update_select_item, args=(folder_path,)).start()
+    def new_folder(self):
+        if os.path.isdir(self.node_path):
+            start_path = self.node_path
+        else:
+            start_path = os.path.dirname(self.node_path)
+        self.new_folder_dialog = NewFolder(self, start_path)
+        self.new_folder_dialog.exec()
 
     # 重命名
-    def rename_dialog(self):
+    def rename(self):
         if self.blank_click_flag is True:
             return
-        title, prompt_text, default_name = '重命名', '请输入新文件名', self.node_name
-        new_name, ok = QInputDialog.getText(self, title, prompt_text, QLineEdit.Normal, default_name)
-        if ok:
-            root_path = os.path.dirname(self.node_path)
-            new_name_path = MergePath(root_path, new_name).merged_path
-            # 如果新命名文件存在
-            if os.path.exists(new_name_path):
-                reply = QMessageBox.question(self, '新命名文件已经存在', '是否替换已经存在的文件？', QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel, QMessageBox.No)
-                if reply == QMessageBox.No:
-                    self.rename_dialog()
-                elif reply == QMessageBox.Yes:
-                    os.rename(self.node_path, new_name_path)
-                    print('重命名 %s 为: %s' % (self.node_path, new_name_path))
-                    Thread(target=self.update_select_item, args=(new_name_path,)).start()
-                elif reply == QMessageBox.Cancel:
-                    pass
-            else:
-                os.rename(self.node_path, new_name_path)
-                print('重命名 %s 为: %s' % (self.node_path, new_name_path))
-                Thread(target=self.update_select_item, args=(new_name_path,)).start()
-
+        self.rename_dialog = Rename(self, self.node_path)
+        self.rename_dialog.exec()
 
     # 删除文件
-    def delete_dialog(self):
+    def delete(self):
         if self.blank_click_flag is True:
             return
-        # file_flag判断是文件还是文件夹(文件为True,文件夹为False)
-        if os.path.isdir(self.node_path) is True:
-            file_flag = False
-            prompt_text = '确定要删除此文件夹吗？'
-        else:
-            file_flag = True
-            prompt_text = '确定要删除此文件吗？'
-        # 判断是否确定删除
-        reply = QMessageBox.question(self, '删除栏', prompt_text, QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
-        if reply == QMessageBox.Yes:
-            # 获取删除项下一项名字
-            name = self.tree.indexBelow(self.model.index(self.node_path)).data()
-            parent_path = os.path.split(self.node_path)[0]
-            # 确保路径存在
-            selected_path = parent_path if name is None else MergePath(parent_path, name).merged_path
-            if os.path.exists(selected_path) is False:
-                selected_path = parent_path
-            Thread(target=self.update_select_item, args=(selected_path,)).start()
-            self.info_label.setText(selected_path)
-            if file_flag is True:
-                os.remove(self.node_path)
-                print('删除文件: %s' % self.node_path)
-                self.signal.emit('delete>' + self.node_path)
-            else:
-                shutil.rmtree(self.node_path)
-                print('删除文件夹: %s' % self.node_path)
+        self.delete_dialog = Delete(self, self.node_path)
+        self.delete_dialog.exec()
 
     # 更新选中item(必须异步线程才能选中, 也就是等待文件model更新完成, 延时时间不能太短)
     def update_select_item(self, path):
@@ -366,27 +269,27 @@ class ProjectBar(QWidget):
         # Ctrl + N 新建文件
         if (event.key() == Qt.Key_N):
             if event.modifiers() == Qt.ControlModifier:
-                self.new_file_dialog()
+                self.new_file()
                 print('新建文件')
             else:
                 QWidget.keyPressEvent(self, event)
         # Ctrl + Shift + N 新建文件夹
         if (event.key() == Qt.Key_N):
             if event.modifiers() == Qt.ControlModifier | Qt.ShiftModifier:
-                self.new_folder_dialog()
+                self.new_folder()
                 print('新建文件夹')
             else:
                 QWidget.keyPressEvent(self, event)
         # Shift + F2 重命名
         if (event.key() == Qt.Key_F2):
             if event.modifiers() == Qt.ShiftModifier:
-                self.rename_dialog()
+                self.rename()
                 print('重命名')
             else:
                 QWidget.keyPressEvent(self, event)
         # Delete 删除
         if (event.key() == Qt.Key_Delete):
-            self.delete_dialog()
+            self.delete()
             print('删除')
         # 其余情况
         else:
