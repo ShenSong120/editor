@@ -138,25 +138,27 @@ class MainWindow(QMainWindow):
     # 获取工程栏发出的信号
     def get_signal_from_project_bar(self, signal_str):
         flag = signal_str.split('>')[0]
-        file_path = signal_str.split('>')[1]
+        path = signal_str.split('>')[1]
         if flag == 'open_xml':
-            self.editor_widget.open_edit_tab(file_path)
-        elif flag == 'new_xml':
-            self.editor_widget.new_edit_tab(file_path)
-        elif flag == 'delete':
-            if file_path in self.editor_widget.file_list:
-                index = self.editor_widget.file_list.index(file_path)
+            self.editor_widget.open_edit_tab(path)
+        elif flag == 'delete_path':
+            if path in self.editor_widget.file_list:
+                index = self.editor_widget.file_list.index(path)
                 self.close_tab(index)
 
-    # 获取New发出的信号
+    # 获取New文件系统发出的信号
     def get_signal_from_new(self, signal_str):
         flag = signal_str.split('>')[0]
-        if flag == 'new_file':
-            print('新建文件')
-        elif flag == 'new_folder':
-            print('新建文件夹')
-        elif flag == 'new_xml_file':
-            print('新建xml文件')
+        path = signal_str.split('>')[1]
+        # 文件新建、打开、等等操作
+        if os.path.exists(path):
+            self.project_bar.update_select_item(path)
+            self.project_bar.operation_file(path)
+        # 文件删除操作
+        else:
+            if path in self.editor_widget.file_list:
+                index = self.editor_widget.file_list.index(path)
+                self.close_tab(index)
 
     # 新建(可以选择文件/文件夹)
     def connect_new(self):

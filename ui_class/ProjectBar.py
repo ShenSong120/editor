@@ -146,6 +146,7 @@ class ProjectBar(QWidget):
         else:
             start_path = os.path.dirname(self.node_path)
         self.paste_dialog = Paste(self, copy_path, start_path)
+        self.paste_dialog.signal[str].connect(self.get_signal_from_file_dialog)
         self.paste_dialog.exec()
 
     # 复制路径
@@ -160,8 +161,8 @@ class ProjectBar(QWidget):
         else:
             start_path = os.path.dirname(self.node_path)
         self.new_file_dialog = NewFile(self, start_path)
+        self.new_file_dialog.signal[str].connect(self.get_signal_from_file_dialog)
         self.new_file_dialog.exec()
-        # self.signal.emit('new_xml>' + str(file_path))
 
     # 新建文件夹
     def new_folder(self):
@@ -170,6 +171,7 @@ class ProjectBar(QWidget):
         else:
             start_path = os.path.dirname(self.node_path)
         self.new_folder_dialog = NewFolder(self, start_path)
+        self.new_folder_dialog.signal[str].connect(self.get_signal_from_file_dialog)
         self.new_folder_dialog.exec()
 
     # 重命名
@@ -177,6 +179,7 @@ class ProjectBar(QWidget):
         if self.blank_click_flag is True:
             return
         self.rename_dialog = Rename(self, self.node_path)
+        self.rename_dialog.signal[str].connect(self.get_signal_from_file_dialog)
         self.rename_dialog.exec()
 
     # 删除文件
@@ -184,9 +187,21 @@ class ProjectBar(QWidget):
         if self.blank_click_flag is True:
             return
         self.delete_dialog = Delete(self, self.node_path)
+        self.delete_dialog.signal[str].connect(self.get_signal_from_file_dialog)
         self.delete_dialog.exec()
 
-    # 更新选中item(必须异步线程才能选中, 也就是等待文件model更新完成, 延时时间不能太短)
+    # 从文件窗口接收消息
+    def get_signal_from_file_dialog(self, signal_str):
+        flag = signal_str.split('>')[0]
+        path = signal_str.split('>')[1]
+        if os.path.exists(path):
+            self.update_select_item(path)
+            self.operation_file(path)
+        else:
+            # 路径不存在就是删除标志(需要删掉子tab)
+            self.signal.emit('delete_path>' + path)
+
+    # 更新选中item(也就是等待文件model更新完成, 延时时间不能太短)
     def update_select_item(self, path):
         time.sleep(0.04)
         new_index = self.model.index(path)

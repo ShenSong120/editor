@@ -7,6 +7,9 @@ from glv import Icon, MergePath
 
 
 class NewFile(QDialog):
+
+    signal = pyqtSignal(str)
+
     def __init__(self, parent, path):
         super(NewFile, self).__init__(parent)
         # 新建文件起始路径
@@ -80,15 +83,22 @@ class NewFile(QDialog):
         elif reply == QMessageBox.Yes:
             with open(file, 'w', encoding='utf-8') as f:
                 f.write('')
+            # 发射文件新建信号
+            self.signal.emit('new_file>' + file)
         else:
             pass
 
     def deal_not_existed_file(self, file):
         with open(file, 'w', encoding='utf-8') as f:
             f.write('')
+        # 发射文件新建信号
+        self.signal.emit('new_file>' + file)
 
 
 class NewFolder(QDialog):
+
+    signal = pyqtSignal(str)
+
     def __init__(self, parent, path):
         super(NewFolder, self).__init__(parent)
         # 新建文件夹起始路径
@@ -152,22 +162,28 @@ class NewFolder(QDialog):
     def click_cancel(self):
         self.setHidden(True)
 
-    # 处理已经存在的文件(需要先添加警告)
+    # 处理已经存在的文件夹(需要先添加警告)
     def deal_existed_folder(self, folder):
         reply = QMessageBox.question(self, '新建此文件夹已经存在', '是否将此文件夹和已经存在的文件夹合并？',
                                      QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel, QMessageBox.No)
         if reply == QMessageBox.No:
             self.setHidden(False)
         elif reply == QMessageBox.Yes:
-            pass
+            # 发射文件夹新建信号
+            self.signal.emit('new_folder>' + folder)
         else:
             pass
 
     def deal_not_existed_folder(self, folder):
         os.makedirs(folder)
+        # 发射文件夹新建信号
+        self.signal.emit('new_folder>' + folder)
 
 
 class NewXmlFile(QDialog):
+
+    signal = pyqtSignal(str)
+
     def __init__(self, parent, path):
         super(NewXmlFile, self).__init__(parent)
         # 新建xml文件起始路径
@@ -240,16 +256,23 @@ class NewXmlFile(QDialog):
         elif reply == QMessageBox.Yes:
             with open(file, 'w', encoding='utf-8') as f:
                 f.write('')
+            # 发射xml文件新建信号
+            self.signal.emit('new_xml_file>' + file)
         else:
             pass
 
     def deal_not_existed_file(self, file):
         with open(file, 'w', encoding='utf-8') as f:
             f.write('')
+        # 发射xml文件新建信号
+        self.signal.emit('new_xml_file>' + file)
 
 
 # 粘贴文件
 class Paste(QDialog):
+
+    signal = pyqtSignal(str)
+
     def __init__(self, parent, source_path, path):
         super(Paste, self).__init__(parent)
         # 新建xml文件起始路径
@@ -333,6 +356,8 @@ class Paste(QDialog):
                             shutil.copytree(current_path, MergePath(target_path, name).merged_path)
                         else:
                             shutil.copyfile(current_path, MergePath(target_path, name).merged_path)
+                # 发射粘贴文件夹信号
+                self.signal.emit('paste_path>' + target_path)
             else:
                 pass
         else:
@@ -343,19 +368,28 @@ class Paste(QDialog):
             elif reply == QMessageBox.Yes:
                 with open(target_path, 'w', encoding='utf-8') as f:
                     f.write('')
+                # 发射粘贴文件信号
+                self.signal.emit('paste_path>' + target_path)
             else:
                 pass
 
     def deal_not_existed_file(self, target_path):
         if os.path.isdir(self.source_path):
             shutil.copytree(self.source_path, target_path)
+            # 发射粘贴文件夹信号
+            self.signal.emit('paste_path>' + target_path)
         else:
             with open(target_path, 'w', encoding='utf-8') as f:
                 f.write('')
+            # 发射粘贴文件信号
+            self.signal.emit('paste_path>' + target_path)
 
 
 # 重命名文件
 class Rename(QDialog):
+
+    signal = pyqtSignal(str)
+
     def __init__(self, parent, source_path):
         super(Rename, self).__init__(parent)
         # 原路径
@@ -444,6 +478,8 @@ class Rename(QDialog):
                             else:
                                 shutil.copyfile(current_path, MergePath(rename_path, name).merged_path)
                     os.removedirs(self.source_path)
+                    # 发射重命名信号
+                    self.signal.emit('rename_path>' + rename_path)
             else:
                 pass
         else:
@@ -455,15 +491,22 @@ class Rename(QDialog):
                 if rename_path != self.source_path:
                     shutil.copyfile(self.source_path, rename_path)
                     os.remove(self.source_path)
+                    # 发射重命名信号
+                    self.signal.emit('rename_path>' + rename_path)
             else:
                 pass
 
     def deal_not_existed_file(self, rename_path):
         os.rename(self.source_path, rename_path)
+        # 发射重命名信号
+        self.signal.emit('rename_path>' + rename_path)
 
 
 # 删除文件
 class Delete(QDialog):
+
+    signal = pyqtSignal(str)
+
     def __init__(self, parent, source_path):
         super(Delete, self).__init__(parent)
         # 原路径
@@ -517,6 +560,7 @@ class Delete(QDialog):
             shutil.rmtree(self.source_path)
         else:
             os.remove(self.source_path)
+        self.signal.emit('delete_path>' + self.source_path)
 
     def click_cancel(self):
         self.setHidden(True)

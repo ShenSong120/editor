@@ -20,6 +20,7 @@ class New(QDialog):
         self.list_widget = QListWidget(self)
         self.new_items = ['文件', '文件夹', 'Xml文件']
         self.list_widget.addItems(self.new_items)
+        self.list_widget.setCurrentRow(0)
         self.list_widget.itemClicked.connect(self.item_clicked_action)
         self.general_layout = QVBoxLayout(self)
         self.general_layout.setContentsMargins(0, 5, 0, 0)
@@ -39,15 +40,19 @@ class New(QDialog):
 
     def new_file(self):
         self.new_file_dialog = NewFile(self, self.path)
+        self.new_file_dialog.signal[str].connect(self.get_signal_from_file_dialog)
         self.new_file_dialog.exec()
-        self.signal.emit('new_file>')
 
     def new_folder(self):
         self.new_folder_dialog = NewFolder(self, self.path)
+        self.new_folder_dialog.signal[str].connect(self.get_signal_from_file_dialog)
         self.new_folder_dialog.exec()
-        self.signal.emit('new_folder>')
 
     def new_xml_file(self):
         self.new_xml_file_dialog = NewXmlFile(self, self.path)
+        self.new_xml_file_dialog.signal[str].connect(self.get_signal_from_file_dialog)
         self.new_xml_file_dialog.exec()
-        self.signal.emit('new_xml_file>')
+
+    def get_signal_from_file_dialog(self, signal_str):
+
+        self.signal.emit(signal_str)
