@@ -23,7 +23,10 @@ class NewFile(QDialog):
         if type is not None:
             self.window_title = '新建' + type + '文件'
         # 新建文件起始路径
-        self.start_path = path
+        if os.path.isdir(path):
+            self.start_path = path
+        else:
+            self.start_path = os.path.dirname(path)
         self.title = QLabel(self)
         self.title.setAlignment(Qt.AlignCenter)
         self.title.setText(self.window_title)
@@ -345,7 +348,7 @@ class Paste(QDialog):
             reply = QMessageBox.question(self, '文件夹重复', source_path+'文件夹已存在\n是否合并这两个已经存在的文件夹？',
                                          QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel, QMessageBox.No)
             if reply == QMessageBox.No:
-                self.setHidden(False)
+                QMessageBox.about(self, '文件夹名重复', source_path+'已存在\n请重新粘贴文件夹并重新命名')
             elif reply == QMessageBox.Yes:
                 for name in os.listdir(source_path):
                     if name not in os.listdir(target_path):
@@ -362,11 +365,11 @@ class Paste(QDialog):
             reply = QMessageBox.question(self, '文件重复', source_path+'文件已经存在\n是否替换已经存在的文件？',
                                          QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel, QMessageBox.No)
             if reply == QMessageBox.No:
-                self.setHidden(False)
+                QMessageBox.about(self, '文件名重复', source_path+'已存在\n请重新粘贴文件并重新命名')
             elif reply == QMessageBox.Yes:
-                with open(target_path, 'w', encoding='utf-8') as f:
-                    f.write('')
-                # 发射粘贴文件信号
+                if source_path != target_path:
+                    shutil.copyfile(source_path, target_path)
+                    # 发射粘贴文件信号
                 self.signal.emit('paste_path>' + target_path)
             else:
                 pass
@@ -377,8 +380,7 @@ class Paste(QDialog):
             # 发射粘贴文件夹信号
             self.signal.emit('paste_path>' + target_path)
         else:
-            with open(target_path, 'w', encoding='utf-8') as f:
-                f.write('')
+            shutil.copyfile(source_path, target_path)
             # 发射粘贴文件信号
             self.signal.emit('paste_path>' + target_path)
 
