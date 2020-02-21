@@ -66,6 +66,19 @@ class ProjectBar(QWidget):
         self.v_layout.addWidget(self.tree)
         self.setLayout(self.v_layout)
 
+    # 重新载入目录树
+    def reload_model(self, path):
+        self.path = path
+        self.model.setRootPath(path)
+        self.tree.setModel(self.model)
+        self.tree.setRootIndex(self.model.index(self.path))
+        self.info_label.setText(self.path)
+        # 文件树状态标志(初始为None)
+        self.node_path = self.path
+        self.node_name = 'new.xml'
+        self.index = None
+        self.blank_click_flag = True
+
     def show_menu(self, point):
         self.index = self.tree.indexAt(point)
         # 如果点击的非空白区域

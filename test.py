@@ -62,7 +62,7 @@ class MainWindow(QMainWindow):
         self.menu_bar.setStyleSheet(menu_style)
         self.setMenuBar(self.menu_bar)
         # 菜单和工具--功能action
-        self.new_action = QAction(QIcon(Icon.new), '打开文件夹(Alt+N)', self)
+        self.new_action = QAction(QIcon(Icon.new), '新建(Alt+N)', self)
         self.new_action.setShortcut('ctrl+alt+n')
         self.new_action.triggered.connect(self.connect_new)
         self.open_folder_action = QAction(QIcon(Icon.open_folder), '打开文件夹(Shift+O)', self)
@@ -114,7 +114,7 @@ class MainWindow(QMainWindow):
         self.status_bar.addPermanentWidget(self.file_icon, stretch=0)
         self.status_bar.addPermanentWidget(self.file_path_label, stretch=0)
         self.status_bar.addPermanentWidget(self.file_status_label, stretch=1)
-        self.status_bar.addPermanentWidget(self.cursor_label, stretch=1)
+        self.status_bar.addPermanentWidget(self.cursor_label, stretch=7)
 
     # 获取编辑器文本中发出的信号
     def get_signal_from_editor(self, signal_str):
@@ -167,9 +167,12 @@ class MainWindow(QMainWindow):
         self.new_dialog.signal[str].connect(self.get_signal_from_new)
         self.new_dialog.exec()
 
-    # 打开文件夹
+    # 打开工程文件夹
     def connect_open_folder(self):
-        print('打开文件夹')
+        dir_choose = QFileDialog.getExistingDirectory(self, '选取文件夹', self.project_path,
+                                                      options=QFileDialog.DontUseNativeDialog)
+        if dir_choose:
+            self.project_bar.reload_model(dir_choose)
 
     # 打开文件
     def connect_open_file(self):
