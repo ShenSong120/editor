@@ -481,10 +481,10 @@ class Delete(QDialog):
 
     signal = pyqtSignal(str)
 
-    def __init__(self, parent, source_path):
+    def __init__(self, parent, path_list):
         super(Delete, self).__init__(parent)
         # 原路径
-        self.source_path = source_path
+        self.path_list = path_list
         self.title = QLabel(self)
         self.title.setAlignment(Qt.AlignCenter)
         self.title.setText('删除')
@@ -493,17 +493,14 @@ class Delete(QDialog):
         self.title_layout = QVBoxLayout()
         self.title_layout.addWidget(self.title)
         self.title_layout.addWidget(self.h_line)
-        # 源文件路径
+        # 源文件路径(显示)
         self.source_path_label = QLabel(self)
         self.source_path_label.setAlignment(Qt.AlignCenter)
-        self.source_path_label.setText(source_path)
+        self.source_path_label.setText('\n'.join(self.path_list))
         # 删除文件的警告
         self.delete_warning_label = QLabel(self)
         self.delete_warning_label.setAlignment(Qt.AlignCenter)
-        if os.path.isdir(source_path):
-            self.delete_warning_label.setText('确定要删除此目录吗？')
-        else:
-            self.delete_warning_label.setText('确定要删除此文件吗？')
+        self.delete_warning_label.setText('确定要删除选中的'+str(len(self.path_list))+'个文件/文件夹吗？')
         # 确定和取消按钮
         self.sure_button = QPushButton('确定', self)
         self.sure_button.clicked.connect(self.click_sure)
@@ -526,15 +523,15 @@ class Delete(QDialog):
         self.general_layout.addLayout(self.button_layout)
         self.setLayout(self.general_layout)
         self.setMinimumWidth(600)
-        # self.setWindowTitle('')
 
     def click_sure(self):
         self.setHidden(True)
-        if os.path.isdir(self.source_path):
-            shutil.rmtree(self.source_path)
-        else:
-            os.remove(self.source_path)
-        self.signal.emit('delete_path>' + self.source_path)
+        for path in self.path_list:
+            if os.path.isdir(path):
+                shutil.rmtree(path)
+            else:
+                os.remove(path)
+            self.signal.emit('delete_path>' + path)
 
     def click_cancel(self):
         self.setHidden(True)

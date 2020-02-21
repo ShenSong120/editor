@@ -195,7 +195,7 @@ class ProjectBar(QWidget):
         if self.blank_click_flag is True:
             return
         path_list = self.get_selected_paths()
-        self.delete_dialog = Delete(self, self.node_path)
+        self.delete_dialog = Delete(self, path_list)
         self.delete_dialog.signal[str].connect(self.get_signal_from_file_dialog)
         self.delete_dialog.exec()
 
