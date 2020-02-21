@@ -2,7 +2,7 @@ import os
 from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
 from glv import Icon, FileStatus
-from ui_class.Editor import Editor
+from ui_class.XML.Editor import Editor
 
 
 # 编辑器分页器

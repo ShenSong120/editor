@@ -5,7 +5,7 @@ from PyQt5.Qsci import *
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from glv import Icon, Param, FileStatus
-from ui_class.Lexer import MyLexerXML
+from ui_class.XML.Lexer import MyLexerXML
 
 
 # xml编辑器
