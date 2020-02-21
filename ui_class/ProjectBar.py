@@ -35,9 +35,9 @@ class ProjectBar(QWidget):
         # self.model.setFilter(QDir.NoDotAndDotDot | QDir.AllDirs)
         # 需要显示的文件
         # filters = ['*.mp4', '*.avi', '*.mov', '*.flv', '*.html', '*.jpg', '*.png', '*.xls', '*.xlsx', '*.xml', '*.txt', '*.ini']
-        filters = ['*']
+        self.filters = ['*']
         self.model.setRootPath(self.path)
-        self.model.setNameFilters(filters)
+        self.model.setNameFilters(self.filters)
         self.model.setNameFilterDisables(False)
         # 树形视图
         # self.tree = QTreeView(self)
@@ -69,7 +69,13 @@ class ProjectBar(QWidget):
     # 重新载入目录树
     def reload_model(self, path):
         self.path = path
-        self.model.setRootPath(path)
+        filters = ['*']
+        self.model.setRootPath(self.path)
+        self.model.setNameFilters(filters)
+        self.model.setNameFilterDisables(False)
+        self.model.setRootPath(self.path)
+        self.model.setNameFilters(self.filters)
+        self.model.setNameFilterDisables(False)
         self.tree.setModel(self.model)
         self.tree.setRootIndex(self.model.index(self.path))
         self.info_label.setText(self.path)
@@ -132,6 +138,12 @@ class ProjectBar(QWidget):
         self.delete_action = QAction('删除', self)
         self.delete_action.setShortcut('delete')
         self.delete_action.triggered.connect(self.delete)
+        # 设置action使能
+        if self.blank_click_flag is True:
+            self.copy_action.setEnabled(False)
+            self.copy_path_action.setEnabled(False)
+            self.rename_action.setEnabled(False)
+            self.delete_action.setEnabled(False)
         # 菜单添加action
         self.menu.addAction(self.copy_action)
         self.menu.addAction(self.paste_action)
@@ -199,6 +211,7 @@ class ProjectBar(QWidget):
 
     # 更新选中item(也就是等待文件model更新完成, 延时时间不能太短)
     def update_select_item(self, path):
+        self.reload_model(self.path)
         time.sleep(0.04)
         self.node_path = path
         self.node_name = os.path.split(path)[1]
@@ -223,7 +236,7 @@ class ProjectBar(QWidget):
                 self.tree.clearSelection()
                 self.node_name = os.path.split(self.path)[1]
                 self.node_path = self.path
-                self.blank_click_flag = False
+                self.blank_click_flag = True
         elif flag == 'double_click_point':
             point = QPoint(signal[0], signal[1])
             self.index = self.tree.indexAt(point)
@@ -236,7 +249,7 @@ class ProjectBar(QWidget):
                 self.tree.clearSelection()
                 self.node_name = os.path.split(self.path)[1]
                 self.node_path = self.path
-                self.blank_click_flag = False
+                self.blank_click_flag = True
         # 更新显示标签
         self.info_label.setText(self.node_path)
 
@@ -262,7 +275,8 @@ class ProjectBar(QWidget):
         # Ctrl + C 复制
         if (event.key() == Qt.Key_C):
             if event.modifiers() == Qt.ControlModifier:
-                self.copy()
+                if self.blank_click_flag is False:
+                    self.copy()
             else:
                 QWidget.keyPressEvent(self, event)
         # Ctrl + V 粘贴
@@ -274,7 +288,8 @@ class ProjectBar(QWidget):
         # Ctrl + Shift + C 复制路径
         if (event.key() == Qt.Key_C):
             if event.modifiers() == Qt.ControlModifier | Qt.ShiftModifier:
-                self.copy_path()
+                if self.blank_click_flag is False:
+                    self.copy_path()
             else:
                 QWidget.keyPressEvent(self, event)
         # Ctrl + N 新建文件、文件夹等等
@@ -286,12 +301,14 @@ class ProjectBar(QWidget):
         # Shift + F2 重命名
         if (event.key() == Qt.Key_F2):
             if event.modifiers() == Qt.ShiftModifier:
-                self.rename()
+                if self.blank_click_flag is False:
+                    self.rename()
             else:
                 QWidget.keyPressEvent(self, event)
         # Delete 删除
         if (event.key() == Qt.Key_Delete):
-            self.delete()
+            if self.blank_click_flag is False:
+                self.delete()
         # 其余情况
         else:
             QWidget.keyPressEvent(self, event)

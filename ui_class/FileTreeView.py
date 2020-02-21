@@ -11,6 +11,8 @@ class FileTreeView(QTreeView):
         super(FileTreeView, self).__init__(parent)
         self.setItemsExpandable(True)
         self.setExpandsOnDoubleClick(True)
+        # 设置允许多选
+        self.setSelectionMode(QAbstractItemView.ExtendedSelection)
 
     # 鼠标点击事件
     def mousePressEvent(self, event):

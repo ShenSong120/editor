@@ -401,7 +401,6 @@ class Editor(QsciScintilla):
         # 获取当前鼠标位置单词(此处可以重新获取这个词,只以空格为分割)
         current_word = self.wordAtLineIndex(line_after, index_after)
         if current_word != '':
-            print('自动补全: ', current_word)
             # 选中补全的单词(后面会用段落代替)
             self.setSelection(line_after, index_after-len(current_word), line_after, index_after)
             # 替换为函数块

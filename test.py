@@ -163,7 +163,7 @@ class MainWindow(QMainWindow):
     # 新建(可以选择文件/文件夹)
     def connect_new(self):
         # 新建菜单(可新建 文件/文件夹/xml文件)
-        self.new_dialog = New(self, os.getcwd())
+        self.new_dialog = New(self, self.project_path)
         self.new_dialog.signal[str].connect(self.get_signal_from_new)
         self.new_dialog.exec()
 
@@ -172,6 +172,7 @@ class MainWindow(QMainWindow):
         dir_choose = QFileDialog.getExistingDirectory(self, '选取文件夹', self.project_path,
                                                       options=QFileDialog.DontUseNativeDialog)
         if dir_choose:
+            self.project_path = dir_choose
             self.project_bar.reload_model(dir_choose)
 
     # 打开文件
