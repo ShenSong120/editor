@@ -160,20 +160,24 @@ class ProjectBar(QWidget):
         self.new_dialog.signal[str].connect(self.get_signal_from_file_dialog)
         self.new_dialog.exec()
 
-    # 复制文件
+    # 复制文件(选中复制文件路径到剪切板)
     def copy(self):
+        path_list = self.get_selected_path_list()
+        clipboard_text = str(path_list)
         clipboard = QApplication.clipboard()
-        clipboard.setText(self.node_path)
+        clipboard.setText(clipboard_text)
 
     # 粘贴文件
     def paste(self):
         clipboard = QApplication.clipboard()
         copy_path = clipboard.text()
+        path_list = eval(copy_path)
         if os.path.isdir(self.node_path):
             start_path = self.node_path
         else:
             start_path = os.path.dirname(self.node_path)
-        self.paste_dialog = Paste(self, copy_path, start_path)
+        self.paste_dialog = Paste(self, path_list, start_path)
+        # self.paste_dialog = Paste(self, copy_path, start_path)
         self.paste_dialog.signal[str].connect(self.get_signal_from_file_dialog)
         self.paste_dialog.exec()
 
@@ -194,13 +198,13 @@ class ProjectBar(QWidget):
     def delete(self):
         if self.blank_click_flag is True:
             return
-        path_list = self.get_selected_paths()
+        path_list = self.get_selected_path_list()
         self.delete_dialog = Delete(self, path_list)
         self.delete_dialog.signal[str].connect(self.get_signal_from_file_dialog)
         self.delete_dialog.exec()
 
     # 获取选中的路径
-    def get_selected_paths(self):
+    def get_selected_path_list(self):
         path_list = []
         index_list = self.tree.selectedIndexes()
         for index in index_list:

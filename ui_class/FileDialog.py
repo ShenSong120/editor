@@ -3,7 +3,7 @@ import shutil
 from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
-from glv import Icon, MergePath
+from glv import Icon, MergePath, BeautifyStyle
 
 
 class NewFile(QDialog):
@@ -235,13 +235,12 @@ class Paste(QDialog):
 
     signal = pyqtSignal(str)
 
-    def __init__(self, parent, source_path, path):
+    def __init__(self, parent, path_list, start_path):
         super(Paste, self).__init__(parent)
-        # 新建xml文件起始路径
-        self.source_path = source_path
-        self.start_path = path
-        # 默认文件名
-        self.default_name = os.path.split(source_path)[1]
+        # 需要粘贴的路径列表
+        self.path_list = path_list
+        # 文件系统起始路径
+        self.start_path = start_path
         # 自定义控件title
         self.title = QLabel(self)
         self.title.setAlignment(Qt.AlignCenter)
@@ -251,10 +250,6 @@ class Paste(QDialog):
         self.title_layout = QVBoxLayout()
         self.title_layout.addWidget(self.title)
         self.title_layout.addWidget(self.h_line)
-        # 源文件路径
-        self.source_path_text = QLineEdit(self)
-        self.source_path_text.setReadOnly(True)
-        self.source_path_text.setText(self.source_path)
         # 路径选择以及名字输入
         self.target_path_text = QLineEdit(self)
         self.target_path_text.setReadOnly(True)
@@ -263,14 +258,33 @@ class Paste(QDialog):
         self.select_path_action.setIcon(QIcon(Icon.path))
         self.select_path_action.triggered.connect(self.select_path)
         self.target_path_text.addAction(self.select_path_action, QLineEdit.TrailingPosition)
-        self.new_name_text = QLineEdit(self)
-        self.new_name_text.setPlaceholderText(self.default_name)
-        self.new_name_text.selectAll()
-        self.form_layout = QFormLayout()
-        self.form_layout.setSpacing(20)
-        self.form_layout.addRow('源路径:', self.source_path_text)
-        self.form_layout.addRow('目标路径:', self.target_path_text)
-        self.form_layout.addRow('目标名字:', self.new_name_text)
+        # 单文件和多文件区别(窗口显示不同)
+        if len(self.path_list) == 1:
+            # 源文件路径
+            source_path = self.path_list[0]
+            self.source_path_text = QLineEdit(self)
+            self.source_path_text.setReadOnly(True)
+            self.source_path_text.setText(source_path)
+            self.default_name = os.path.split(source_path)[1]
+            self.new_name_text = QLineEdit(self)
+            self.new_name_text.setPlaceholderText(self.default_name)
+            self.new_name_text.selectAll()
+            self.form_layout = QFormLayout()
+            self.form_layout.setSpacing(20)
+            self.form_layout.addRow('源路径:', self.source_path_text)
+            self.form_layout.addRow('目标路径:', self.target_path_text)
+            self.form_layout.addRow('目标名字:', self.new_name_text)
+        else:
+            source_path_list = self.path_list
+            self.source_path_text = QLabel(self)
+            self.source_path_text.setStyleSheet(BeautifyStyle.label_qss)
+            self.source_path_text.setText('\n'.join(source_path_list))
+            self.new_name_text = QLabel(self)
+            self.form_layout = QFormLayout()
+            self.form_layout.setSpacing(20)
+            self.form_layout.addRow('源路径:', self.source_path_text)
+            self.form_layout.addRow('目标路径:', self.target_path_text)
+            self.form_layout.addRow('', self.new_name_text)
         # 确定和取消按钮
         self.sure_button = QPushButton('确定', self)
         self.sure_button.clicked.connect(self.click_sure)
@@ -299,29 +313,43 @@ class Paste(QDialog):
 
     def click_sure(self):
         self.setHidden(True)
-        target_name = self.new_name_text.text()
-        if target_name == '':
-            target_name = self.default_name
-        target_path = MergePath(self.target_path_text.text(), target_name).merged_path
-        if os.path.exists(target_path):
-            self.deal_existed_file(target_path)
+        # 粘贴的路径为单个路径
+        if len(self.path_list) == 1:
+            source_path = self.path_list[0]
+            target_name = self.new_name_text.text()
+            if target_name == '':
+                target_name = self.default_name
+            target_path = MergePath(self.target_path_text.text(), target_name).merged_path
+            if os.path.exists(target_path):
+                self.deal_existed_file(source_path, target_path)
+            else:
+                self.deal_not_existed_file(source_path, target_path)
+        # 粘贴的路径为多个路径
         else:
-            self.deal_not_existed_file(target_path)
+            source_name_list = [os.path.split(path)[1] for path in self.path_list]
+            target_path_list = [MergePath(self.target_path_text.text(), name).merged_path for name in source_name_list]
+            for i in range(len(self.path_list)):
+                source_path = self.path_list[i]
+                target_path = target_path_list[i]
+                if os.path.exists(target_path):
+                    self.deal_existed_file(source_path, target_path)
+                else:
+                    self.deal_not_existed_file(source_path, target_path)
 
     def click_cancel(self):
         self.setHidden(True)
 
     # 处理已经存在的文件(需要先添加警告)
-    def deal_existed_file(self, target_path):
-        if os.path.isdir(self.source_path):
-            reply = QMessageBox.question(self, '此文件夹已经存在', '是否合并这两个已经存在的文件？',
+    def deal_existed_file(self, source_path, target_path):
+        if os.path.isdir(source_path):
+            reply = QMessageBox.question(self, '文件夹重复', source_path+'文件夹已存在\n是否合并这两个已经存在的文件夹？',
                                          QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel, QMessageBox.No)
             if reply == QMessageBox.No:
                 self.setHidden(False)
             elif reply == QMessageBox.Yes:
-                for name in os.listdir(self.source_path):
+                for name in os.listdir(source_path):
                     if name not in os.listdir(target_path):
-                        current_path = MergePath(self.source_path, name).merged_path
+                        current_path = MergePath(source_path, name).merged_path
                         if os.path.isdir(current_path):
                             shutil.copytree(current_path, MergePath(target_path, name).merged_path)
                         else:
@@ -331,7 +359,7 @@ class Paste(QDialog):
             else:
                 pass
         else:
-            reply = QMessageBox.question(self, '此文件已经存在', '是否替换已经存在的文件？',
+            reply = QMessageBox.question(self, '文件重复', source_path+'文件已经存在\n是否替换已经存在的文件？',
                                          QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel, QMessageBox.No)
             if reply == QMessageBox.No:
                 self.setHidden(False)
@@ -343,9 +371,9 @@ class Paste(QDialog):
             else:
                 pass
 
-    def deal_not_existed_file(self, target_path):
-        if os.path.isdir(self.source_path):
-            shutil.copytree(self.source_path, target_path)
+    def deal_not_existed_file(self, source_path, target_path):
+        if os.path.isdir(source_path):
+            shutil.copytree(source_path, target_path)
             # 发射粘贴文件夹信号
             self.signal.emit('paste_path>' + target_path)
         else:
@@ -494,13 +522,14 @@ class Delete(QDialog):
         self.title_layout.addWidget(self.title)
         self.title_layout.addWidget(self.h_line)
         # 源文件路径(显示)
-        self.source_path_label = QLabel(self)
-        self.source_path_label.setAlignment(Qt.AlignCenter)
-        self.source_path_label.setText('\n'.join(self.path_list))
+        self.source_path_text = QLabel(self)
+        self.source_path_text.setStyleSheet(BeautifyStyle.label_qss)
+        self.source_path_text.setText('\n'.join(self.path_list))
         # 删除文件的警告
-        self.delete_warning_label = QLabel(self)
-        self.delete_warning_label.setAlignment(Qt.AlignCenter)
-        self.delete_warning_label.setText('确定要删除选中的'+str(len(self.path_list))+'个文件/文件夹吗？')
+        self.delete_warning_text = QLabel(self)
+        self.delete_warning_text.setStyleSheet(BeautifyStyle.label_qss)
+        self.delete_warning_text.setAlignment(Qt.AlignCenter)
+        self.delete_warning_text.setText('确定要删除选中的'+str(len(self.path_list))+'个文件/文件夹吗？')
         # 确定和取消按钮
         self.sure_button = QPushButton('确定', self)
         self.sure_button.clicked.connect(self.click_sure)
@@ -516,9 +545,9 @@ class Delete(QDialog):
         self.general_layout.setContentsMargins(0, 5, 0, 5)
         self.general_layout.addLayout(self.title_layout)
         self.general_layout.addSpacing(20)
-        self.general_layout.addWidget(self.source_path_label)
+        self.general_layout.addWidget(self.source_path_text)
         self.general_layout.addSpacing(20)
-        self.general_layout.addWidget(self.delete_warning_label)
+        self.general_layout.addWidget(self.delete_warning_text)
         self.general_layout.addSpacing(20)
         self.general_layout.addLayout(self.button_layout)
         self.setLayout(self.general_layout)

@@ -20,7 +20,7 @@ class EditorTab(QTabWidget):
         # 设置tab可以关闭
         self.setTabsClosable(True)
         # 样式设置
-        style_sheet = 'QTabWidget:pane{ border: 1px solid #7A7A7A; top: -1px;}\
+        style_sheet = 'QTabWidget:pane{border: 1px solid #7A7A7A; top: -1px;}\
                        QTabWidget:tab-bar{border: 1px solid blue; top: 0px; alignment:left; background: blue}\
                        QTabBar::tab{height: 28px; margin-right: 0px; margin-bottom:-3px; padding-left: 5px; padding-right: 5px;}\
                        QTabBar::tab:selected{border: 1px solid #0099FF; color: #0099FF; background-color: white; border-top: 1px solid #0099FF; border-bottom: 5px solid #0099FF;}\
