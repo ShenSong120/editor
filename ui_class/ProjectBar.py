@@ -194,9 +194,20 @@ class ProjectBar(QWidget):
     def delete(self):
         if self.blank_click_flag is True:
             return
+        path_list = self.get_selected_paths()
         self.delete_dialog = Delete(self, self.node_path)
         self.delete_dialog.signal[str].connect(self.get_signal_from_file_dialog)
         self.delete_dialog.exec()
+
+    # 获取选中的路径
+    def get_selected_paths(self):
+        path_list = []
+        index_list = self.tree.selectedIndexes()
+        for index in index_list:
+            if index.isValid():
+                path = self.model.filePath(index)
+                path_list.append(path)
+        return path_list
 
     # 从文件窗口接收消息
     def get_signal_from_file_dialog(self, signal_str):
