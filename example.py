@@ -1,9 +1,9 @@
 import os
+import shutil
 import functools
 import configparser
+from glv import MergePath
 
-file = 'D:/Code/editor/new-.xml'
-if os.path.exists(file):
-    print('yes')
-else:
-    print('no')
+old_path = 'D:/Code/editor/xml'
+
+print(os.path.split(old_path)[1])

@@ -97,11 +97,15 @@ class MainWindow(QMainWindow):
         # self.editor.SendScintilla(QsciScintilla.SCI_SETKEYWORDS, 1, " ".join(g_allFuncList).encode(encoding='utf-8'))
 
         self.editor.textChanged.connect(self.changed)
+        self.editor.userListActivated.connect(self.get_selected_item)
 
 
     def changed(self):
         self.mod = True
         self.editor.setMarginWidth(0, len(str(len(self.editor.text().split('\n')))) * 20)
+
+    def get_selected_item(self, id, item):
+        print(id, item)
 
 
 

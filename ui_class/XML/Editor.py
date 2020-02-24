@@ -44,6 +44,9 @@ class Editor(QsciScintilla):
         self.setFolding(QsciScintilla.PlainFoldStyle)
         # 设置折叠栏颜色
         self.setFoldMarginColors(Qt.gray, Qt.lightGray)
+        # 设置括号匹配
+        # self.setBraceMatching(QsciScintilla.SloppyBraceMatch)
+        # self.setBraceMatching(QsciScintilla.StrictBraceMatch)
         # 当前文档中出现的名称以及xml自带的都自动补全提示
         # self.setAutoCompletionSource(QsciScintilla.AcsDocument)
         self.setAutoCompletionSource(QsciScintilla.AcsAll)
@@ -63,6 +66,8 @@ class Editor(QsciScintilla):
         self.old_text = ''
         # 点击跳转标志位
         self.click_dump_flag = False
+        # item条件触发事件
+        self.userListActivated.connect(self.get_selectd_item)
         # 触发事件
         self.cursorPositionChanged.connect(self.cursor_move)
         # 提示框选项图标(单词和函数的区分)
@@ -86,6 +91,12 @@ class Editor(QsciScintilla):
         # self.lexer = QsciLexerXML(self)
         self.lexer = MyLexerXML(self)
         self.lexer.setFont(self.font)
+        # 设置(自定义颜色)
+        # self.lexer.setColor(QColor(Qt.gray), QsciLexerXML.HTMLComment)
+        # self.lexer.setColor(QColor(Qt.red), QsciLexerXML.Tag)
+        # self.lexer.setColor(QColor(Qt.green), QsciLexerXML.Attribute)
+        # self.lexer.setColor(QColor(Qt.green), QsciLexerXML.OtherInTag)
+        # self.lexer.setColor(QColor(Qt.yellow), QsciLexerXML.HTMLValue)
         self.setLexer(self.lexer)
         self.__api = QsciAPIs(self.lexer)
         auto_completions = self.key_words + list(self.function_dict.keys())
@@ -241,6 +252,10 @@ class Editor(QsciScintilla):
             self.signal.emit('file_status>' + FileStatus.save_status)
         else:
             self.signal.emit('file_status>' + FileStatus.not_save_status)
+
+    # 获取选中的item
+    def get_selectd_item(self, id, item):
+        print(id, item)
 
     # 光标移动事件
     def cursor_move(self):
