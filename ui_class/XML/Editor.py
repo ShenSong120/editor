@@ -26,12 +26,12 @@ class Editor(QsciScintilla):
         # 设置光标宽度(0不显示光标)
         self.setCaretWidth(2)
         # 设置光标颜色
-        self.setCaretForegroundColor(QColor('darkCyan'))
+        self.setCaretForegroundColor(QColor('#009966'))
         # 高亮显示光标所在行
         self.setCaretLineVisible(True)
-        # 选中行背景色
+        # 选中行背景色(灰色背景)
         self.setCaretLineBackgroundColor(QColor('#F0F0F0'))
-        # tab宽度设置为8, 也就是四个字符
+        # tab宽度设置为4, 也就是四个字符
         self.setTabWidth(4)
         # 换行后自动缩进
         self.setAutoIndent(True)
