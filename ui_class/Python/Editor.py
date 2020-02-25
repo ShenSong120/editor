@@ -73,7 +73,6 @@ class MainWindow(QMainWindow):
         self.lexer.setDefaultFont(QFont('Consolas', 12))
         self.editor.setLexer(self.lexer)
         self.mod = False
-        self.__api = QsciAPIs(self.lexer)
         autocompletions = keyword.kwlist + ["abs", "all", "any", "basestring", "bool",
                                             "callable", "chr", "classmethod", "cmp", "compile",
                                             "complex", "delattr", "dict", "dir", "divmod",
@@ -86,6 +85,7 @@ class MainWindow(QMainWindow):
                                             "round", "set", "setattr", "slice", "sorted",
                                             "staticmethod", "str", "sum", "super", "tuple", "type",
                                             "vars", "zip", 'print']
+        self.__api = QsciAPIs(self.lexer)
         for ac in autocompletions:
             self.__api.add(ac)
         self.__api.prepare()
