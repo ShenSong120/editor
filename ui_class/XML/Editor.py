@@ -44,20 +44,19 @@ class Editor(QsciScintilla):
         self.setFolding(QsciScintilla.PlainFoldStyle)
         # 设置折叠栏颜色
         self.setFoldMarginColors(Qt.gray, Qt.lightGray)
+        # 是否用补全的字符串替换后面的字符串
+        self.setAutoCompletionReplaceWord(False)
+        # 大小写敏感
+        self.setAutoCompletionCaseSensitivity(True)
         # 设置括号匹配
         # self.setBraceMatching(QsciScintilla.SloppyBraceMatch)
         # self.setBraceMatching(QsciScintilla.StrictBraceMatch)
         # 当前文档中出现的名称以及xml自带的都自动补全提示
         # self.setAutoCompletionSource(QsciScintilla.AcsDocument)
         self.setAutoCompletionSource(QsciScintilla.AcsAll)
-        # 大小写敏感
-        self.setAutoCompletionCaseSensitivity(True)
-        # 是否用补全的字符串替换后面的字符串
-        self.setAutoCompletionReplaceWord(False)
         # 输入一个字符就会出现自动补全的提示
         self.setAutoCompletionThreshold(1)
-        self.setAutoCompletionUseSingle(QsciScintilla.AcusExplicit)
-        # self.setAutoCompletionUseSingle(QsciScintilla.AcusAlways)
+        # self.setAutoCompletionUseSingle(QsciScintilla.AcusExplicit)
         self.autoCompleteFromAll()
         # 右键菜单
         self.setContextMenuPolicy(Qt.CustomContextMenu)
