@@ -1,10 +1,10 @@
 import re
-import configparser
 from PyQt5.QtCore import *
 from PyQt5.Qsci import *
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
-from glv import Icon, Param, FileStatus
+from other.CaseConfigParser import CaseConfigParser
+from other.glv import Icon, Param, FileStatus
 from ui_class.XML.Lexer import MyLexerXML
 
 
@@ -73,7 +73,8 @@ class Editor(QsciScintilla):
         self.registerImage(1, word_image)
         self.registerImage(2, function_image)
         # 获取配置文件
-        self.cf = configparser.ConfigParser()
+        # self.cf = configparser.ConfigParser()
+        self.cf = CaseConfigParser()
         self.cf.read(Param.config_file, encoding='utf-8')
         # 首行文件
         self.begin_line_label = self.cf.get('begin_line', 'label')
@@ -94,8 +95,8 @@ class Editor(QsciScintilla):
             function = function.replace('\\t', '\t')
             self.function_dict[key] = function
         # 定义语言为xml语言
-        self.lexer = QsciLexerXML(self)
-        # self.lexer = MyLexerXML(self)
+        # self.lexer = QsciLexerXML(self)
+        self.lexer = MyLexerXML(self)
         self.lexer.setFont(self.font)
         # 设置(自定义颜色)
         # self.lexer.setColor(QColor(Qt.gray), QsciLexerXML.HTMLComment)

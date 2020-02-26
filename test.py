@@ -4,7 +4,7 @@ import sys
 from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
-from glv import Icon, Param, MergePath, BeautifyStyle, FileStatus
+from other.glv import Icon, Param, MergePath, BeautifyStyle, FileStatus
 from ui_class.ProjectBar import ProjectBar
 from ui_class.EditorTab import EditorTab
 from ui_class.New import New

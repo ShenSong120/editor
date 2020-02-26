@@ -3,7 +3,7 @@ import shutil
 from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
-from glv import Icon, MergePath, BeautifyStyle
+from other.glv import Icon, MergePath, BeautifyStyle
 
 
 class NewFile(QDialog):

@@ -1,7 +1,7 @@
 import os
 from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
-from glv import Icon, FileStatus
+from other.glv import Icon, FileStatus
 from ui_class.XML.Editor import Editor
 
 

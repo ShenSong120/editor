@@ -1,13 +1,10 @@
 import os
 import time
-import shutil
 from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
-from threading import Thread
-from glv import MergePath
 from ui_class.FileTreeView import FileTreeView
-from ui_class.FileDialog import Paste, NewFolder, NewFile, Rename, Delete
+from ui_class.FileDialog import Paste, Rename, Delete
 from ui_class.New import New
 
 
