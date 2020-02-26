@@ -74,7 +74,7 @@ class NewFile(QDialog):
     # 获取文件首行(如)
     def get_file_first_row_text(self, type):
         if type in ['xml', 'XML']:
-            first_row_text = "<?xml version='1.0' encoding='utf-8' ?>"
+            first_row_text = '<?xml version="1.0" encoding="utf-8" ?>'
         else:
             first_row_text = ''
         return first_row_text

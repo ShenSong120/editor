@@ -75,8 +75,17 @@ class Editor(QsciScintilla):
         # 获取配置文件
         self.cf = configparser.ConfigParser()
         self.cf.read(Param.config_file, encoding='utf-8')
+        # 首行文件
         self.begin_line_label = self.cf.get('begin_line', 'label')
-        self.key_words = eval(self.cf.get('keywords', 'word_list'))
+        # 标签单词列表
+        self.tag_list = list(self.cf.options('tags'))
+        # 属性
+        self.attribute_list = list(self.cf.options('attributes'))
+        # 属性值
+        self.attribute_value_list = list(self.cf.options('attribute_values'))
+        # word(共用)
+        self.common_word_list = list(self.cf.options('words'))
+        # 函数代码块
         self.function_dict = {}
         for key in self.cf.options('function'):
             function = str(self.cf.get('function', key))
@@ -85,8 +94,8 @@ class Editor(QsciScintilla):
             function = function.replace('\\t', '\t')
             self.function_dict[key] = function
         # 定义语言为xml语言
-        # self.lexer = QsciLexerXML(self)
-        self.lexer = MyLexerXML(self)
+        self.lexer = QsciLexerXML(self)
+        # self.lexer = MyLexerXML(self)
         self.lexer.setFont(self.font)
         # 设置(自定义颜色)
         # self.lexer.setColor(QColor(Qt.gray), QsciLexerXML.HTMLComment)
@@ -96,7 +105,7 @@ class Editor(QsciScintilla):
         # self.lexer.setColor(QColor(Qt.yellow), QsciLexerXML.HTMLValue)
         self.setLexer(self.lexer)
         self.__api = QsciAPIs(self.lexer)
-        auto_completions = self.key_words + list(self.function_dict.keys())
+        auto_completions = self.tag_list + self.attribute_list + self.attribute_value_list + self.common_word_list + list(self.function_dict.keys())
         for item in auto_completions:
             # 如果是函数(图标显示function)
             if item in list(self.function_dict.keys()):
