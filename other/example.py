@@ -1,5 +1,8 @@
 import os
+import re
 
-old_path = 'D:/Code/editor/xml'
+xml_text = '<case name="ss"><action></action></case>'
 
-print(os.path.split(old_path)[1])
+aaa = re.findall('<.[^<>]*>', xml_text)
+
+print(aaa)

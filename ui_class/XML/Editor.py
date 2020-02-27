@@ -281,7 +281,7 @@ class Editor(QsciScintilla):
         line, index = self.getCursorPosition()
         # 只有新增字符的情况下才执行如下代码(删除文本不需要执行)
         if text_length > old_text_length:
-            # 通过键盘键入字符
+            # 通过键盘键入字符(敲入单个字符)
             if (text_length - old_text_length) == 1:
                 # line, index = self.getCursorPosition()
                 current_line_text = self.text(line)
@@ -293,6 +293,14 @@ class Editor(QsciScintilla):
                             key_words = ''.join(list_current_line_text[i+1:index-1])
                             self.insertAt('</'+key_words+'>', line, index)
                             break
+            # 回车自动补全(一次输入多个字符)
+            else:
+                current_line_text = self.text(line)
+                list_current_line_text = list(current_line_text)
+                current_char = list_current_line_text[index - 1] if index > 0 else None
+                if current_char == '"' or current_char == "'":
+                    line, index = self.getCursorPosition()
+                    self.setCursorPosition(line, index-1)
         self.old_text = self.text()
         # 获取当前光标
         cursor_position = '[' + str(line+1) + ':' + str(index) + ']'
@@ -425,12 +433,25 @@ class Editor(QsciScintilla):
         line_after, index_after = self.getCursorPosition()
         # 获取当前鼠标位置单词(此处可以重新获取这个词,只以空格为分割)
         current_word = self.wordAtLineIndex(line_after, index_after)
-        if current_word != '':
+        if current_word != '' and len(current_word) > 1:
             # 选中补全的单词(后面会用段落代替)
             self.setSelection(line_after, index_after-len(current_word), line_after, index_after)
-            # 替换为函数块
+            # 替换为函数代码块
             if current_word in self.function_dict.keys():
                 self.replaceSelectedText(self.function_dict[current_word])
+            # 自动补全标签
+            elif current_word in self.tag_list:
+                start_index = index_after - len(current_word) - 1
+                if start_index >= 0:
+                    current_char = list(self.text(line_after))[start_index]
+                    if current_char == '<':
+                        replace_text = current_word + '></' + current_word + '>'
+                        self.replaceSelectedText(replace_text)
+                    else:
+                        self.setCursorPosition(line_after, index_after)
+                else:
+                    self.setCursorPosition(line_after, index_after)
+            # 其他情况
             else:
                 # 此处可以添加更改(将函数名代替为函数)
                 self.setCursorPosition(line_after, index_after)
