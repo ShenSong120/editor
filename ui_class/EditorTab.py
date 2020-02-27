@@ -108,12 +108,17 @@ class EditorTab(QTabWidget):
     # 获取编辑器信号
     def get_editor_signal(self, signal_str):
         flag = signal_str.split('>')[0]
+        # 文件保存状态
         if flag == 'file_status':
             file_status = signal_str.split('>')[1]
             index = self.currentIndex()
             self.file_status_list[index] = file_status
             self.signal.emit(signal_str)
+        # 光标信号
         elif flag == 'cursor_position':
+            self.signal.emit(signal_str)
+        # 函数跳转
+        elif flag == 'dump_in_function':
             self.signal.emit(signal_str)
         else:
             self.signal.emit(signal_str)

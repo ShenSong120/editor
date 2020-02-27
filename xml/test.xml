@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<case>
+	<action>
+		<param>
+			<map>
+				<entry key="id">com.android.systemui:id/img_setting_icon</entry>
+			</map>
+		</param>
+		<param name="sleep_ms">1000</param>
+	</action>
+	<!--车辆按钮-->
+	<action name="click">
+		<param name="nodeProp">
+			<map>
+				<entry key="xpath">desc:车辆;id:com.chehejia.car.carsetting:id/setting_item_titles</entry>
+			</map>
+		</param>
+		<param name="sleep_ms">1000</param>
+	</action>
+	<!--声音按钮-->
+	<action name="click">
+		<param name="nodeProp">
+			<map>
+				<entry key="xpath">desc:声音;id:com.chehejia.car.carsettings:id/setting_item_titles</entry>
+			</map>
+		</param>
+		<param name="sleep_ms">1000</param>
+	</action>
+	
+	<action name="seekBar">
+		<param name="nodeProp">
+			<map>
+				<entry key="xpath">desc:系统;id.com.chehejia.car.carsettings:id/seek_progress</entry>
+			</map>
+		</param>
+		<param name="percent">random</param>
+		<param name="sleep_ms">100</param>
+	</action>
+	<!--函数调用-->
+	<callFunction name="func2" id="r">
+		<param name="param1">true</param>
+	</callFunction>
+</case>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,10 +1,11 @@
+import os
 import re
 from PyQt5.QtCore import *
 from PyQt5.Qsci import *
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from other.CaseConfigParser import CaseConfigParser
-from other.glv import Icon, Param, FileStatus
+from other.glv import Icon, Param, FileStatus, MergePath
 from ui_class.XML.Lexer import MyLexerXML
 
 
@@ -14,6 +15,8 @@ class Editor(QsciScintilla):
 
     def __init__(self, parent, file=None):
         super(Editor, self).__init__(parent)
+        self.parent = parent
+
         self.font = QFont('Consolas', 14, QFont.Bold)
         self.setFont(self.font)
         self.setUtf8(True)
@@ -573,4 +576,21 @@ class Editor(QsciScintilla):
     def indicator_clicked(self):
         line, index = self.getCursorPosition()
         indicator_word = self.wordAtLineIndex(line, index)
-        print(indicator_word)
+        current_line = self.text(line)
+        if 'callFunction' in current_line:
+            name_value = current_line.split('name')[1]
+            if ' ' in name_value:
+                name_value = name_value.split(' ')[0]
+            else:
+                name_value = name_value.split('>')[0]
+            if indicator_word in name_value:
+                function_name = indicator_word + '.xml'
+                self.open_function(function_name)
+
+    # Ctrl+点击 打开函数文件
+    def open_function(self, function_name):
+        current_path = os.path.dirname(self.file)
+        current_path = os.path.dirname(current_path)
+        current_path = MergePath(current_path, 'functions', function_name).merged_path
+        # 点击跳入到函数内部
+        self.signal.emit('dump_in_function>' + current_path)

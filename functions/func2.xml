@@ -1,0 +1,21 @@
+<?xml version="1,0" encoding="utf-8" ?>
+<functions>
+	<function name="func2">
+		<!-- 回到Launcher界面 -->
+		<action name="threeFingerSwipe">
+		   <param name="nodeProp">
+			   <map>
+				   <entry key="coordinate">1297,90;1297,90;1297,90</entry>
+			   </map>
+		   </param>
+		   <param name="targetProp">
+				<map>
+					<entry key="coordinate">1297,599;1297,599;1297,599</entry>
+				</map>
+		   </param>
+		   <param name="speed">s</param>
+		   <param name="offset">100</param>
+		   <param name="sleep_ms">1000</param>
+		</action>
+	</function>
+</functions>

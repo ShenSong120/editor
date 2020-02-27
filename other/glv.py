@@ -1,6 +1,9 @@
 class Param:
     config_file = 'config/config.ini'
     translator_file = 'config/qt_zh_CN.qm'
+    # 打开的文件工程目录
+    project_path = None
+
 
 class Icon:
     close_tab = 'config/icon/close_tab.png'

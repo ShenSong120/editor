@@ -30,6 +30,7 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(self.central_widget)
         # 工程栏
         self.project_path = MergePath(os.getcwd()).merged_path
+        Param.project_path = self.project_path
         self.project_bar = ProjectBar(self.central_widget, self.project_path)
         self.project_bar.signal[str].connect(self.get_signal_from_project_bar)
         # 编辑器设置
@@ -132,6 +133,10 @@ class MainWindow(QMainWindow):
             index = self.editor_widget.currentIndex()
             file_status = self.editor_widget.file_status_list[index]
             self.file_status_label.setText(file_status)
+        # 函数跳转
+        elif flag == 'dump_in_function':
+            file_path = signal_str.split('>')[1]
+            self.editor_widget.open_edit_tab(file_path)
         else:
             pass
 
@@ -173,6 +178,7 @@ class MainWindow(QMainWindow):
                                                       options=QFileDialog.DontUseNativeDialog)
         if dir_choose:
             self.project_path = dir_choose
+            Param.project_path = dir_choose
             self.project_bar.reload_model(dir_choose)
 
     # 打开文件
