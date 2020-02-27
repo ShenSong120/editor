@@ -36,6 +36,45 @@
 		<param name="percent">random</param>
 		<param name="sleep_ms">100</param>
 	</action>
+	<action name="seekBar">
+		<param name="nodeProp">
+			<map>
+				<entry key="xpath">desc:媒体;id.com.chehejia.car.setting_item_titles:id/seek_progress</entry>
+			</map>
+		</param>
+		<param name="percent">random</param>
+		<param name="sleep_ms">100</param>
+	</action>
+	<!--显示按钮-->
+	<action name="click">
+		<param name="nodeProp">
+			<map>
+				<entry key="xpath">desc:显示;id.com.chehejia.car.carsettings:id/setting_item_titles</entry>
+			</map>
+		</param>
+		<param name="sleep_ms">1000</param>
+	</action>
+	
+	<action name="click">
+		<param name="nodeProp">
+			<map>
+				<entry key="id">com.chehejia.car.carsettings:id/cont_btn</entry>
+			</map>
+		</param>
+		<param name="sleep_ms">1000</param>
+	</action>
+	
+	<action name="seekBar">
+		<param name="nodeProp">
+			<map>
+				<entry key="id">com.chehejia.car.carsettings:id/seek_progress</entry>
+			</map>
+		</param>
+		<param name="percent">random</param>
+		<param name="sleep_ms">100</param>
+	</action>
+	
+	
 	<!--函数调用-->
 	<callFunction name="func2" id="r">
 		<param name="param1">true</param>

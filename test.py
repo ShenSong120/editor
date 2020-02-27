@@ -8,6 +8,7 @@ from other.glv import Icon, Param, MergePath, BeautifyStyle, FileStatus
 from ui_class.ProjectBar import ProjectBar
 from ui_class.EditorTab import EditorTab
 from ui_class.New import New
+from other.CaseConfigParser import CaseConfigParser
 
 '''
 需要增加的功能:
@@ -29,8 +30,9 @@ class MainWindow(QMainWindow):
         self.central_widget = QWidget(self)
         self.setCentralWidget(self.central_widget)
         # 工程栏
-        self.project_path = MergePath(os.getcwd()).merged_path
-        Param.project_path = self.project_path
+        self.cf = CaseConfigParser()
+        self.cf.read(Param.config_file, encoding='utf-8')
+        self.project_path = Param.project_path = MergePath(self.cf.get('default', 'project_path')).merged_path
         self.project_bar = ProjectBar(self.central_widget, self.project_path)
         self.project_bar.signal[str].connect(self.get_signal_from_project_bar)
         # 编辑器设置
@@ -177,8 +179,10 @@ class MainWindow(QMainWindow):
         dir_choose = QFileDialog.getExistingDirectory(self, '选取文件夹', self.project_path,
                                                       options=QFileDialog.DontUseNativeDialog)
         if dir_choose:
-            self.project_path = dir_choose
-            Param.project_path = dir_choose
+            self.project_path = Param.project_path = dir_choose
+            self.cf.set('default', 'project_path', self.project_path)
+            with open(Param.config_file, 'w', encoding='utf-8') as f:
+                self.cf.write(f)
             self.project_bar.reload_model(dir_choose)
 
     # 打开文件
