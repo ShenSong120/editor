@@ -103,9 +103,9 @@ class Editor(QsciScintilla):
         self.lexer.setFont(self.font)
         # 设置(自定义颜色)
         # self.lexer.setColor(QColor(Qt.gray), QsciLexerXML.HTMLComment)
-        # self.lexer.setColor(QColor(Qt.red), QsciLexerXML.Tag)
-        # self.lexer.setColor(QColor(Qt.green), QsciLexerXML.Attribute)
-        # self.lexer.setColor(QColor(Qt.green), QsciLexerXML.OtherInTag)
+        self.lexer.setColor(QColor('#0099CC'), QsciLexerXML.Tag)
+        self.lexer.setColor(QColor('#66CC00'), QsciLexerXML.Attribute)
+        self.lexer.setColor(QColor('#00CC00'), QsciLexerXML.OtherInTag)
         # self.lexer.setColor(QColor(Qt.yellow), QsciLexerXML.HTMLValue)
         self.setLexer(self.lexer)
         self.__api = QsciAPIs(self.lexer)
@@ -447,6 +447,7 @@ class Editor(QsciScintilla):
                     if current_char == '<':
                         replace_text = current_word + '></' + current_word + '>'
                         self.replaceSelectedText(replace_text)
+                        self.setCursorPosition(line_after, index_after+1)
                     else:
                         self.setCursorPosition(line_after, index_after)
                 else:
