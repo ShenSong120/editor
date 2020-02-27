@@ -81,7 +81,10 @@ class Editor(QsciScintilla):
         # 标签单词列表
         self.tag_list = list(self.cf.options('tags'))
         # 属性
-        self.attribute_list = list(self.cf.options('attributes'))
+        self.attribute_list = []
+        for option in list(self.cf.options('attributes')):
+            value = self.cf.get('attributes', option)
+            self.attribute_list.append(value)
         # 属性值
         self.attribute_value_list = list(self.cf.options('attribute_values'))
         # word(共用)
