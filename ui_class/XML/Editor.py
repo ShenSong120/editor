@@ -436,12 +436,25 @@ class Editor(QsciScintilla):
         line_after, index_after = self.getCursorPosition()
         # 获取当前鼠标位置单词(此处可以重新获取这个词,只以空格为分割)
         current_word = self.wordAtLineIndex(line_after, index_after)
+        # 如果有自动导入
         if current_word != '' and len(current_word) > 1:
             # 选中补全的单词(后面会用段落代替)
             self.setSelection(line_after, index_after-len(current_word), line_after, index_after)
             # 替换为函数代码块
             if current_word in self.function_dict.keys():
-                self.replaceSelectedText(self.function_dict[current_word])
+                forword = self.text(line_after).split(current_word)[0]
+                new_forword_char_list = []
+                for char in list(forword):
+                    if char == '\t':
+                        new_forword_char_list.append(char)
+                    else:
+                        new_forword_char_list.append(' ')
+                new_forword = ''.join(new_forword_char_list)
+                line_text_list = self.function_dict[current_word].split('\r\n')
+                for index in range(1, len(line_text_list)):
+                    line_text_list[index] = new_forword + line_text_list[index]
+                replace_text = '\r\n'.join(line_text_list)
+                self.replaceSelectedText(replace_text)
             # 自动补全标签
             elif current_word in self.tag_list:
                 start_index = index_after - len(current_word) - 1
@@ -459,6 +472,16 @@ class Editor(QsciScintilla):
             else:
                 # 此处可以添加更改(将函数名代替为函数)
                 self.setCursorPosition(line_after, index_after)
+        # 标签换行(需要换行并自动添加缩进)
+        elif current_word == '' and self.lines() >= line_after and line_before != line_after:
+            last_line_text = list(self.text(line_after-1).strip())
+            last_line_last_char = last_line_text[-1] if len(last_line_text) > 0 else ''
+            current_line_text = list(self.text(line_after).strip())
+            current_line_first_char = current_line_text[0] if len(current_line_text) > 0 else ''
+            if last_line_last_char == '>' and current_line_first_char == '<':
+                forword_tab = self.text(line_after-1).split('<')[0]
+                self.insertAt('\t\r\n'+forword_tab, line_after, index_after)
+                self.setCursorPosition(line_after, index_after+1)
 
     # 这是重写键盘事件
     def keyPressEvent(self, event):
