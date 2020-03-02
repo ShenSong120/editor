@@ -50,33 +50,48 @@ class Editor(QsciScintilla):
         self.setAutoCompletionReplaceWord(False)
         # 大小写敏感
         self.setAutoCompletionCaseSensitivity(True)
-        # 设置括号匹配
+        '''设置括号匹配'''
         # self.setBraceMatching(QsciScintilla.SloppyBraceMatch)
         # self.setBraceMatching(QsciScintilla.StrictBraceMatch)
-        # 当前文档中出现的名称以及xml自带的都自动补全提示
+        '''设置自动补全源'''
+        # 自动补全当前文档中动态增加的item
         # self.setAutoCompletionSource(QsciScintilla.AcsDocument)
-        self.setAutoCompletionSource(QsciScintilla.AcsAll)
+        # 自动补全所有(包括动态增加的item)
+        # self.setAutoCompletionSource(QsciScintilla.AcsAll)
+        # 禁用自动补全
+        # self.setAutoCompletionSource(QsciScintilla.AcsNone)
+        # 不动态增加item
+        self.setAutoCompletionSource(QsciScintilla.AcsAPIs)
         # 输入一个字符就会出现自动补全的提示
         self.setAutoCompletionThreshold(1)
         # self.setAutoCompletionUseSingle(QsciScintilla.AcusExplicit)
         self.autoCompleteFromAll()
-        # 右键菜单
+        '''右键菜单'''
         self.setContextMenuPolicy(Qt.CustomContextMenu)
         self.customContextMenuRequested.connect(self.show_menu)
         # 保存每一次操作后的text
         self.old_text = ''
         # 点击跳转标志位
         self.click_dump_flag = False
+        '''触发事件'''
+        # 用户自定义随时调起函数
+        # self.showUserList(1, ['111?1', '222?1', '333?1'])
         # item条件触发事件
         self.userListActivated.connect(self.get_selectd_item)
-        # 触发事件
+        # 光标移动事件
         self.cursorPositionChanged.connect(self.cursor_move)
-        # 提示框选项图标(单词和函数的区分)
-        word_image = QPixmap(Icon.word)
-        function_image = QPixmap(Icon.function)
-        self.registerImage(1, word_image)
-        self.registerImage(2, function_image)
-        # 获取配置文件
+        '''定义语言为xml语言'''
+        # self.lexer = QsciLexerXML(self)
+        self.lexer = MyLexerXML(self)
+        self.lexer.setFont(self.font)
+        # 设置(自定义颜色)
+        # self.lexer.setColor(QColor(Qt.gray), QsciLexerXML.HTMLComment)
+        self.lexer.setColor(QColor('#0099CC'), QsciLexerXML.Tag)
+        self.lexer.setColor(QColor('#33CC33'), QsciLexerXML.Attribute)
+        self.lexer.setColor(QColor('#33CC33'), QsciLexerXML.OtherInTag)
+        # self.lexer.setColor(QColor(Qt.yellow), QsciLexerXML.HTMLValue)
+        self.setLexer(self.lexer)
+        '''获取配置文件'''
         # self.cf = configparser.ConfigParser()
         self.cf = CaseConfigParser()
         self.cf.read(Param.config_file, encoding='utf-8')
@@ -101,17 +116,16 @@ class Editor(QsciScintilla):
             function = function.replace('\\n', '\n')
             function = function.replace('\\t', '\t')
             self.function_dict[key] = function
-        # 定义语言为xml语言
-        # self.lexer = QsciLexerXML(self)
-        self.lexer = MyLexerXML(self)
-        self.lexer.setFont(self.font)
-        # 设置(自定义颜色)
-        # self.lexer.setColor(QColor(Qt.gray), QsciLexerXML.HTMLComment)
-        self.lexer.setColor(QColor('#0099CC'), QsciLexerXML.Tag)
-        self.lexer.setColor(QColor('#33CC33'), QsciLexerXML.Attribute)
-        self.lexer.setColor(QColor('#33CC33'), QsciLexerXML.OtherInTag)
-        # self.lexer.setColor(QColor(Qt.yellow), QsciLexerXML.HTMLValue)
-        self.setLexer(self.lexer)
+        '''提示框选项图标(单词和函数的区分)'''
+        word_image = QPixmap(Icon.word)
+        function_image = QPixmap(Icon.function)
+        self.registerImage(1, word_image)
+        self.registerImage(2, function_image)
+        # 几类自动补全集合的序号
+        self.tag_set_num = 1
+        self.attribute_set_num = 2
+        self.attribute_value_set_num = 3
+        '''自动补全'''
         self.__api = QsciAPIs(self.lexer)
         auto_completions = self.tag_list + self.attribute_list + self.attribute_value_list + self.common_word_list + list(self.function_dict.keys())
         for item in auto_completions:
@@ -124,7 +138,7 @@ class Editor(QsciScintilla):
         for ac in auto_completions:
             self.__api.add(ac)
         self.__api.prepare()
-        # 新建文件还是导入文件
+        '''新建文件还是导入文件'''
         self.file = file
         if file is None:
             # 默认第一行内容
@@ -269,7 +283,9 @@ class Editor(QsciScintilla):
 
     # 获取选中的item
     def get_selectd_item(self, id, item):
-        print(id, item)
+        line, index = self.getCursorPosition()
+        self.insert(item)
+        self.setCursorPosition(line, index+len(item))
 
     # 光标移动事件
     def cursor_move(self):
@@ -285,13 +301,19 @@ class Editor(QsciScintilla):
         line, index = self.getCursorPosition()
         # 只有新增字符的情况下才执行如下代码(删除文本不需要执行)
         if text_length > old_text_length:
+            # 获取前一个字符和后一个字符
+            current_line_text = self.text(line)
+            list_current_line_text = list(current_line_text)
+            # 刚刚键入的字符
+            current_char = list_current_line_text[index - 1] if index > 0 else None
             # 通过键盘键入字符(敲入单个字符)
             if (text_length - old_text_length) == 1:
-                # line, index = self.getCursorPosition()
-                current_line_text = self.text(line)
-                list_current_line_text = list(current_line_text)
-                current_char = list_current_line_text[index-1] if index > 0 else None
-                if current_char == '>':
+                # 键入'<'字符
+                if current_char == '<':
+                    user_list = [tag+'?1' for tag in self.tag_list]
+                    self.showUserList(self.tag_set_num, user_list)
+                # 键入'>'字符
+                elif current_char == '>':
                     for i in range(index-1, -1, -1):
                         if list_current_line_text[i] == '<' and list_current_line_text[i+1] != '?':
                             key_words = ''.join(list_current_line_text[i+1:index-1])
@@ -299,16 +321,11 @@ class Editor(QsciScintilla):
                             break
                 # 键入空格字符
                 elif current_char == ' ':
+                    user_list = [attribute+'?1' for attribute in self.attribute_list]
+                    self.showUserList(self.attribute_set_num, user_list)
+                # 键入'.'字符
+                elif current_char == '.':
                     pass
-                    # self.SendScintilla(self.SCI_AUTOCSHOW, 0, ['111', '222'])
-            # 回车自动补全(一次输入多个字符)
-            else:
-                current_line_text = self.text(line)
-                list_current_line_text = list(current_line_text)
-                current_char = list_current_line_text[index - 1] if index > 0 else None
-                if current_char == '"' or current_char == "'":
-                    line, index = self.getCursorPosition()
-                    self.setCursorPosition(line, index-1)
         self.old_text = self.text()
         # 获取当前光标
         cursor_position = '[' + str(line+1) + ':' + str(index) + ']'
@@ -478,16 +495,28 @@ class Editor(QsciScintilla):
             else:
                 # 此处可以添加更改(将函数名代替为函数)
                 self.setCursorPosition(line_after, index_after)
-        # 标签换行(需要换行并自动添加缩进)
-        elif current_word == '' and self.lines() >= line_after and line_before != line_after:
-            last_line_text = list(self.text(line_after-1).strip())
-            last_line_last_char = last_line_text[-1] if len(last_line_text) > 0 else ''
-            current_line_text = list(self.text(line_after).strip())
-            current_line_first_char = current_line_text[0] if len(current_line_text) > 0 else ''
-            if last_line_last_char == '>' and current_line_first_char == '<':
-                forword_tab = self.text(line_after-1).split('<')[0]
-                self.insertAt('\t\n'+forword_tab, line_after, index_after)
-                self.setCursorPosition(line_after, index_after+1)
+        # 当前单词为空(光标没有落在单词上)
+        elif current_word == '':
+            # 获取光标前一个字符
+            current_line_text = self.text(line_after)
+            list_current_line_text = list(current_line_text)
+            current_char = list_current_line_text[index_after - 1] if index_after > 0 else None
+            # 标签换行(需要换行并自动添加缩进)
+            if self.lines() >= line_after and line_before != line_after:
+                last_line_text = list(self.text(line_after-1).strip())
+                last_line_last_char = last_line_text[-1] if len(last_line_text) > 0 else ''
+                current_line_text = list(self.text(line_after).strip())
+                current_line_first_char = current_line_text[0] if len(current_line_text) > 0 else ''
+                if last_line_last_char == '>' and current_line_first_char == '<':
+                    forword_tab = self.text(line_after-1).split('<')[0]
+                    self.insertAt('\t\n'+forword_tab, line_after, index_after)
+                    self.setCursorPosition(line_after, index_after+1)
+            # 自动补全带有""或者''的属性(如name="")
+            elif current_char == '"' or current_char == "'":
+                line, index = self.getCursorPosition()
+                self.setCursorPosition(line, index - 1)
+                user_list = [attribute+'?1' for attribute in self.attribute_value_list]
+                self.showUserList(self.attribute_value_set_num, user_list)
 
     # 这是重写键盘事件
     def keyPressEvent(self, event):
