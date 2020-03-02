@@ -241,7 +241,7 @@ class MainWindow(QMainWindow):
                 event.ignore()
 
 
-if __name__=='__main__':
+if __name__ == '__main__':
     '''将QFileDialog转为中文'''
     tran = QTranslator()
     tran.load(Param.translator_file)

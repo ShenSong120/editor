@@ -74,6 +74,25 @@
 		<param name="sleep_ms">100</param>
 	</action>
 	
+	<!--蓝牙按钮-->
+	<action name="click">
+		<param name="nodeProp">
+			<map>
+				<entry key="xpath">desc=:蓝牙;id:com.chehejia.car.carsettings:id/setting_item_titles</entry>
+			</map>
+		</param>
+		<param name="sleep_ms">1000</param>
+	</action>
+	
+	<!--通用按钮-->
+	<action name="click">
+		<param name="nodeProp">
+			<map>
+				<entry key="xpath">desc:通用;id:com.chehejia.car.carsettings:id/setting_item_titles</entry>
+			</map>
+		</param>
+		<param name="sleep_ms">1000</param>
+	</action>
 	
 	<!--函数调用-->
 	<callFunction name="func2" id="r">

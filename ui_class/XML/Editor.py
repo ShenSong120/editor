@@ -296,6 +296,10 @@ class Editor(QsciScintilla):
                             key_words = ''.join(list_current_line_text[i+1:index-1])
                             self.insertAt('</'+key_words+'>', line, index)
                             break
+                # 键入空格字符
+                elif current_char == ' ':
+                    pass
+                    # self.SendScintilla(QsciScintillaBase.SCI_AUTOCSHOW, 0, ['111', '222'])
             # 回车自动补全(一次输入多个字符)
             else:
                 current_line_text = self.text(line)
