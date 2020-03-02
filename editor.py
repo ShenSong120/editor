@@ -229,7 +229,8 @@ class MainWindow(QMainWindow):
         if close_flag is True:
             event.accept()
         else:
-            reply = QMessageBox.question(self, '有文件未保存', file+'未保存\n是否先保存文件？', QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel, QMessageBox.No)
+            reply = QMessageBox.question(self, '有文件未保存', file+'未保存\n是否先保存文件？',
+                                         QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel, QMessageBox.No)
             if reply == QMessageBox.No:
                 event.accept()
             elif reply == QMessageBox.Cancel:

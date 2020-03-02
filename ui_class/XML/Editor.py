@@ -24,8 +24,9 @@ class Editor(QsciScintilla):
         self.setMarginWidth(0, 20)
         # 设置行号
         self.setMarginLineNumbers(0, True)
-        # 设置换行符为(\r\n)
-        self.setEolMode(QsciScintilla.EolWindows)
+        # 设置换行符为(\n)
+        # self.setEolMode(QsciScintilla.EolWindows)
+        self.setEolMode(QsciScintilla.EolUnix)
         # 设置光标宽度(0不显示光标)
         self.setCaretWidth(2)
         # 设置光标颜色
@@ -131,7 +132,7 @@ class Editor(QsciScintilla):
         else:
             with open(file, 'r', encoding='utf-8') as f:
                 editor_text = f.read()
-                editor_text = editor_text.replace('\n\n', '\r\n')
+                editor_text = editor_text.replace('\n\n', '\n')
             self.setText(editor_text)
 
     # 右键菜单展示
@@ -260,7 +261,7 @@ class Editor(QsciScintilla):
     def file_status_update(self):
         with open(self.file, 'r', encoding='utf-8') as f:
             text = f.read()
-            text = text.replace('\n\n', '\r\n')
+            text = text.replace('\n\n', '\n')
         if self.text() == text:
             self.signal.emit('file_status>' + FileStatus.save_status)
         else:
@@ -299,7 +300,7 @@ class Editor(QsciScintilla):
                 # 键入空格字符
                 elif current_char == ' ':
                     pass
-                    # self.SendScintilla(QsciScintillaBase.SCI_AUTOCSHOW, 0, ['111', '222'])
+                    # self.SendScintilla(self.SCI_AUTOCSHOW, 0, ['111', '222'])
             # 回车自动补全(一次输入多个字符)
             else:
                 current_line_text = self.text(line)
@@ -353,7 +354,7 @@ class Editor(QsciScintilla):
         # 设置选中(开始行/列, 结束行/列)
         self.setSelection(start_line, 0, end_line, end_index)
         selected_text = self.selectedText()
-        selected_list = selected_text.split('\r\n')
+        selected_list = selected_text.split('\n')
         if len(selected_list) > 1 and selected_list[-1] == '':
             selected_list.pop(-1)
         # 保存将每一行切为的三个部分(三个部分为一个list)
@@ -380,7 +381,7 @@ class Editor(QsciScintilla):
                 else:
                     line_list = ['', '', '']
                     line_separate_list.append(line_list)
-                    cursor_position =  4
+                    cursor_position = 4
             else:
                 line_list = ['', '', '']
                 line_separate_list.append(line_list)
@@ -388,10 +389,11 @@ class Editor(QsciScintilla):
         for i in range(len(line_separate_list)):
             if '<!--' not in selected_list[i] and '-->' not in selected_list[i]:
                 selected_list[i] = line_separate_list[i][0] + '<!--' + line_separate_list[i][1] + '-->' + line_separate_list[i][2]
-        if self.text(end_line).endswith('\r\n'):
-            replace_text = '\r\n'.join(selected_list) + '\r\n'
+        if self.text(end_line).endswith('\n'):
+            # replace_text = '\n'.join(selected_list) + '\n'
+            replace_text = '\n'.join(selected_list)
         else:
-            replace_text = '\r\n'.join(selected_list)
+            replace_text = '\n'.join(selected_list)
         self.replaceSelectedText(replace_text)
         if cursor_position != -1:
             self.setCursorPosition(end_line, cursor_position)
@@ -407,11 +409,11 @@ class Editor(QsciScintilla):
         # 设置选中(开始行/列, 结束行/列)
         self.setSelection(start_line, 0, end_line, end_index)
         selected_text = self.selectedText()
-        selected_list = selected_text.split('\r\n')
+        selected_list = selected_text.split('\n')
         for line in selected_list:
             if '<!--' in line and '-->' in line:
                 selected_list[selected_list.index(line)] = line.replace('<!--', '', 1).replace('-->', '', 1)
-        replace_text = '\r\n'.join(selected_list)
+        replace_text = '\n'.join(selected_list)
         self.replaceSelectedText(replace_text)
 
     # 删除单/双引号操作
@@ -454,10 +456,10 @@ class Editor(QsciScintilla):
                     else:
                         new_forword_char_list.append(' ')
                 new_forword = ''.join(new_forword_char_list)
-                line_text_list = self.function_dict[current_word].split('\r\n')
+                line_text_list = self.function_dict[current_word].split('\n')
                 for index in range(1, len(line_text_list)):
                     line_text_list[index] = new_forword + line_text_list[index]
-                replace_text = '\r\n'.join(line_text_list)
+                replace_text = '\n'.join(line_text_list)
                 self.replaceSelectedText(replace_text)
             # 自动补全标签
             elif current_word in self.tag_list:
@@ -484,7 +486,7 @@ class Editor(QsciScintilla):
             current_line_first_char = current_line_text[0] if len(current_line_text) > 0 else ''
             if last_line_last_char == '>' and current_line_first_char == '<':
                 forword_tab = self.text(line_after-1).split('<')[0]
-                self.insertAt('\t\r\n'+forword_tab, line_after, index_after)
+                self.insertAt('\t\n'+forword_tab, line_after, index_after)
                 self.setCursorPosition(line_after, index_after+1)
 
     # 这是重写键盘事件
