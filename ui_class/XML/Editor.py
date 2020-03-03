@@ -36,7 +36,8 @@ class Editor(QsciScintilla):
         # 选中行背景色(灰色背景)
         self.setCaretLineBackgroundColor(QColor('#F0F0F0'))
         # tab宽度设置为4, 也就是四个字符
-        self.setTabWidth(4)
+        self.indentation = 4
+        self.setTabWidth(self.indentation)
         # 换行后自动缩进
         self.setAutoIndent(True)
         self.setBackspaceUnindents(True)
