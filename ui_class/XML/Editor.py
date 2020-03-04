@@ -16,7 +16,9 @@ class Editor(QsciScintilla):
     def __init__(self, parent, file=None):
         super(Editor, self).__init__(parent)
         self.parent = parent
-
+        # 屏幕显示的代码行数
+        self.lines_on_screen = 0
+        # 设置字体
         self.font = QFont('Consolas', 14, QFont.Bold)
         self.setFont(self.font)
         self.setUtf8(True)
@@ -517,6 +519,15 @@ class Editor(QsciScintilla):
                 user_list = [attribute+'?1' for attribute in self.attribute_value_list]
                 self.showUserList(self.attribute_value_set_num, user_list)
 
+    # 更新滚动条
+    def update_scroll_bar(self, value):
+        self.verticalScrollBar().setValue(value)
+
+    # 重写窗口缩放事件
+    def resizeEvent(self, event):
+        super(Editor, self).resizeEvent(event)
+        self.lines_on_screen = self.SendScintilla(QsciScintilla.SCI_LINESONSCREEN)
+
     # 这是重写键盘事件
     def keyPressEvent(self, event):
         # Ctrl + / 键 注释or取消注释
@@ -611,6 +622,7 @@ class Editor(QsciScintilla):
         else:
             # 留点汤给父类，不然滚轮无法翻页
             super().wheelEvent(event)
+        self.lines_on_screen = self.SendScintilla(QsciScintilla.SCI_LINESONSCREEN)
 
     # 鼠标点击事件
     def mousePressEvent(self, event):
