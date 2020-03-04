@@ -147,7 +147,6 @@ class Editor(QsciScintilla):
         else:
             with open(file, 'r', encoding='utf-8') as f:
                 editor_text = f.read()
-                editor_text = editor_text.replace('\n\n', '\n')
             self.setText(editor_text)
 
     # 右键菜单展示
@@ -276,7 +275,6 @@ class Editor(QsciScintilla):
     def file_status_update(self):
         with open(self.file, 'r', encoding='utf-8') as f:
             text = f.read()
-            text = text.replace('\n\n', '\n')
         if self.text() == text:
             self.signal.emit('file_status>' + FileStatus.save_status)
         else:
