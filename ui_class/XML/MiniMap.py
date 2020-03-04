@@ -64,8 +64,7 @@ class MiniMap(QsciScintilla):
     #     self.zoomIn(-3)
 
     def update_code(self):
-        text = self.editor.text().replace('\t', ' ' * self.indentation)
-        self.setText(text)
+        self.setText(self.editor.text())
 
     # def leaveEvent(self, event):
     #     super(MiniMap, self).leaveEvent(event)
