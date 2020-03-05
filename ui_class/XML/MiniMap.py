@@ -17,8 +17,7 @@ class MiniMap(QsciScintilla):
         # 缩进字符数
         self.indentation = self.editor.indentation
         # 词法分析器
-        self._lexer = MyLexerXML(self)
-        self.setLexer(self._lexer)
+        self.setLexer(self.editor.lexer)
         # 缩略图文本
         self.setText(self.editor.text())
         # 设置鼠标跟踪

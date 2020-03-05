@@ -84,8 +84,7 @@ class Editor(QsciScintilla):
         # 光标移动事件
         self.cursorPositionChanged.connect(self.cursor_move)
         '''定义语言为xml语言'''
-        # self.lexer = QsciLexerXML(self)
-        self.lexer = MyLexerXML(self)
+        self.lexer = QsciLexerXML(self)
         self.lexer.setFont(self.font)
         # 设置(自定义颜色)
         # self.lexer.setColor(QColor(Qt.gray), QsciLexerXML.HTMLComment)
