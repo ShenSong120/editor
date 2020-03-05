@@ -10,7 +10,7 @@ class Editor(QWidget):
     def __init__(self, parent, file):
         super(Editor, self).__init__(parent)
         self.editor = XML_Editor(self, file)
-        self.mini_map = MiniMap(self.editor)
+        self.mini_map = MiniMap(self, self.editor)
 
         self.editor.signal[str].connect(self.get_signal_from_editor)
 
@@ -33,8 +33,12 @@ class Editor(QWidget):
 
     # 信号传递
     def get_signal_from_editor(self, signal_str):
-        self.signal.emit(signal_str)
+        if signal_str.split('>')[0] == 'editor_width_changed':
+            self.mini_map.change_slider_width()
+        else:
+            self.signal.emit(signal_str)
 
+    # 返回编辑器文本
     def text(self):
         return self.editor.text()
 

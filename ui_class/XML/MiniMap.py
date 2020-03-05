@@ -5,16 +5,14 @@ from PyQt5.Qsci import QsciScintilla
 
 class MiniMap(QsciScintilla):
 
-    def __init__(self, editor):
-        QsciScintilla.__init__(self, editor)
+    def __init__(self, parent, editor):
+        QsciScintilla.__init__(self, parent)
         # 设置最大最小宽度
         self.setMaximumWidth(300)
         self.setMinimumWidth(150)
         self.editor = editor
-        # 设置缩放(比原始大小缩小7倍)
-        self.zoomIn(-7)
-        # 缩进字符数
-        self.indentation = self.editor.indentation
+        # 设置缩放(比原始大小缩小10个档)
+        self.zoomIn(-10)
         # 词法分析器
         self.setLexer(self.editor.lexer)
         # 缩略图文本
@@ -40,15 +38,16 @@ class MiniMap(QsciScintilla):
         self.effect.setOpacity(0.5)
         # 设置滑动面板
         self.slider = Slider(self)
-        # self.slider.hide()
 
     # 尺寸更改
     def resizeEvent(self, event):
         super(MiniMap, self).resizeEvent(event)
+        self.change_slider_width()
+
+    # 更改slider宽度
+    def change_slider_width(self):
         self.slider.setFixedWidth(self.width())
         self.slider.setFixedHeight(self.editor.lines_on_screen * 4)
-        # self.slider.setFixedHeight(200)
-        # print(self.editor.lines_on_screen)
 
     # 更新滚动值
     def update_scroll_bar(self, value):
@@ -61,6 +60,7 @@ class MiniMap(QsciScintilla):
     #     self.move(x, 0)
     #     self.zoomIn(-3)
 
+    # 缩略图代码更新
     def update_code(self):
         self.setText(self.editor.text())
 

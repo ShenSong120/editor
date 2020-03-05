@@ -525,6 +525,7 @@ class Editor(QsciScintilla):
     def resizeEvent(self, event):
         super(Editor, self).resizeEvent(event)
         self.lines_on_screen = self.SendScintilla(QsciScintilla.SCI_LINESONSCREEN)
+        self.signal.emit('editor_width_changed>')
 
     # 这是重写键盘事件
     def keyPressEvent(self, event):
@@ -617,10 +618,11 @@ class Editor(QsciScintilla):
                 self.zoomIn(1)
             elif da.y() < 0:
                 self.zoomOut(1)
+            self.lines_on_screen = self.SendScintilla(QsciScintilla.SCI_LINESONSCREEN)
+            self.signal.emit('editor_width_changed>')
         else:
             # 留点汤给父类，不然滚轮无法翻页
             super().wheelEvent(event)
-        self.lines_on_screen = self.SendScintilla(QsciScintilla.SCI_LINESONSCREEN)
 
     # 鼠标点击事件
     def mousePressEvent(self, event):
