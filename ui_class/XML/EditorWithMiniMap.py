@@ -2,6 +2,7 @@ from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
 from ui_class.XML.Editor import Editor as XML_Editor
 from ui_class.XML.MiniMap import MiniMap
+from threading import Thread
 
 
 class Editor(QWidget):
@@ -14,8 +15,9 @@ class Editor(QWidget):
 
         self.editor.signal[str].connect(self.get_signal_from_editor)
 
-        self.editor.verticalScrollBar().valueChanged.connect(self.mini_map.update_scroll_bar)
-        self.mini_map.verticalScrollBar().valueChanged.connect(self.editor.update_scroll_bar)
+        self.editor.verticalScrollBar().valueChanged.connect(self.editor_vertical_scroll_bar_changed)
+        self.mini_map.verticalScrollBar().valueChanged.connect(self.mini_map_vertical_scroll_bar_changed)
+
         self.editor.textChanged.connect(self.mini_map.update_code)
 
         self.splitter_h_general = QSplitter(Qt.Horizontal)
@@ -41,6 +43,26 @@ class Editor(QWidget):
     # 返回编辑器文本
     def text(self):
         return self.editor.text()
+
+    # editor滚动条滚动事件
+    def editor_vertical_scroll_bar_changed(self, value):
+        # editor滚动的时候, 禁止mini_map滚动触发(防止混乱触发)
+        self.mini_map.verticalScrollBar().valueChanged.disconnect(self.mini_map_vertical_scroll_bar_changed)
+        scale = value / self.editor.verticalScrollBar().maximum()
+        new_value = int(scale * self.mini_map.verticalScrollBar().maximum())
+        self.mini_map.verticalScrollBar().setValue(new_value)
+        # 同步完mini_map后, 打开mini_map滚动触发
+        self.mini_map.verticalScrollBar().valueChanged.connect(self.mini_map_vertical_scroll_bar_changed)
+
+    # mini_map滚动条滚动事件
+    def mini_map_vertical_scroll_bar_changed(self, value):
+        # mini_map滚动的时候, 禁止editor滚动触发(防止混乱触发)
+        self.editor.verticalScrollBar().valueChanged.disconnect(self.editor_vertical_scroll_bar_changed)
+        scale = value / self.mini_map.verticalScrollBar().maximum()
+        new_value = int(scale * self.editor.verticalScrollBar().maximum())
+        self.editor.verticalScrollBar().setValue(new_value)
+        # 同步完editor后, 打开editor滚动触发
+        self.editor.verticalScrollBar().valueChanged.connect(self.editor_vertical_scroll_bar_changed)
 
 
 if __name__ == '__main__':

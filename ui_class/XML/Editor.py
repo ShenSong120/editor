@@ -18,10 +18,10 @@ class Editor(QsciScintilla):
         # 屏幕显示的代码行数
         self.lines_on_screen = 0
         # 设置字体
-        self.font = QFont('Consolas', 14, QFont.Bold)
+        self.font = QFont('Consolas', 13, QFont.Bold)
         self.setFont(self.font)
         self.setUtf8(True)
-        self.setMarginsFont(QFont('Arial ', 14))
+        self.setMarginsFont(QFont('Arial ', 13))
         self.setMarginWidth(0, 20)
         # 设置行号
         self.setMarginLineNumbers(0, True)
@@ -516,10 +516,6 @@ class Editor(QsciScintilla):
                 self.setCursorPosition(line, index - 1)
                 user_list = [attribute+'?1' for attribute in self.attribute_value_list]
                 self.showUserList(self.attribute_value_set_num, user_list)
-
-    # 更新滚动条
-    def update_scroll_bar(self, value):
-        self.verticalScrollBar().setValue(value)
 
     # 重写窗口缩放事件
     def resizeEvent(self, event):

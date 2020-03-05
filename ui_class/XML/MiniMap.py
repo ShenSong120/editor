@@ -14,9 +14,12 @@ class MiniMap(QsciScintilla):
         # 设置缩放(比原始大小缩小10个档)
         self.zoomIn(-10)
         # 词法分析器
-        self.setLexer(self.editor.lexer)
+        self.lexer = self.editor.lexer
+        self.setLexer(self.lexer)
         # 缩略图文本
         self.setText(self.editor.text())
+        # mini_map可以显示的行数
+        self.lines_on_screen = 0
         # 设置鼠标跟踪
         self.setMouseTracking(True)
         # 隐藏拖动条
@@ -46,12 +49,11 @@ class MiniMap(QsciScintilla):
 
     # 更改slider宽度
     def change_slider_width(self):
-        self.slider.setFixedWidth(self.width())
-        self.slider.setFixedHeight(self.editor.lines_on_screen * 4)
-
-    # 更新滚动值
-    def update_scroll_bar(self, value):
-        self.verticalScrollBar().setValue(value)
+        self.lines_on_screen = self.SendScintilla(QsciScintilla.SCI_LINESONSCREEN)
+        slider_width = self.width()
+        slider_height = int((self.editor.lines_on_screen / self.lines_on_screen) * self.height())
+        self.slider.setFixedWidth(slider_width)
+        self.slider.setFixedHeight(slider_height)
 
     # def update_geometry(self):
     #     self.setFixedHeight(self.editor.height())
