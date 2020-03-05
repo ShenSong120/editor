@@ -55,31 +55,9 @@ class MiniMap(QsciScintilla):
         self.slider.setFixedWidth(slider_width)
         self.slider.setFixedHeight(slider_height)
 
-    # def update_geometry(self):
-    #     self.setFixedHeight(self.editor.height())
-    #     self.setFixedWidth(self.editor.width() * 0.13)
-    #     x = self.editor.width() - self.width()
-    #     self.move(x, 0)
-    #     self.zoomIn(-3)
-
     # 缩略图代码更新
     def update_code(self):
         self.setText(self.editor.text())
-
-    # def leaveEvent(self, event):
-    #     super(MiniMap, self).leaveEvent(event)
-    #     self.slider.animation.setStartValue(0.2)
-    #     self.slider.animation.setEndValue(0)
-    #     self.slider.animation.start()
-    #
-    # def enterEvent(self, event):
-    #     super(MiniMap, self).enterEvent(event)
-    #     if not self.slider.isVisible():
-    #         self.slider.show()
-    #     else:
-    #         self.slider.animation.setStartValue(0)
-    #         self.slider.animation.setEndValue(0.2)
-    #         self.slider.animation.start()
 
 
 class Slider(QFrame):
@@ -100,19 +78,22 @@ class Slider(QFrame):
 
     def mouseMoveEvent(self, event):
         super(Slider, self).mouseMoveEvent(event)
-        pos = self.mapToParent(event.pos())
-        dy = pos.y() - (self.height() / 2)
-        if dy < 0:
-            dy = 0
-        self.move(0, dy)
-        pos.setY(pos.y() - event.pos().y())
-        self.mini_map.editor.verticalScrollBar().setValue(pos.y())
-        self.mini_map.verticalScrollBar().setSliderPosition(self.mini_map.verticalScrollBar().sliderPosition() + 2)
-        self.mini_map.verticalScrollBar().setValue(pos.y() - event.pos().y())
+
+        # pos = self.mapToParent(event.pos())
+        # dy = pos.y() - (self.height() / 2)
+        # if dy < 0:
+        #     dy = 0
+        # self.move(0, dy)
+        # pos.setY(pos.y() - event.pos().y())
+        # self.mini_map.editor.verticalScrollBar().setValue(pos.y())
+        # self.mini_map.verticalScrollBar().setSliderPosition(self.mini_map.verticalScrollBar().sliderPosition() + 2)
+        # self.mini_map.verticalScrollBar().setValue(pos.y() - event.pos().y())
 
     def mousePressEvent(self, event):
         super(Slider, self).mousePressEvent(event)
         self.setCursor(Qt.ClosedHandCursor)
+        pos = self.mapToParent(event.pos())
+        self.move(0, pos.y() - int((self.height() / 2)))
 
     def mouseReleaseEvent(self, event):
         super(Slider, self).mouseReleaseEvent(event)

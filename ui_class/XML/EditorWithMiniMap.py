@@ -2,7 +2,6 @@ from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
 from ui_class.XML.Editor import Editor as XML_Editor
 from ui_class.XML.MiniMap import MiniMap
-from threading import Thread
 
 
 class Editor(QWidget):
@@ -49,8 +48,10 @@ class Editor(QWidget):
         # editor滚动的时候, 禁止mini_map滚动触发(防止混乱触发)
         self.mini_map.verticalScrollBar().valueChanged.disconnect(self.mini_map_vertical_scroll_bar_changed)
         scale = value / self.editor.verticalScrollBar().maximum()
-        new_value = int(scale * self.mini_map.verticalScrollBar().maximum())
-        self.mini_map.verticalScrollBar().setValue(new_value)
+        mini_map_value = int(scale * self.mini_map.verticalScrollBar().maximum())
+        self.mini_map.verticalScrollBar().setValue(mini_map_value)
+        # 更新mini_map中的slider
+        self.update_mini_map_slider(value, mini_map_value)
         # 同步完mini_map后, 打开mini_map滚动触发
         self.mini_map.verticalScrollBar().valueChanged.connect(self.mini_map_vertical_scroll_bar_changed)
 
@@ -59,10 +60,30 @@ class Editor(QWidget):
         # mini_map滚动的时候, 禁止editor滚动触发(防止混乱触发)
         self.editor.verticalScrollBar().valueChanged.disconnect(self.editor_vertical_scroll_bar_changed)
         scale = value / self.mini_map.verticalScrollBar().maximum()
-        new_value = int(scale * self.editor.verticalScrollBar().maximum())
-        self.editor.verticalScrollBar().setValue(new_value)
+        editor_value = int(scale * self.editor.verticalScrollBar().maximum())
+        self.editor.verticalScrollBar().setValue(editor_value)
+        # 更新mini_map中的slider
+        self.update_mini_map_slider(editor_value, value)
         # 同步完editor后, 打开editor滚动触发
         self.editor.verticalScrollBar().valueChanged.connect(self.editor_vertical_scroll_bar_changed)
+
+    # mini_map的slider滚动更新
+    def update_mini_map_slider(self, editor_vertical_scroll_bar_value, mini_map_vertical_scroll_bar_value):
+        editor_value = editor_vertical_scroll_bar_value
+        mini_map_value = mini_map_vertical_scroll_bar_value
+        # 获取屏幕展示的起始行号
+        editor_first_line = int(((self.editor.lines() - self.editor.lines_on_screen) * editor_value) /
+                                self.editor.verticalScrollBar().maximum())
+        # 如果mini_map有滚动条的话(计算mini_map第一行行号)
+        if self.mini_map.verticalScrollBar().maximum():
+            mini_map_first_line = int(((self.mini_map.lines() - self.mini_map.lines_on_screen) * mini_map_value) /
+                                      self.mini_map.verticalScrollBar().maximum())
+        # 如果mini_map没有滚动条的话(第一行行号一直为0)
+        else:
+            mini_map_first_line = 0
+        slider_height = int((editor_first_line - mini_map_first_line) *
+                            (self.mini_map.height() / self.mini_map.lines_on_screen))
+        self.mini_map.slider.move(0, slider_height)
 
 
 if __name__ == '__main__':
