@@ -1,7 +1,6 @@
 from PyQt5.QtWidgets import QGraphicsOpacityEffect, QFrame
 from PyQt5.QtCore import QPropertyAnimation, Qt
 from PyQt5.Qsci import QsciScintilla
-from ui_class.XML.Lexer import MyLexerXML
 
 
 class MiniMap(QsciScintilla):
@@ -49,7 +48,7 @@ class MiniMap(QsciScintilla):
         self.slider.setFixedWidth(self.width())
         self.slider.setFixedHeight(self.editor.lines_on_screen * 4)
         # self.slider.setFixedHeight(200)
-        print(self.editor.lines_on_screen)
+        # print(self.editor.lines_on_screen)
 
     # 更新滚动值
     def update_scroll_bar(self, value):

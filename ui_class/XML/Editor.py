@@ -6,7 +6,6 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from other.CaseConfigParser import CaseConfigParser
 from other.glv import Icon, Param, FileStatus, MergePath
-from ui_class.XML.Lexer import MyLexerXML
 
 
 # xml编辑器
