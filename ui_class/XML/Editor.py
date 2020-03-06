@@ -149,6 +149,9 @@ class Editor(QsciScintilla):
             with open(file, 'r', encoding='utf-8') as f:
                 editor_text = f.read()
             self.setText(editor_text)
+        '''创建搜索框'''
+        self.search_box = SearchBox(self)
+        self.search_box.setHidden(True)
 
     # 右键菜单展示
     def show_menu(self, point):
@@ -522,6 +525,7 @@ class Editor(QsciScintilla):
     def resizeEvent(self, event):
         super(Editor, self).resizeEvent(event)
         self.lines_on_screen = self.SendScintilla(QsciScintilla.SCI_LINESONSCREEN)
+        self.search_box.setFixedWidth(self.width())
         self.signal.emit('editor_width_changed>')
 
     # 这是重写键盘事件
@@ -587,9 +591,7 @@ class Editor(QsciScintilla):
         # Ctrl + F 键(打开搜索框)
         elif (event.key() == Qt.Key_F):
             if QApplication.keyboardModifiers() == Qt.ControlModifier:
-                self.search_box = SearchBox(self)
-                self.search_box.setFixedWidth(self.width())
-                self.search_box.show()
+                self.search_box.setHidden(False)
             else:
                 # 不要破坏原有功能
                 QsciScintilla.keyPressEvent(self, event)

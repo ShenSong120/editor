@@ -28,6 +28,7 @@ class SearchBox(QFrame):
         self.close_option_button = QToolButton(self)
         self.close_option_button.setToolTip('关闭搜索框')
         self.close_option_button.setStyleSheet('QToolButton{border-image: url(' + Icon.close + ')}')
+        self.close_option_button.clicked.connect(self.close_option)
         # 布局
         self.general_layout = QHBoxLayout(self)
         self.general_layout.setContentsMargins(0, 0, 5, 0)
@@ -41,3 +42,7 @@ class SearchBox(QFrame):
         self.general_layout.addWidget(self.close_option_button)
         self.general_layout.addSpacing(30)
         self.setLayout(self.general_layout)
+
+    # 关闭操作
+    def close_option(self):
+        self.setHidden(True)
