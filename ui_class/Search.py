@@ -2,17 +2,18 @@ from PyQt5.QtWidgets import *
 from other.glv import Icon
 
 
-class SearchBox(QWidget):  # 我现在通过一个新窗口的方式去做，感觉不好
+class SearchBox(QFrame):
     def __init__(self, parent):
         super(SearchBox, self).__init__(parent)
         # 设置透明度
         self.effect = QGraphicsOpacityEffect()
         self.setGraphicsEffect(self.effect)
-        self.effect.setOpacity(0.8)
+        self.effect.setOpacity(0.7)
         # self.setWindowTitle("子窗口")
-        # self.setStyleSheet('background-color:blue;')
+        self.setStyleSheet('background-color:#CCCCCC;')
         # 搜索框
         self.search_line_edit = QLineEdit(self)
+        self.search_line_edit.setStyleSheet('background-color:#333333;')
         self.search_line_edit.setMinimumWidth(200)
         self.search_line_edit.setMaximumWidth(400)
         # 上一个
