@@ -18,6 +18,9 @@ class Icon:
     save_as_file = 'config/icon/save_as_file.png'
     file = 'config/icon/file.png'
     path = 'config/icon/path.png'
+    last = 'config/icon/last.png'
+    next = 'config/icon/next.png'
+    close = 'config/icon/close.png'
 
 
 # 样式

@@ -6,6 +6,7 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from other.CaseConfigParser import CaseConfigParser
 from other.glv import Icon, Param, FileStatus, MergePath
+from ui_class.Search import SearchBox
 
 
 # xml编辑器
@@ -580,6 +581,15 @@ class Editor(QsciScintilla):
                 # 不要破坏原有功能
                 QsciScintilla.keyPressEvent(self, event)
                 self.old_text = self.text()
+            else:
+                # 不要破坏原有功能
+                QsciScintilla.keyPressEvent(self, event)
+        # Ctrl + F 键(打开搜索框)
+        elif (event.key() == Qt.Key_F):
+            if QApplication.keyboardModifiers() == Qt.ControlModifier:
+                self.search_box = SearchBox(self)
+                self.search_box.setFixedWidth(self.width())
+                self.search_box.show()
             else:
                 # 不要破坏原有功能
                 QsciScintilla.keyPressEvent(self, event)
