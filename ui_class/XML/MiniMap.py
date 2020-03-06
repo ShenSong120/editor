@@ -70,7 +70,6 @@ class MiniMap(QsciScintilla):
     # 缩略图代码更新
     def update_code(self):
         self.setText(self.editor.text())
-        self.firstVisibleLine()
 
     # 通过坐标跳转到点击行
     def click_and_jump_to_current_line(self, pos):
