@@ -41,11 +41,22 @@ class MiniMap(QsciScintilla):
         self.effect.setOpacity(0.5)
         # 设置滑动面板
         self.slider = Slider(self)
+        # 设置鼠标样式(箭头光标)
+        self.setCursor(Qt.ArrowCursor)
 
     # 尺寸更改
     def resizeEvent(self, event):
         super(MiniMap, self).resizeEvent(event)
         self.change_slider_width()
+
+    # 鼠标点击事件
+    def mousePressEvent(self, event):
+        self.click_and_jump_to_current_line(event.pos())
+
+    # 滚轮事件
+    def wheelEvent(self, event):
+        data = event.angleDelta()
+        self.wheel_update(data)
 
     # 更改slider宽度
     def change_slider_width(self):
@@ -54,10 +65,31 @@ class MiniMap(QsciScintilla):
         slider_height = int((self.editor.lines_on_screen / self.lines_on_screen) * self.height())
         self.slider.setFixedWidth(slider_width)
         self.slider.setFixedHeight(slider_height)
+        self.slider.lines = self.editor.lines_on_screen
 
     # 缩略图代码更新
     def update_code(self):
         self.setText(self.editor.text())
+        self.firstVisibleLine()
+
+    # 通过坐标跳转到点击行
+    def click_and_jump_to_current_line(self, pos):
+        # 确保点击有效
+        if self.editor.verticalScrollBar().maximum():
+            click_line = int(pos.y() / (self.height() / self.lines_on_screen)) + self.firstVisibleLine()
+            value = int((self.editor.verticalScrollBar().maximum()/(self.editor.lines()-self.editor.lines_on_screen)) *
+                        (click_line - (self.editor.lines_on_screen / 2)))
+            self.editor.verticalScrollBar().setValue(value)
+
+    # 滚轮事件更新
+    def wheel_update(self, data):
+        # 确保可以滑动
+        if self.editor.verticalScrollBar().maximum():
+            if data.y() < 0:
+                new_value = self.editor.verticalScrollBar().value() + 3
+            else:
+                new_value = self.editor.verticalScrollBar().value() - 3
+            self.editor.verticalScrollBar().setValue(new_value)
 
 
 class Slider(QFrame):
@@ -66,6 +98,8 @@ class Slider(QFrame):
         QFrame.__init__(self, mini_map)
         self.mini_map = mini_map
         self.setStyleSheet("background: gray; border-radius: 3px;")
+        # 渲染的行数
+        self.lines = 0
         # Opacity
         self.effect = QGraphicsOpacityEffect()
         self.setGraphicsEffect(self.effect)
@@ -78,23 +112,21 @@ class Slider(QFrame):
 
     def mouseMoveEvent(self, event):
         super(Slider, self).mouseMoveEvent(event)
-
-        # pos = self.mapToParent(event.pos())
-        # dy = pos.y() - (self.height() / 2)
-        # if dy < 0:
-        #     dy = 0
-        # self.move(0, dy)
-        # pos.setY(pos.y() - event.pos().y())
-        # self.mini_map.editor.verticalScrollBar().setValue(pos.y())
-        # self.mini_map.verticalScrollBar().setSliderPosition(self.mini_map.verticalScrollBar().sliderPosition() + 2)
-        # self.mini_map.verticalScrollBar().setValue(pos.y() - event.pos().y())
+        pos = self.mapToParent(event.pos())
+        # 触发mini_map进行跳转
+        self.mini_map.click_and_jump_to_current_line(pos)
 
     def mousePressEvent(self, event):
         super(Slider, self).mousePressEvent(event)
         self.setCursor(Qt.ClosedHandCursor)
         pos = self.mapToParent(event.pos())
-        self.move(0, pos.y() - int((self.height() / 2)))
+        # 触发mini_map进行跳转
+        self.mini_map.click_and_jump_to_current_line(pos)
 
     def mouseReleaseEvent(self, event):
         super(Slider, self).mouseReleaseEvent(event)
         self.setCursor(Qt.OpenHandCursor)
+
+    def wheelEvent(self, event):
+        data = event.angleDelta()
+        self.mini_map.wheel_update(data)
