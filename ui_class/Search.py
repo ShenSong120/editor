@@ -1,4 +1,5 @@
 from PyQt5.QtWidgets import *
+from PyQt5.QtGui import *
 from other.glv import Icon
 
 
@@ -13,15 +14,23 @@ class SearchBox(QFrame):
         self.setStyleSheet('background-color:#CCCCCC;')
         # 搜索框
         self.search_line_edit = QLineEdit(self)
-        self.search_line_edit.setStyleSheet('background-color:#333333;')
+        self.search_line_edit.setStyleSheet('background-color:#000000; color:white;')
         self.search_line_edit.setMinimumWidth(200)
         self.search_line_edit.setMaximumWidth(400)
+        # 搜索框控件(敲击回车匹配下一个)
+        self.find_first_action = QAction(self.search_line_edit)
+        self.find_first_action.setShortcut('return')
+        self.find_first_action.setIcon(QIcon(Icon.enter))
+        self.find_first_action.triggered.connect(self.find_first_option)
+        self.search_line_edit.addAction(self.find_first_action, QLineEdit.TrailingPosition)
         # 上一个
         self.last_option_button = QToolButton(self)
+        self.last_option_button.clicked.connect(self.find_last_option)
         self.last_option_button.setToolTip('上一个搜索项')
         self.last_option_button.setStyleSheet('QToolButton{border-image: url(' + Icon.last + ')}')
         # 下一个
         self.next_option_button = QToolButton(self)
+        self.next_option_button.clicked.connect(self.find_next_option)
         self.next_option_button.setToolTip('下一个搜索项')
         self.next_option_button.setStyleSheet('QToolButton{border-image: url(' + Icon.next + ')}')
         # 关闭按钮
@@ -42,6 +51,20 @@ class SearchBox(QFrame):
         self.general_layout.addWidget(self.close_option_button)
         self.general_layout.addSpacing(30)
         self.setLayout(self.general_layout)
+
+    # QLineEdit控件中的查找当前匹配
+    def find_first_option(self):
+        text = self.search_line_edit.text()
+        self.parentWidget().findFirst(text, False, False, False, True)
+
+    # 查找上一个匹配
+    def find_last_option(self):
+        # self.parentWidget()
+        pass
+
+    # 查找下一个匹配
+    def find_next_option(self):
+        self.parentWidget().findNext()
 
     # 关闭操作
     def close_option(self):

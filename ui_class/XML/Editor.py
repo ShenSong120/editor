@@ -592,6 +592,7 @@ class Editor(QsciScintilla):
         elif (event.key() == Qt.Key_F):
             if QApplication.keyboardModifiers() == Qt.ControlModifier:
                 self.search_box.setHidden(False)
+                self.search_box.search_line_edit.setFocus()
             else:
                 # 不要破坏原有功能
                 QsciScintilla.keyPressEvent(self, event)
@@ -611,7 +612,11 @@ class Editor(QsciScintilla):
             self.old_text = self.text()
         # 回车自动补全处理
         elif (event.key() == Qt.Key_Return):
-            self.auto_completion(event)
+            current_focus_widget = self.focusWidget()
+            if current_focus_widget is self:
+                self.auto_completion(event)
+            elif current_focus_widget is self.search_box.search_line_edit:
+                self.search_box.find_first_option()
         else:
             # 不要破坏原有功能
             QsciScintilla.keyPressEvent(self, event)
