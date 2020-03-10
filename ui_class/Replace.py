@@ -67,9 +67,11 @@ class ReplaceBox(QFrame):
         # 替换按钮
         self.replace_button = QPushButton('替换', self)
         self.replace_all_button = QPushButton('替换所有', self)
-        button_style = 'QPushButton{border-radius:8px; border:3px solid #000000; padding:2px 6px 0px 6px;}'
+        button_style = 'QPushButton{border-radius:8px; border:2px solid #000000; padding:2px 6px 0px 6px;}'
         self.replace_button.setStyleSheet(button_style)
         self.replace_all_button.setStyleSheet(button_style)
+        self.replace_button.clicked.connect(self.replace_single)
+        self.replace_all_button.clicked.connect(self.replace_all)
         # 搜索结果背景标记
         self.search_thread = SearchThread()
         self.search_thread.signal[str].connect(self.search_option_marker)
@@ -105,9 +107,11 @@ class ReplaceBox(QFrame):
 
         self.setLayout(self.general_layout)
 
+    # 清除搜索框文本
     def clear_search_edit_text(self):
         self.search_line_edit.clear()
 
+    # 清除替换框文本
     def clear_replace_edit_text(self):
         self.replace_line_edit.clear()
 
@@ -148,6 +152,15 @@ class ReplaceBox(QFrame):
         text = self.search_line_edit.text()
         # self.parentWidget().findNext()
         self.parentWidget().findFirst(text, False, False, False, True, True, -1, -1, True)
+
+    # 替换一个选项
+    def replace_single(self):
+        print('替换文本')
+        pass
+
+    # 替换所有选项
+    def replace_all(self):
+        pass
 
     # 关闭操作
     def close_option(self):

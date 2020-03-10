@@ -103,7 +103,10 @@ class Editor(QsciScintilla):
         # self.lexer.setColor(QColor(Qt.yellow), QsciLexerXML.HTMLValue)
         self.setLexer(self.lexer)
         # 设置特定前景色
-        self.SendScintilla(self.SCI_INDICSETSTYLE, Editor.WORD_INDICATOR, self.INDIC_BOX)
+        # 将单词框起来
+        # self.SendScintilla(self.SCI_INDICSETSTYLE, Editor.WORD_INDICATOR, self.INDIC_BOX)
+        # 用颜色渲染单词
+        self.SendScintilla(self.SCI_INDICSETSTYLE, Editor.WORD_INDICATOR, self.INDIC_FULLBOX)
         self.SendScintilla(self.SCI_INDICSETFORE, self.WORD_INDICATOR, QColor("#FF0000"))
         self.SendScintilla(self.SCI_INDICSETSTYLE, self.WARNING_INDICATOR, self.INDIC_SQUIGGLE)
         self.SendScintilla(self.SCI_INDICSETFORE, self.WARNING_INDICATOR, QColor("#0000FF"))
