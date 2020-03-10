@@ -13,6 +13,14 @@ from ui_class.Search import SearchBox
 class Editor(QsciScintilla):
     signal = pyqtSignal(str)
 
+    # Marcadores
+    MARKER_MODIFIED = 3
+    MARKER_SAVED = 4
+
+    # Indicadores
+    WORD_INDICATOR = 0
+    WARNING_INDICATOR = 1
+
     def __init__(self, parent, file=None):
         super(Editor, self).__init__(parent)
         self.parent = parent
@@ -93,6 +101,11 @@ class Editor(QsciScintilla):
         self.lexer.setColor(QColor('#33CC33'), QsciLexerXML.OtherInTag)
         # self.lexer.setColor(QColor(Qt.yellow), QsciLexerXML.HTMLValue)
         self.setLexer(self.lexer)
+        # 设置特定前景色
+        self.SendScintilla(self.SCI_INDICSETSTYLE, Editor.WORD_INDICATOR, self.INDIC_BOX)
+        self.SendScintilla(self.SCI_INDICSETFORE, self.WORD_INDICATOR, QColor("#FF0000"))
+        self.SendScintilla(self.SCI_INDICSETSTYLE, self.WARNING_INDICATOR, self.INDIC_SQUIGGLE)
+        self.SendScintilla(self.SCI_INDICSETFORE, self.WARNING_INDICATOR, QColor("#0000FF"))
         '''获取配置文件'''
         # self.cf = configparser.ConfigParser()
         self.cf = CaseConfigParser()
