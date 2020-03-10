@@ -36,11 +36,8 @@ class MainWindow(QMainWindow):
         self.project_bar = ProjectBar(self.central_widget, self.project_path)
         self.project_bar.signal[str].connect(self.get_signal_from_project_bar)
         # 编辑器设置
-        # self.editor = MyQscintilla(self.centralWidget())
-        # self.setCentralWidget(self.editor)
         self.editor_widget = EditorTab(self.central_widget)
         self.editor_widget.signal[str].connect(self.get_signal_from_editor)
-        # self.setCentralWidget(self.editor_widget)
         # 全局竖直布局
         self.general_v_layout = QVBoxLayout(self.central_widget)
         self.general_v_layout.setContentsMargins(1, 0, 0, 0)

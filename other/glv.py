@@ -22,6 +22,7 @@ class Icon:
     next = 'config/icon/next.png'
     close = 'config/icon/close.png'
     enter = 'config/icon/enter.png'
+    clear_text = 'config/icon/clear_text.png'
 
 
 # 样式

@@ -7,6 +7,7 @@ from PyQt5.QtGui import *
 from other.CaseConfigParser import CaseConfigParser
 from other.glv import Icon, Param, FileStatus, MergePath
 from ui_class.Search import SearchBox
+from ui_class.Replace import ReplaceBox
 
 
 # xml编辑器
@@ -165,6 +166,9 @@ class Editor(QsciScintilla):
         '''创建搜索框'''
         self.search_box = SearchBox(self)
         self.search_box.setHidden(True)
+        '''创建替换框'''
+        self.replace_box = ReplaceBox(self)
+        self.replace_box.setHidden(True)
 
     # 右键菜单展示
     def show_menu(self, point):
@@ -539,6 +543,7 @@ class Editor(QsciScintilla):
         super(Editor, self).resizeEvent(event)
         self.lines_on_screen = self.SendScintilla(QsciScintilla.SCI_LINESONSCREEN)
         self.search_box.setFixedWidth(self.width())
+        self.replace_box.setFixedWidth(self.width())
         self.signal.emit('editor_width_changed>')
 
     # 这是重写键盘事件
@@ -604,8 +609,20 @@ class Editor(QsciScintilla):
         # Ctrl + F 键(打开搜索框)
         elif (event.key() == Qt.Key_F):
             if QApplication.keyboardModifiers() == Qt.ControlModifier:
+                if self.replace_box.isHidden() is False:
+                    self.replace_box.setHidden(True)
                 self.search_box.setHidden(False)
                 self.search_box.search_line_edit.setFocus()
+            else:
+                # 不要破坏原有功能
+                QsciScintilla.keyPressEvent(self, event)
+        # Ctrl + R 键(打开替换框)
+        elif (event.key() == Qt.Key_R):
+            if QApplication.keyboardModifiers() == Qt.ControlModifier:
+                if self.search_box.isHidden() is False:
+                    self.search_box.setHidden(True)
+                self.replace_box.setHidden(False)
+                self.replace_box.search_line_edit.setFocus()
             else:
                 # 不要破坏原有功能
                 QsciScintilla.keyPressEvent(self, event)
@@ -630,6 +647,8 @@ class Editor(QsciScintilla):
                 self.auto_completion(event)
             elif current_focus_widget is self.search_box.search_line_edit:
                 self.search_box.find_next_option()
+            elif current_focus_widget is self.replace_box.search_line_edit:
+                self.replace_box.find_next_option()
         else:
             # 不要破坏原有功能
             QsciScintilla.keyPressEvent(self, event)

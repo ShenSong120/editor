@@ -4,9 +4,9 @@ from PyQt5.QtCore import *
 from other.glv import Icon
 
 
-class SearchBox(QFrame):
+class ReplaceBox(QFrame):
     def __init__(self, parent):
-        super(SearchBox, self).__init__(parent)
+        super(ReplaceBox, self).__init__(parent)
         # 设置透明度
         self.effect = QGraphicsOpacityEffect()
         self.setGraphicsEffect(self.effect)
@@ -24,7 +24,7 @@ class SearchBox(QFrame):
         self.clear_search_edit_action.setIcon(QIcon(Icon.clear_text))
         self.clear_search_edit_action.triggered.connect(self.clear_search_edit_text)
         self.search_line_edit.addAction(self.clear_search_edit_action, QLineEdit.TrailingPosition)
-        # 搜索框控件(敲击回车匹配下一个)
+        # 搜索框回车控件(敲击回车匹配下一个)
         self.find_first_action = QAction(self.search_line_edit)
         self.find_first_action.setShortcut('return')
         self.find_first_action.setIcon(QIcon(Icon.enter))
@@ -48,28 +48,68 @@ class SearchBox(QFrame):
         self.close_option_button.setToolTip('关闭搜索框')
         self.close_option_button.setStyleSheet('QToolButton{border-image: url(' + Icon.close + ')}')
         self.close_option_button.clicked.connect(self.close_option)
+        # 替代文本框
+        self.replace_line_edit = QLineEdit(self)
+        self.replace_line_edit.setStyleSheet('background-color:#000000; color:white;')
+        self.replace_line_edit.setMinimumWidth(200)
+        self.replace_line_edit.setMaximumWidth(400)
+        # 替换框内清除文本控件(点击清除文本)
+        self.clear_replace_edit_action = QAction(self.replace_line_edit)
+        self.clear_replace_edit_action.setIcon(QIcon(Icon.clear_text))
+        self.clear_replace_edit_action.triggered.connect(self.clear_replace_edit_text)
+        self.replace_line_edit.addAction(self.clear_replace_edit_action, QLineEdit.TrailingPosition)
+        # 替代框回车控件(敲击回车匹配下一个)
+        self.replace_first_action = QAction(self.replace_line_edit)
+        self.replace_first_action.setShortcut('return')
+        self.replace_first_action.setIcon(QIcon(Icon.enter))
+        # self.replace_first_action.triggered.connect(self.find_next_option)
+        self.replace_line_edit.addAction(self.find_first_action, QLineEdit.TrailingPosition)
+        # 替换按钮
+        self.replace_button = QPushButton('替换', self)
+        self.replace_all_button = QPushButton('替换所有', self)
+        button_style = 'QPushButton{border-radius:8px; border:3px solid #000000; padding:2px 6px 0px 6px;}'
+        self.replace_button.setStyleSheet(button_style)
+        self.replace_all_button.setStyleSheet(button_style)
         # 搜索结果背景标记
         self.search_thread = SearchThread()
         self.search_thread.signal[str].connect(self.search_option_marker)
-        # 布局
-        self.general_layout = QHBoxLayout(self)
-        self.general_layout.setContentsMargins(0, 0, 5, 0)
-        self.general_layout.addSpacing(80)
-        self.general_layout.addWidget(self.search_line_edit)
-        self.general_layout.addStretch(1)
-        self.general_layout.addWidget(self.last_option_button)
-        self.general_layout.addSpacing(20)
-        self.general_layout.addWidget(self.next_option_button)
-        self.general_layout.addStretch(1)
-        self.general_layout.addWidget(self.match_num_label)
-        self.general_layout.addStretch(6)
-        self.general_layout.addWidget(self.close_option_button)
-        self.general_layout.addSpacing(30)
+        # search布局
+        self.search_layout = QHBoxLayout()
+        self.search_layout.setContentsMargins(0, 0, 5, 0)
+        self.search_layout.addSpacing(80)
+        self.search_layout.addWidget(self.search_line_edit)
+        self.search_layout.addStretch(1)
+        self.search_layout.addWidget(self.last_option_button)
+        self.search_layout.addSpacing(20)
+        self.search_layout.addWidget(self.next_option_button)
+        self.search_layout.addStretch(1)
+        self.search_layout.addWidget(self.match_num_label)
+        self.search_layout.addStretch(6)
+        self.search_layout.addWidget(self.close_option_button)
+        self.search_layout.addSpacing(30)
+        # replace布局
+        self.replace_layout = QHBoxLayout()
+        self.replace_layout.setContentsMargins(0, 0, 5, 0)
+        self.replace_layout.addSpacing(80)
+        self.replace_layout.addWidget(self.replace_line_edit)
+        self.replace_layout.addStretch(1)
+        self.replace_layout.addWidget(self.replace_button)
+        self.replace_layout.addSpacing(20)
+        self.replace_layout.addWidget(self.replace_all_button)
+        self.replace_layout.addStretch(9)
+        # 总体布局
+        self.general_layout = QVBoxLayout(self)
+        self.general_layout.setContentsMargins(0, 0, 0, 0)
+        self.general_layout.addLayout(self.search_layout)
+        self.general_layout.addLayout(self.replace_layout)
+
         self.setLayout(self.general_layout)
 
-    # 清除检索框文本
     def clear_search_edit_text(self):
         self.search_line_edit.clear()
+
+    def clear_replace_edit_text(self):
+        self.replace_line_edit.clear()
 
     # 明确指标
     def clear_indicators(self, indicator):
