@@ -616,7 +616,7 @@ class Editor(QsciScintilla):
             if current_focus_widget is self:
                 self.auto_completion(event)
             elif current_focus_widget is self.search_box.search_line_edit:
-                self.search_box.find_first_option()
+                self.search_box.find_next_option()
         else:
             # 不要破坏原有功能
             QsciScintilla.keyPressEvent(self, event)

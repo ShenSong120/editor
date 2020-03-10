@@ -22,7 +22,7 @@ class SearchBox(QFrame):
         self.find_first_action = QAction(self.search_line_edit)
         self.find_first_action.setShortcut('return')
         self.find_first_action.setIcon(QIcon(Icon.enter))
-        self.find_first_action.triggered.connect(self.find_first_option)
+        self.find_first_action.triggered.connect(self.find_next_option)
         self.search_line_edit.addAction(self.find_first_action, QLineEdit.TrailingPosition)
         # 上一个
         self.last_option_button = QToolButton(self)
@@ -61,17 +61,19 @@ class SearchBox(QFrame):
     # QLineEdit控件中的查找当前匹配
     def find_first_option(self):
         text = self.search_line_edit.text()
-        # self.parentWidget().markerDefine(text, 100)
-        # self.parentWidget().setMarkerBackgroundColor(QColor('#0099CC'), 100)
-        self.parentWidget().findFirst(text, False, False, False, True)
+        self.parentWidget().findFirst(text, False, False, False, False, True, 0, 0, True)
 
     # 查找上一个匹配(暂时不支持)
     def find_last_option(self):
-        pass
+        text = self.search_line_edit.text()
+        self.parentWidget().findFirst(text, False, False, False, True, False, -1, -1, True)
+        self.parentWidget().findNext()
 
     # 查找下一个匹配
     def find_next_option(self):
-        self.parentWidget().findNext()
+        text = self.search_line_edit.text()
+        # self.parentWidget().findNext()
+        self.parentWidget().findFirst(text, False, False, False, True, True, -1, -1, True)
 
     # 关闭操作
     def close_option(self):
