@@ -670,6 +670,8 @@ class Editor(QsciScintilla):
                 self.search_box.find_next_option()
             elif current_focus_widget is self.replace_box.search_line_edit:
                 self.replace_box.find_next_option()
+            elif current_focus_widget is self.replace_box.replace_line_edit:
+                self.replace_box.replace_button.click()
         else:
             # 不要破坏原有功能
             QsciScintilla.keyPressEvent(self, event)

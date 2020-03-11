@@ -15,7 +15,8 @@ class SearchBox(QFrame):
         self.setStyleSheet('background-color:#CCCCCC;')
         # 搜索框
         self.search_line_edit = QLineEdit(self)
-        self.search_line_edit.textChanged.connect(self.find_first_option)
+        # self.search_line_edit.textChanged.connect(self.find_first_option)
+        self.search_line_edit.textChanged.connect(self.search_line_edit_text_changed)
         self.search_line_edit.setStyleSheet('background-color:#000000; color:white;')
         self.search_line_edit.setMinimumWidth(200)
         self.search_line_edit.setMaximumWidth(400)
@@ -23,7 +24,6 @@ class SearchBox(QFrame):
         self.clear_search_edit_action = QAction(self.search_line_edit)
         self.clear_search_edit_action.setIcon(QIcon(Icon.clear_text))
         self.clear_search_edit_action.triggered.connect(self.clear_search_edit_text)
-        self.search_line_edit.addAction(self.clear_search_edit_action, QLineEdit.TrailingPosition)
         # 搜索框控件(敲击回车匹配下一个)
         self.find_first_action = QAction(self.search_line_edit)
         self.find_first_action.setShortcut('return')
@@ -97,6 +97,16 @@ class SearchBox(QFrame):
                 self.parentWidget().fillIndicatorRange(p[0], p[1], p[0], p[2], self.parentWidget().WORD_INDICATOR)
             char = str(len(palabras))
         self.match_num_label.setText(char+' matches')
+
+    # 动态显示隐藏清除文本控件
+    def search_line_edit_text_changed(self):
+        if self.clear_search_edit_action in self.search_line_edit.actions():
+            if self.search_line_edit.text() == '':
+                self.search_line_edit.removeAction(self.clear_search_edit_action)
+        else:
+            if self.search_line_edit.text() != '':
+                self.search_line_edit.addAction(self.clear_search_edit_action, QLineEdit.TrailingPosition)
+        self.find_first_option()
 
     # QLineEdit控件中的查找当前匹配
     def find_first_option(self):

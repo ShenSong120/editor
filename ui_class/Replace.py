@@ -15,7 +15,7 @@ class ReplaceBox(QFrame):
         self.setStyleSheet('background-color:#CCCCCC;')
         # 搜索框
         self.search_line_edit = QLineEdit(self)
-        self.search_line_edit.textChanged.connect(self.find_first_option)
+        self.search_line_edit.textChanged.connect(self.search_line_edit_text_changed)
         self.search_line_edit.setStyleSheet('background-color:#000000; color:white;')
         self.search_line_edit.setMinimumWidth(200)
         self.search_line_edit.setMaximumWidth(400)
@@ -23,7 +23,6 @@ class ReplaceBox(QFrame):
         self.clear_search_edit_action = QAction(self.search_line_edit)
         self.clear_search_edit_action.setIcon(QIcon(Icon.clear_text))
         self.clear_search_edit_action.triggered.connect(self.clear_search_edit_text)
-        self.search_line_edit.addAction(self.clear_search_edit_action, QLineEdit.TrailingPosition)
         # 搜索框回车控件(敲击回车匹配下一个)
         self.find_first_action = QAction(self.search_line_edit)
         self.find_first_action.setShortcut('return')
@@ -57,6 +56,7 @@ class ReplaceBox(QFrame):
         self.close_option_button.clicked.connect(self.close_option)
         # 替代文本框
         self.replace_line_edit = QLineEdit(self)
+        self.replace_line_edit.textChanged.connect(self.replace_line_edit_text_changed)
         self.replace_line_edit.setStyleSheet('background-color:#000000; color:white;')
         self.replace_line_edit.setMinimumWidth(200)
         self.replace_line_edit.setMaximumWidth(400)
@@ -64,20 +64,22 @@ class ReplaceBox(QFrame):
         self.clear_replace_edit_action = QAction(self.replace_line_edit)
         self.clear_replace_edit_action.setIcon(QIcon(Icon.clear_text))
         self.clear_replace_edit_action.triggered.connect(self.clear_replace_edit_text)
-        self.replace_line_edit.addAction(self.clear_replace_edit_action, QLineEdit.TrailingPosition)
         # 替代框回车控件(敲击回车匹配下一个)
         self.replace_first_action = QAction(self.replace_line_edit)
         self.replace_first_action.setShortcut('return')
         self.replace_first_action.setIcon(QIcon(Icon.enter))
         # self.replace_first_action.triggered.connect(self.find_next_option)
         self.replace_line_edit.addAction(self.find_first_action, QLineEdit.TrailingPosition)
-        # 替换按钮
+        # 替换按钮(单个和所有)
+        button_style = 'QPushButton{border-radius:8px; border:2px solid #000000; padding:2px 6px 0px 6px;}\
+                        QPushButton:disabled{border-radius:8px; border:2px solid #969696; padding:2px 6px 0px 6px;}'
         self.replace_button = QPushButton('替换', self)
-        self.replace_all_button = QPushButton('替换所有', self)
-        button_style = 'QPushButton{border-radius:8px; border:2px solid #000000; padding:2px 6px 0px 6px;}'
+        self.replace_button.setEnabled(False)
         self.replace_button.setStyleSheet(button_style)
-        self.replace_all_button.setStyleSheet(button_style)
         self.replace_button.clicked.connect(self.replace_single)
+        self.replace_all_button = QPushButton('替换所有', self)
+        self.replace_all_button.setEnabled(False)
+        self.replace_all_button.setStyleSheet(button_style)
         self.replace_all_button.clicked.connect(self.replace_all)
         # 搜索结果背景标记
         self.search_thread = SearchThread()
@@ -142,6 +144,29 @@ class ReplaceBox(QFrame):
             char = str(len(palabras))
         self.match_num_label.setText(char + ' matches')
 
+    # 动态显示搜索框隐藏清除文本控件
+    def search_line_edit_text_changed(self):
+        if self.clear_search_edit_action in self.search_line_edit.actions():
+            if self.search_line_edit.text() == '':
+                self.search_line_edit.removeAction(self.clear_search_edit_action)
+                self.replace_button.setEnabled(False)
+                self.replace_all_button.setEnabled(False)
+        else:
+            if self.search_line_edit.text() != '':
+                self.search_line_edit.addAction(self.clear_search_edit_action, QLineEdit.TrailingPosition)
+                self.replace_button.setEnabled(True)
+                self.replace_all_button.setEnabled(True)
+        self.find_first_option()
+
+    # 动态显示替换框隐藏清除文本控件
+    def replace_line_edit_text_changed(self):
+        if self.clear_replace_edit_action in self.replace_line_edit.actions():
+            if self.replace_line_edit.text() == '':
+                self.replace_line_edit.removeAction(self.clear_replace_edit_action)
+        else:
+            if self.replace_line_edit.text() != '':
+                self.replace_line_edit.addAction(self.clear_replace_edit_action, QLineEdit.TrailingPosition)
+
     # QLineEdit控件中的查找当前匹配
     def find_first_option(self):
         text = self.search_line_edit.text()
@@ -151,6 +176,11 @@ class ReplaceBox(QFrame):
         if flag is False:
             line, index = self.parentWidget().getCursorPosition()
             self.parentWidget().setCursorPosition(line, index)
+            self.replace_button.setEnabled(False)
+            self.replace_all_button.setEnabled(False)
+        else:
+            self.replace_button.setEnabled(True)
+            self.replace_all_button.setEnabled(True)
 
     # 查找上一个匹配(暂时不支持)
     def find_last_option(self):
@@ -173,6 +203,9 @@ class ReplaceBox(QFrame):
             text = self.search_line_edit.text()
             source_text = self.parentWidget().text()
             self.search_thread.find(text, source_text)
+            if self.parentWidget().selectedText() == '':
+                self.replace_button.setEnabled(False)
+                self.replace_all_button.setEnabled(False)
 
     # 替换所有选项
     def replace_all(self):
@@ -182,6 +215,8 @@ class ReplaceBox(QFrame):
         while found:
             self.parentWidget().replaceSelectedText(replace_text)
             found = self.parentWidget().findNext()
+        self.replace_button.setEnabled(False)
+        self.replace_all_button.setEnabled(False)
 
     # 关闭操作
     def close_option(self):
