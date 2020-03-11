@@ -183,7 +183,7 @@ class ReplaceBox(QFrame):
         text = self.search_line_edit.text()
         source_text = self.parentWidget().text()
         self.search_thread.find(text, source_text, self.match_case_flag)
-        flag = self.parentWidget().findFirst(text, False, self.match_case_flag, False, False, True, 0, 0, True)
+        flag = self.parentWidget().findFirst(text, False, self.match_case_flag, False, False, True, -1, -1, True)
         if flag is False:
             line, index = self.parentWidget().getCursorPosition()
             self.parentWidget().setCursorPosition(line, index)
@@ -196,15 +196,12 @@ class ReplaceBox(QFrame):
     # 查找上一个匹配(暂时不支持)
     def find_last_option(self):
         text = self.search_line_edit.text()
-        # self.parentWidget().findFirst(text, False, False, False, True, False, -1, -1, True)
         self.parentWidget().findFirst(text, False, self.match_case_flag, False, True, False, -1, -1, True)
         self.parentWidget().findNext()
 
     # 查找下一个匹配
     def find_next_option(self):
         text = self.search_line_edit.text()
-        # self.parentWidget().findNext()
-        # self.parentWidget().findFirst(text, False, False, False, True, True, -1, -1, True)
         self.parentWidget().findFirst(text, False, self.match_case_flag, False, True, True, -1, -1, True)
 
     # 替换一个选项
