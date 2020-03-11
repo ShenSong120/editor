@@ -319,6 +319,7 @@ class Editor(QsciScintilla):
     def search_operate(self):
         if self.replace_box.isHidden() is False:
             self.replace_box.setHidden(True)
+        self.search_box.get_current_position()
         self.search_box.setHidden(False)
         self.search_box.search_line_edit.setFocus()
         self.search_box.find_first_option()
@@ -327,6 +328,7 @@ class Editor(QsciScintilla):
     def replace_operate(self):
         if self.search_box.isHidden() is False:
             self.search_box.setHidden(True)
+        self.replace_box.get_current_position()
         self.replace_box.setHidden(False)
         self.replace_box.search_line_edit.setFocus()
         self.replace_box.find_first_option()
