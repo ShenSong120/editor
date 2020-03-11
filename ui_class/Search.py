@@ -40,9 +40,16 @@ class SearchBox(QFrame):
         self.next_option_button.clicked.connect(self.find_next_option)
         self.next_option_button.setToolTip('下一个搜索项')
         self.next_option_button.setStyleSheet('QToolButton{border-image: url(' + Icon.next + ')}')
+        # 是否区分大小写
+        check_box_style = 'QCheckBox:indicator{background:transparent;border:1px solid #000000;width:20;height:20}\
+                           QCheckBox::indicator:unchecked{image:url(' + Icon.unchecked + ')}\
+                           QCheckBox::indicator:checked{image:url(' + Icon.checked + ')}'
+        self.match_case_check_box = QCheckBox(self)
+        self.match_case_check_box.setStyleSheet(check_box_style)
+        self.match_case_label = QLabel(self)
+        self.match_case_label.setText('区分大小写')
         # 匹配数量
         self.match_num_label = QLabel(self)
-        # self.match_num_label.setText('123')
         # 关闭按钮
         self.close_option_button = QToolButton(self)
         self.close_option_button.setToolTip('关闭搜索框')
@@ -54,12 +61,16 @@ class SearchBox(QFrame):
         # 布局
         self.general_layout = QHBoxLayout(self)
         self.general_layout.setContentsMargins(0, 0, 5, 0)
+        self.general_layout.setSpacing(0)
         self.general_layout.addSpacing(80)
         self.general_layout.addWidget(self.search_line_edit)
         self.general_layout.addStretch(1)
         self.general_layout.addWidget(self.last_option_button)
         self.general_layout.addSpacing(20)
         self.general_layout.addWidget(self.next_option_button)
+        self.general_layout.addStretch(1)
+        self.general_layout.addWidget(self.match_case_check_box)
+        self.general_layout.addWidget(self.match_case_label)
         self.general_layout.addStretch(1)
         self.general_layout.addWidget(self.match_num_label)
         self.general_layout.addStretch(6)
@@ -79,13 +90,13 @@ class SearchBox(QFrame):
     def search_option_marker(self, signal_str):
         palabras = eval(signal_str)
         self.clear_indicators(self.parentWidget().WORD_INDICATOR)
-        for p in palabras:
-            self.parentWidget().fillIndicatorRange(p[0], p[1], p[0], p[2], self.parentWidget().WORD_INDICATOR)
-        if len(palabras) == 1:
-            if sum(palabras[0]) == 0:
-                self.match_num_label.setText('No matches')
-                return
-        char = str(len(palabras))
+        if len(palabras) == 0:
+            self.parentWidget().fillIndicatorRange(0, 0, 0, 0, self.parentWidget().WORD_INDICATOR)
+            char = 'No'
+        else:
+            for p in palabras:
+                self.parentWidget().fillIndicatorRange(p[0], p[1], p[0], p[2], self.parentWidget().WORD_INDICATOR)
+            char = str(len(palabras))
         self.match_num_label.setText(char+' matches')
 
     # QLineEdit控件中的查找当前匹配
@@ -114,6 +125,8 @@ class SearchBox(QFrame):
         self.setHidden(True)
         line, index = self.parentWidget().getCursorPosition()
         self.parentWidget().setCursorPosition(line, index)
+        # 关闭搜索框后(清除搜索文本标记)
+        self.search_option_marker('[]')
 
 
 # 渲染线程(将目标文字背景变色)
@@ -128,7 +141,7 @@ class SearchThread(QThread):
             for i in found_generator:
                 found_list.append([i[2], i[0], i[1]])
         else:
-            found_list.append([0, 0, 0])
+            found_list = found_list
         self.signal.emit(str(found_list))
 
     def find_with_lines(self, text, word):

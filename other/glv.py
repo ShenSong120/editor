@@ -23,6 +23,8 @@ class Icon:
     close = 'config/icon/close.png'
     enter = 'config/icon/enter.png'
     clear_text = 'config/icon/clear_text.png'
+    checked = 'config/icon/checked.png'
+    unchecked = 'config/icon/unchecked.png'
 
 
 # 样式

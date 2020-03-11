@@ -89,7 +89,7 @@ class Editor(QsciScintilla):
         # 用户自定义随时调起函数
         # self.showUserList(1, ['111?1', '222?1', '333?1'])
         # item条件触发事件
-        self.userListActivated.connect(self.get_selectd_item)
+        self.userListActivated.connect(self.get_selected_item)
         # 光标移动事件
         self.cursorPositionChanged.connect(self.cursor_move)
         '''定义语言为xml语言'''
@@ -231,6 +231,7 @@ class Editor(QsciScintilla):
         self.menu.addAction(self.comment_action)
         self.menu.exec(self.mapToGlobal(point))
 
+    # 取消上次操作
     def undo_operate(self):
         # 注释的时候先关闭自动补全后半部分功能
         self.cursorPositionChanged.disconnect(self.cursor_move)
@@ -239,6 +240,7 @@ class Editor(QsciScintilla):
         self.cursorPositionChanged.connect(self.cursor_move)
         self.old_text = self.text()
 
+    # 恢复上次操作
     def redo_operate(self):
         # 注释的时候先关闭自动补全后半部分功能
         self.cursorPositionChanged.disconnect(self.cursor_move)
@@ -247,6 +249,7 @@ class Editor(QsciScintilla):
         self.cursorPositionChanged.connect(self.cursor_move)
         self.old_text = self.text()
 
+    # 剪切
     def cut_operate(self):
         # 注释的时候先关闭自动补全后半部分功能
         self.cursorPositionChanged.disconnect(self.cursor_move)
@@ -255,6 +258,7 @@ class Editor(QsciScintilla):
         self.cursorPositionChanged.connect(self.cursor_move)
         self.old_text = self.text()
 
+    # 复制
     def copy_operate(self):
         # 注释的时候先关闭自动补全后半部分功能
         self.cursorPositionChanged.disconnect(self.cursor_move)
@@ -263,6 +267,7 @@ class Editor(QsciScintilla):
         self.cursorPositionChanged.connect(self.cursor_move)
         self.old_text = self.text()
 
+    # 粘贴
     def paste_operate(self):
         # 注释的时候先关闭自动补全后半部分功能
         self.cursorPositionChanged.disconnect(self.cursor_move)
@@ -271,6 +276,7 @@ class Editor(QsciScintilla):
         self.cursorPositionChanged.connect(self.cursor_move)
         self.old_text = self.text()
 
+    # 删除
     def delete_operate(self):
         # 注释的时候先关闭自动补全后半部分功能
         self.cursorPositionChanged.disconnect(self.cursor_move)
@@ -279,6 +285,7 @@ class Editor(QsciScintilla):
         self.cursorPositionChanged.connect(self.cursor_move)
         self.old_text = self.text()
 
+    # 选择所有
     def select_all_operate(self):
         # 注释的时候先关闭自动补全后半部分功能
         self.cursorPositionChanged.disconnect(self.cursor_move)
@@ -287,6 +294,7 @@ class Editor(QsciScintilla):
         self.cursorPositionChanged.connect(self.cursor_move)
         self.old_text = self.text()
 
+    # 注释
     def comment_operate(self):
         # 注释的时候先关闭自动补全后半部分功能
         self.cursorPositionChanged.disconnect(self.cursor_move)
@@ -294,6 +302,22 @@ class Editor(QsciScintilla):
         self.toggle_comment()
         self.cursorPositionChanged.connect(self.cursor_move)
         self.old_text = self.text()
+
+    # 搜索
+    def search_operate(self):
+        if self.replace_box.isHidden() is False:
+            self.replace_box.setHidden(True)
+        self.search_box.setHidden(False)
+        self.search_box.search_line_edit.setFocus()
+        self.search_box.find_first_option()
+
+    # 替换
+    def replace_operate(self):
+        if self.search_box.isHidden() is False:
+            self.search_box.setHidden(True)
+        self.replace_box.setHidden(False)
+        self.replace_box.search_line_edit.setFocus()
+        self.replace_box.find_first_option()
 
     # 文件状态更新
     def file_status_update(self):
@@ -305,7 +329,7 @@ class Editor(QsciScintilla):
             self.signal.emit('file_status>' + FileStatus.not_save_status)
 
     # 获取选中的item
-    def get_selectd_item(self, id, item):
+    def get_selected_item(self, id, item):
         line, index = self.getCursorPosition()
         self.insert(item)
         self.setCursorPosition(line, index+len(item))
@@ -612,20 +636,14 @@ class Editor(QsciScintilla):
         # Ctrl + F 键(打开搜索框)
         elif (event.key() == Qt.Key_F):
             if QApplication.keyboardModifiers() == Qt.ControlModifier:
-                if self.replace_box.isHidden() is False:
-                    self.replace_box.setHidden(True)
-                self.search_box.setHidden(False)
-                self.search_box.search_line_edit.setFocus()
+                self.search_operate()
             else:
                 # 不要破坏原有功能
                 QsciScintilla.keyPressEvent(self, event)
         # Ctrl + R 键(打开替换框)
         elif (event.key() == Qt.Key_R):
             if QApplication.keyboardModifiers() == Qt.ControlModifier:
-                if self.search_box.isHidden() is False:
-                    self.search_box.setHidden(True)
-                self.replace_box.setHidden(False)
-                self.replace_box.search_line_edit.setFocus()
+                self.replace_operate()
             else:
                 # 不要破坏原有功能
                 QsciScintilla.keyPressEvent(self, event)
