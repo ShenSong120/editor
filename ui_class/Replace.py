@@ -40,13 +40,16 @@ class ReplaceBox(QFrame):
         self.next_option_button.setToolTip('下一个搜索项')
         self.next_option_button.setStyleSheet('QToolButton{border-image: url(' + Icon.next + ')}')
         # 是否区分大小写
-        check_box_style = 'QCheckBox:indicator{background:transparent;border:1px solid #000000;width:20;height:20}\
+        check_box_style = 'QCheckBox:indicator{background:transparent;border:1px solid #000000;width:18;height:18}\
                                    QCheckBox::indicator:unchecked{image:url(' + Icon.unchecked + ')}\
                                    QCheckBox::indicator:checked{image:url(' + Icon.checked + ')}'
         self.match_case_check_box = QCheckBox(self)
         self.match_case_check_box.setStyleSheet(check_box_style)
+        self.match_case_check_box.stateChanged.connect(self.match_case_check_box_state_changed)
         self.match_case_label = QLabel(self)
         self.match_case_label.setText('区分大小写')
+        # 大小写区分标志(默认不区分大小写)
+        self.match_case_flag = False
         # 匹配数量
         self.match_num_label = QLabel(self)
         # 关闭按钮
@@ -167,12 +170,20 @@ class ReplaceBox(QFrame):
             if self.replace_line_edit.text() != '':
                 self.replace_line_edit.addAction(self.clear_replace_edit_action, QLineEdit.TrailingPosition)
 
+    # 区分大小写check_box触发函数
+    def match_case_check_box_state_changed(self):
+        if self.match_case_check_box.checkState() == Qt.Checked:
+            self.match_case_flag = True
+        else:
+            self.match_case_flag = False
+        self.find_first_option()
+
     # QLineEdit控件中的查找当前匹配
     def find_first_option(self):
         text = self.search_line_edit.text()
         source_text = self.parentWidget().text()
-        self.search_thread.find(text, source_text)
-        flag = self.parentWidget().findFirst(text, False, False, False, False, True, 0, 0, True)
+        self.search_thread.find(text, source_text, self.match_case_flag)
+        flag = self.parentWidget().findFirst(text, False, self.match_case_flag, False, False, True, 0, 0, True)
         if flag is False:
             line, index = self.parentWidget().getCursorPosition()
             self.parentWidget().setCursorPosition(line, index)
@@ -185,14 +196,16 @@ class ReplaceBox(QFrame):
     # 查找上一个匹配(暂时不支持)
     def find_last_option(self):
         text = self.search_line_edit.text()
-        self.parentWidget().findFirst(text, False, False, False, True, False, -1, -1, True)
+        # self.parentWidget().findFirst(text, False, False, False, True, False, -1, -1, True)
+        self.parentWidget().findFirst(text, False, self.match_case_flag, False, True, False, -1, -1, True)
         self.parentWidget().findNext()
 
     # 查找下一个匹配
     def find_next_option(self):
         text = self.search_line_edit.text()
         # self.parentWidget().findNext()
-        self.parentWidget().findFirst(text, False, False, False, True, True, -1, -1, True)
+        # self.parentWidget().findFirst(text, False, False, False, True, True, -1, -1, True)
+        self.parentWidget().findFirst(text, False, self.match_case_flag, False, True, True, -1, -1, True)
 
     # 替换一个选项
     def replace_single(self):
@@ -202,7 +215,7 @@ class ReplaceBox(QFrame):
             self.find_next_option()
             text = self.search_line_edit.text()
             source_text = self.parentWidget().text()
-            self.search_thread.find(text, source_text)
+            self.search_thread.find(text, source_text, self.match_case_flag)
             if self.parentWidget().selectedText() == '':
                 self.replace_button.setEnabled(False)
                 self.replace_all_button.setEnabled(False)
@@ -257,7 +270,11 @@ class SearchThread(QThread):
             yield i, end
             i += len(word)
 
-    def find(self, word, source):
-        self._text = source
-        self._word = word
+    def find(self, word, source, case_sensitive):
+        if case_sensitive is False:
+            self._text = source.lower()
+            self._word = word.lower()
+        else:
+            self._text = source
+            self._word = word
         self.start()
