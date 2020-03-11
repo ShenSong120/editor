@@ -77,25 +77,73 @@ class MainWindow(QMainWindow):
         self.save_as_file_action = QAction(QIcon(Icon.save_as_file), '另存文件为(Shift+S)', self)
         self.save_as_file_action.setShortcut('ctrl+shift+s')
         self.save_as_file_action.triggered.connect(self.connect_save_as_file)
+        # 编辑操作动作
+        self.undo_action = QAction(QIcon(Icon.undo), '撤消上一次操作(Ctrl+Z)', self)
+        self.undo_action.triggered.connect(self.connect_undo)
+        self.redo_action = QAction(QIcon(Icon.redo), '恢复上一次操作(Ctrl+Y)', self)
+        self.redo_action.triggered.connect(self.connect_redo)
+        self.cut_action = QAction(QIcon(Icon.cut), '剪切(Ctrl+X)', self)
+        self.cut_action.triggered.connect(self.connect_cut)
+        self.copy_action = QAction(QIcon(Icon.copy), '复制(Ctrl+C)', self)
+        self.copy_action.triggered.connect(self.connect_copy)
+        self.paste_action = QAction(QIcon(Icon.paste), '粘贴(Ctrl+V)', self)
+        self.paste_action.triggered.connect(self.connect_paste)
+        self.delete_action = QAction(QIcon(Icon.delete), '删除(Backspace)', self)
+        self.delete_action.triggered.connect(self.connect_delete)
+        self.select_all_action = QAction(QIcon(Icon.select_all), '选中全部(Ctrl+A)', self)
+        self.select_all_action.triggered.connect(self.connect_select_all)
+        self.comment_action = QAction(QIcon(Icon.comment), '添加/去除-注释(Ctrl+/)', self)
+        self.comment_action.triggered.connect(self.connect_comment)
+        self.search_action = QAction(QIcon(Icon.search), '搜索(Ctrl+F)', self)
+        self.search_action.triggered.connect(self.connect_search)
+        self.replace_action = QAction(QIcon(Icon.replace), '替换(Ctrl+R)', self)
+        self.replace_action.triggered.connect(self.connect_replace)
+
         # 文件菜单栏
-        self.file_bar = self.menu_bar.addMenu('文件')
-        self.file_bar.addAction(self.new_action)
-        self.file_bar.addAction(self.open_folder_action)
-        self.file_bar.addAction(self.open_file_action)
-        self.file_bar.addAction(self.save_file_action)
-        self.file_bar.addAction(self.save_as_file_action)
+        self.file_menu_bar = self.menu_bar.addMenu('文件')
+        self.file_menu_bar.addAction(self.new_action)
+        self.file_menu_bar.addAction(self.open_folder_action)
+        self.file_menu_bar.addAction(self.open_file_action)
+        self.file_menu_bar.addAction(self.save_file_action)
+        self.file_menu_bar.addAction(self.save_as_file_action)
+        # 编辑菜单栏
+        self.edit_menu_bar = self.menu_bar.addMenu('编辑')
+        self.edit_menu_bar.addAction(self.undo_action)
+        self.edit_menu_bar.addAction(self.redo_action)
+        self.edit_menu_bar.addAction(self.cut_action)
+        self.edit_menu_bar.addAction(self.copy_action)
+        self.edit_menu_bar.addAction(self.paste_action)
+        self.edit_menu_bar.addAction(self.delete_action)
+        self.edit_menu_bar.addAction(self.select_all_action)
+        self.edit_menu_bar.addAction(self.comment_action)
+        self.edit_menu_bar.addAction(self.search_action)
+        self.edit_menu_bar.addAction(self.replace_action)
         # 帮助菜单栏
-        self.help_bar = self.menu_bar.addMenu('帮助')
-        self.help_action_menu = QAction('操作说明', self)
-        # self.help_action_menu.triggered.connect(self.connect_open_file)
-        self.help_bar.addAction(self.help_action_menu)
-        # 工具栏
-        self.tool_bar = self.addToolBar('tool_bar')
-        self.tool_bar.addAction(self.new_action)
-        self.tool_bar.addAction(self.open_folder_action)
-        self.tool_bar.addAction(self.open_file_action)
-        self.tool_bar.addAction(self.save_file_action)
-        self.tool_bar.addAction(self.save_as_file_action)
+        self.help_menu_bar = self.menu_bar.addMenu('帮助')
+        self.help_action = QAction('操作说明', self)
+        # self.help_action.triggered.connect(self.connect_open_file)
+        self.help_menu_bar.addAction(self.help_action)
+        # 文件工具栏
+        self.file_tool_bar = self.addToolBar('file_tool_bar')
+        self.file_tool_bar.setMaximumHeight(32)
+        self.file_tool_bar.addAction(self.new_action)
+        self.file_tool_bar.addAction(self.open_folder_action)
+        self.file_tool_bar.addAction(self.open_file_action)
+        self.file_tool_bar.addAction(self.save_file_action)
+        self.file_tool_bar.addAction(self.save_as_file_action)
+        # 编辑工具栏
+        self.edit_tool_bar = self.addToolBar('edit_tool_bar')
+        self.edit_tool_bar.setMaximumHeight(32)
+        self.edit_tool_bar.addAction(self.undo_action)
+        self.edit_tool_bar.addAction(self.redo_action)
+        self.edit_tool_bar.addAction(self.cut_action)
+        self.edit_tool_bar.addAction(self.copy_action)
+        self.edit_tool_bar.addAction(self.paste_action)
+        self.edit_tool_bar.addAction(self.delete_action)
+        self.edit_tool_bar.addAction(self.select_all_action)
+        self.edit_tool_bar.addAction(self.comment_action)
+        self.edit_tool_bar.addAction(self.search_action)
+        self.edit_tool_bar.addAction(self.replace_action)
         # 状态栏 & 状态栏显示
         self.status_bar = QStatusBar(self)
         self.status_bar.setObjectName('status_bar')
@@ -213,6 +261,37 @@ class MainWindow(QMainWindow):
             cursor_position = '[0:0]'
             self.get_signal_from_editor('file_path>' + file_path)
             self.get_signal_from_editor('cursor_position>' + cursor_position)
+
+    # 撤销上一次操作
+    def connect_undo(self):
+        print('撤销上一次操作')
+
+    def connect_redo(self):
+        print('恢复上一次操作')
+
+    def connect_cut(self):
+        print('剪切')
+
+    def connect_copy(self):
+        print('复制')
+
+    def connect_paste(self):
+        print('粘贴')
+
+    def connect_delete(self):
+        print('删除')
+
+    def connect_select_all(self):
+        print('全选')
+
+    def connect_comment(self):
+        print('注释')
+
+    def connect_search(self):
+        print('检索')
+
+    def connect_replace(self):
+        print('替换')
 
     # 窗口关闭事件
     def closeEvent(self, event):

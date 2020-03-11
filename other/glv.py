@@ -25,6 +25,16 @@ class Icon:
     clear_text = 'config/icon/clear_text.png'
     checked = 'config/icon/checked.png'
     unchecked = 'config/icon/unchecked.png'
+    undo = 'config/icon/undo.png'
+    redo = 'config/icon/redo.png'
+    cut = 'config/icon/cut.png'
+    copy = 'config/icon/copy.png'
+    paste = 'config/icon/paste.png'
+    delete = 'config/icon/delete.png'
+    select_all = 'config/icon/select_all.png'
+    comment = 'config/icon/comment.png'
+    search = 'config/icon/search.png'
+    replace = 'config/icon/replace.png'
 
 
 # 样式

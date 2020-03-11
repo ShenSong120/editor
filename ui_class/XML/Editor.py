@@ -210,7 +210,7 @@ class Editor(QsciScintilla):
         self.paste_action = QAction('粘贴(Ctrl+V)', self)
         self.paste_action.triggered.connect(self.paste_operate)
         # 删除
-        self.delete_action = QAction('删除', self)
+        self.delete_action = QAction('删除(Backspace)', self)
         self.delete_action.triggered.connect(self.delete_operate)
         if self.selectedText() == '':
             self.delete_action.setEnabled(False)
@@ -218,8 +218,18 @@ class Editor(QsciScintilla):
         self.select_all_action = QAction('选中全部(Ctrl+A)', self)
         self.select_all_action.triggered.connect(self.select_all_operate)
         # 添加/去除-注释
-        self.comment_action = QAction('添加/去除-注释(Ctrl+L)', self)
+        self.comment_action = QAction('添加/去除-注释(Ctrl+/)', self)
         self.comment_action.triggered.connect(self.comment_operate)
+        # 搜索
+        self.search_action = QAction('搜索(Ctrl+F)', self)
+        self.search_action.triggered.connect(self.search_operate)
+        if self.search_box.isHidden() is False:
+            self.search_action.setEnabled(False)
+        # 替换
+        self.replace_action = QAction('替换(Ctrl+R)', self)
+        self.replace_action.triggered.connect(self.replace_operate)
+        if self.replace_box.isHidden() is False:
+            self.replace_action.setEnabled(False)
         # 菜单添加action
         self.menu.addAction(self.undo_action)
         self.menu.addAction(self.redo_action)
@@ -229,6 +239,8 @@ class Editor(QsciScintilla):
         self.menu.addAction(self.delete_action)
         self.menu.addAction(self.select_all_action)
         self.menu.addAction(self.comment_action)
+        self.menu.addAction(self.search_action)
+        self.menu.addAction(self.replace_action)
         self.menu.exec(self.mapToGlobal(point))
 
     # 取消上次操作

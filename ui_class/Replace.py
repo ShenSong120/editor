@@ -87,6 +87,9 @@ class ReplaceBox(QFrame):
         # 搜索结果背景标记
         self.search_thread = SearchThread()
         self.search_thread.signal[str].connect(self.search_option_marker)
+        # 搜索开始位置
+        self.start_line = 0
+        self.start_index = 0
         # search布局
         self.search_layout = QHBoxLayout()
         self.search_layout.setContentsMargins(0, 0, 5, 0)
@@ -183,10 +186,10 @@ class ReplaceBox(QFrame):
         text = self.search_line_edit.text()
         source_text = self.parentWidget().text()
         self.search_thread.find(text, source_text, self.match_case_flag)
-        flag = self.parentWidget().findFirst(text, False, self.match_case_flag, False, False, True, -1, -1, True)
+        flag = self.parentWidget().findFirst(text, False, self.match_case_flag, False, False, True,
+                                             self.start_line, self.start_index, True)
         if flag is False:
-            line, index = self.parentWidget().getCursorPosition()
-            self.parentWidget().setCursorPosition(line, index)
+            self.parentWidget().setCursorPosition(self.start_line, self.start_index)
             self.replace_button.setEnabled(False)
             self.replace_all_button.setEnabled(False)
         else:
@@ -201,8 +204,12 @@ class ReplaceBox(QFrame):
 
     # 查找下一个匹配
     def find_next_option(self):
+        self.start_line, self.start_index = self.parentWidget().getCursorPosition()
         text = self.search_line_edit.text()
-        self.parentWidget().findFirst(text, False, self.match_case_flag, False, True, True, -1, -1, True)
+        flag = self.parentWidget().findFirst(text, False, self.match_case_flag, False, True, True, -1, -1, True)
+        if flag is True:
+            self.replace_button.setEnabled(True)
+            self.replace_all_button.setEnabled(True)
 
     # 替换一个选项
     def replace_single(self):
@@ -231,8 +238,7 @@ class ReplaceBox(QFrame):
     # 关闭操作
     def close_option(self):
         self.setHidden(True)
-        line, index = self.parentWidget().getCursorPosition()
-        self.parentWidget().setCursorPosition(line, index)
+        self.parentWidget().setCursorPosition(self.start_line, self.start_index)
         # 关闭搜索框后(清除搜索文本标记)
         self.search_option_marker('[]')
 
