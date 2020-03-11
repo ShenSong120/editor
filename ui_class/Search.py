@@ -62,7 +62,6 @@ class SearchBox(QFrame):
         self.general_layout = QHBoxLayout(self)
         self.general_layout.setContentsMargins(0, 0, 5, 0)
         self.general_layout.setSpacing(0)
-        self.general_layout.addSpacing(80)
         self.general_layout.addWidget(self.search_line_edit)
         self.general_layout.addStretch(1)
         self.general_layout.addWidget(self.last_option_button)

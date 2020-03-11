@@ -86,7 +86,6 @@ class ReplaceBox(QFrame):
         self.search_layout = QHBoxLayout()
         self.search_layout.setContentsMargins(0, 0, 5, 0)
         self.search_layout.setSpacing(0)
-        self.search_layout.addSpacing(80)
         self.search_layout.addWidget(self.search_line_edit)
         self.search_layout.addStretch(1)
         self.search_layout.addWidget(self.last_option_button)
@@ -104,7 +103,6 @@ class ReplaceBox(QFrame):
         self.replace_layout = QHBoxLayout()
         self.replace_layout.setContentsMargins(0, 0, 5, 0)
         self.replace_layout.setSpacing(0)
-        self.replace_layout.addSpacing(80)
         self.replace_layout.addWidget(self.replace_line_edit)
         self.replace_layout.addStretch(1)
         self.replace_layout.addWidget(self.replace_button)
@@ -147,7 +145,8 @@ class ReplaceBox(QFrame):
     # QLineEdit控件中的查找当前匹配
     def find_first_option(self):
         text = self.search_line_edit.text()
-        self.search_thread.find(text, self.parentWidget().text())
+        source_text = self.parentWidget().text()
+        self.search_thread.find(text, source_text)
         flag = self.parentWidget().findFirst(text, False, False, False, False, True, 0, 0, True)
         if flag is False:
             line, index = self.parentWidget().getCursorPosition()
@@ -167,12 +166,22 @@ class ReplaceBox(QFrame):
 
     # 替换一个选项
     def replace_single(self):
-        print('替换文本')
-        pass
+        replace_text = self.replace_line_edit.text()
+        if self.parentWidget().selectedText() != '':
+            self.parentWidget().replaceSelectedText(replace_text)
+            self.find_next_option()
+            text = self.search_line_edit.text()
+            source_text = self.parentWidget().text()
+            self.search_thread.find(text, source_text)
 
     # 替换所有选项
     def replace_all(self):
-        pass
+        text = self.search_line_edit.text()
+        replace_text = self.replace_line_edit.text()
+        found = self.parentWidget().findFirst(text, False, False, False, False, True, 0, 0, True)
+        while found:
+            self.parentWidget().replaceSelectedText(replace_text)
+            found = self.parentWidget().findNext()
 
     # 关闭操作
     def close_option(self):
