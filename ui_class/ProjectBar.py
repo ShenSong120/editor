@@ -16,7 +16,7 @@ class ProjectBar(QWidget):
     def __init__(self, parent, path):
         super(ProjectBar, self).__init__(parent)
         # 设置工程栏背景颜色
-        self.setStyleSheet('background-color: #F0F0F0;')
+        self.setStyleSheet('background-color: #F0F0F0; font-family:Arial')
         self.parent = parent
         self.path = path
         # 文件树状态标志(初始为None)
@@ -53,6 +53,7 @@ class ProjectBar(QWidget):
         # self.tree.doubleClicked.connect(lambda : self.operation_file(None))
         # 工程栏路径信息展示
         self.info_label = QLineEdit(self)
+        self.info_label.setStyleSheet('height:24px')
         self.info_label.setReadOnly(True)
         self.info_label.setText(self.path)
         # 总体布局

@@ -39,8 +39,7 @@ class Icon:
 
 # 样式
 class BeautifyStyle:
-    # font_family = 'font-family: Times New Roman;'
-    font_family = 'font-family: Consolas;'
+    font_family = 'font-family: Times New Roman;'
     font_size = 'font-size: 13pt;'
     file_dialog_qss = 'QFileDialog {font-family: Times New Roman; background-color: beige;}'
     label_qss = "QLabel{border: 1px solid #7A7A7A;}"

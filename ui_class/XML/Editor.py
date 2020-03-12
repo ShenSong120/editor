@@ -28,10 +28,8 @@ class Editor(QsciScintilla):
         # 屏幕显示的代码行数
         self.lines_on_screen = 0
         # 设置字体
-        self.font = QFont('Consolas', 13, QFont.Bold)
-        self.setFont(self.font)
+        self.setStyleSheet('font-family:Consolas')
         self.setUtf8(True)
-        self.setMarginsFont(QFont('Arial ', 13))
         self.setMarginWidth(0, 20)
         # 设置行号
         self.setMarginLineNumbers(0, True)
@@ -93,6 +91,7 @@ class Editor(QsciScintilla):
         # 光标移动事件
         self.cursorPositionChanged.connect(self.cursor_move)
         '''定义语言为xml语言'''
+        self.font = QFont('Consolas', 13, QFont.Bold)
         self.lexer = QsciLexerXML(self)
         self.lexer.setFont(self.font)
         # 设置(自定义颜色)
