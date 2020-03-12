@@ -99,6 +99,11 @@ class MainWindow(QMainWindow):
         self.search_action.triggered.connect(self.connect_search)
         self.replace_action = QAction(QIcon(Icon.replace), '替换(Ctrl+R)', self)
         self.replace_action.triggered.connect(self.connect_replace)
+        # 视图动作
+        self.mini_map_switch_action = QAction('小地图', self)
+        self.mini_map_switch_action.triggered.connect(self.connect_mini_map_switch)
+        self.structure_show_switch_action = QAction('结构', self)
+        self.structure_show_switch_action.triggered.connect(self.connect_structure_show)
         # 非使能编辑操作动作
         self.set_edit_tool_bar_enable(status=False)
         # 文件菜单栏
@@ -120,10 +125,14 @@ class MainWindow(QMainWindow):
         self.edit_menu_bar.addAction(self.comment_action)
         self.edit_menu_bar.addAction(self.search_action)
         self.edit_menu_bar.addAction(self.replace_action)
+        # 视图菜单栏
+        self.view_menu_bar = self.menu_bar.addMenu('视图')
+        self.view_menu_bar.addAction(self.mini_map_switch_action)
+        self.view_menu_bar.addAction(self.structure_show_switch_action)
         # 帮助菜单栏
         self.help_menu_bar = self.menu_bar.addMenu('帮助')
         self.help_action = QAction('操作说明', self)
-        # self.help_action.triggered.connect(self.connect_open_file)
+        self.help_action.triggered.connect(self.connect_help)
         self.help_menu_bar.addAction(self.help_action)
         # 文件工具栏
         self.file_tool_bar = self.addToolBar('file_tool_bar')
@@ -146,6 +155,11 @@ class MainWindow(QMainWindow):
         self.edit_tool_bar.addAction(self.comment_action)
         self.edit_tool_bar.addAction(self.search_action)
         self.edit_tool_bar.addAction(self.replace_action)
+        # 视图工具栏
+        self.view_tool_bar = self.addToolBar('view_tool_bar')
+        self.view_tool_bar.setMaximumHeight(32)
+        self.view_tool_bar.addAction(self.mini_map_switch_action)
+        self.view_tool_bar.addAction(self.structure_show_switch_action)
         # 状态栏 & 状态栏显示
         self.status_bar = QStatusBar(self)
         self.status_bar.setObjectName('status_bar')
@@ -333,6 +347,20 @@ class MainWindow(QMainWindow):
 
     def connect_replace(self):
         print('替换')
+
+    def connect_help(self):
+        pass
+
+    def connect_mini_map_switch(self):
+        editor = self.editor_widget.currentWidget()
+        if editor is not None:
+            if editor.mini_map.isHidden():
+                editor.mini_map.setHidden(False)
+            else:
+                editor.mini_map.setHidden(True)
+
+    def connect_structure_show(self):
+        pass
 
     # 窗口关闭事件
     def closeEvent(self, event):
