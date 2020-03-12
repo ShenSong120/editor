@@ -51,6 +51,20 @@ class FileStatus:
     not_save_status = '未保存'
 
 
+# 编辑器动作
+class EditorAction:
+    undo = 'undo'
+    redo = 'redo'
+    cut = 'cut'
+    copy = 'copy'
+    paste = 'paste'
+    delete = 'delete'
+    select_all = 'select_all'
+    comment = 'comment'
+    search = 'search'
+    replace = 'replace'
+
+
 # 文件格式统一
 class MergePath:
     merged_path = None

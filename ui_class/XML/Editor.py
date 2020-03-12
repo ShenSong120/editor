@@ -1,11 +1,12 @@
 import os
 import re
+import json
 from PyQt5.QtCore import *
 from PyQt5.Qsci import *
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from other.CaseConfigParser import CaseConfigParser
-from other.glv import Icon, Param, FileStatus, MergePath
+from other.glv import Icon, Param, FileStatus, MergePath, EditorAction
 from ui_class.Search import SearchBox
 from ui_class.Replace import ReplaceBox
 
@@ -392,6 +393,49 @@ class Editor(QsciScintilla):
         self.signal.emit('cursor_position>' + cursor_position)
         # 文件状态更新
         self.file_status_update()
+        # 更新工具栏动作使能状态
+        self.judge_action_enable()
+
+    # 判断动作是否使能(并发送信号给窗口动作)
+    def judge_action_enable(self):
+        # 动作使能状态
+        enable_status = 'true'
+        disable_status = 'false'
+        # 将动作状态装入字典传出去(paste/select_all/comment始终有效)
+        action_enable_status_dict = {EditorAction.paste: enable_status,
+                                     EditorAction.select_all: enable_status,
+                                     EditorAction.comment: enable_status}
+        if self.isUndoAvailable() is False:
+            action_enable_status_dict[EditorAction.undo] = disable_status
+        else:
+            action_enable_status_dict[EditorAction.undo] = enable_status
+        if self.isRedoAvailable() is False:
+            action_enable_status_dict[EditorAction.redo] = disable_status
+        else:
+            action_enable_status_dict[EditorAction.redo] = enable_status
+        if self.selectedText() == '':
+            action_enable_status_dict[EditorAction.cut] = disable_status
+        else:
+            action_enable_status_dict[EditorAction.cut] = enable_status
+        if self.selectedText() == '':
+            action_enable_status_dict[EditorAction.copy] = disable_status
+        else:
+            action_enable_status_dict[EditorAction.copy] = enable_status
+        if self.selectedText() == '':
+            action_enable_status_dict[EditorAction.delete] = disable_status
+        else:
+            action_enable_status_dict[EditorAction.delete] = enable_status
+        if self.search_box.isHidden() is False:
+            action_enable_status_dict[EditorAction.search] = disable_status
+        else:
+            action_enable_status_dict[EditorAction.search] = enable_status
+        if self.replace_box.isHidden() is False:
+            action_enable_status_dict[EditorAction.replace] = disable_status
+        else:
+            action_enable_status_dict[EditorAction.replace] = enable_status
+        # 将字典转为字符串发送到窗口工具栏(工具栏接收信号更新动作状态)
+        action_enable_status_dict_str = json.dumps(action_enable_status_dict)
+        self.signal.emit('action>' + action_enable_status_dict_str)
 
     # 切换注释
     def toggle_comment(self):

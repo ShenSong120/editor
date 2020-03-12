@@ -1,10 +1,11 @@
 # coding:utf-8
 import os
 import sys
+import json
 from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
-from other.glv import Icon, Param, MergePath, BeautifyStyle, FileStatus
+from other.glv import Icon, Param, MergePath, BeautifyStyle, FileStatus, EditorAction
 from ui_class.ProjectBar import ProjectBar
 from ui_class.EditorTab import EditorTab
 from ui_class.New import New
@@ -98,7 +99,6 @@ class MainWindow(QMainWindow):
         self.search_action.triggered.connect(self.connect_search)
         self.replace_action = QAction(QIcon(Icon.replace), '替换(Ctrl+R)', self)
         self.replace_action.triggered.connect(self.connect_replace)
-
         # 文件菜单栏
         self.file_menu_bar = self.menu_bar.addMenu('文件')
         self.file_menu_bar.addAction(self.new_action)
@@ -184,6 +184,9 @@ class MainWindow(QMainWindow):
         elif flag == 'dump_in_function':
             file_path = signal_str.split('>')[1]
             self.editor_widget.open_edit_tab(file_path)
+        # 更新工具栏动作状态
+        elif flag == 'action':
+            self.update_tool_bar_enable_status(signal_str.split('>')[1])
         else:
             pass
 
@@ -211,6 +214,26 @@ class MainWindow(QMainWindow):
             if path in self.editor_widget.file_list:
                 index = self.editor_widget.file_list.index(path)
                 self.close_tab(index)
+
+    # 更新工具栏动作状态
+    def update_tool_bar_enable_status(self, signal_str):
+        edit_tool_bar_action_enable_status_dict = json.loads(signal_str)
+        enable_status, disable_status = 'true', 'false'
+        action_dict = {EditorAction.undo: self.undo_action,
+                       EditorAction.redo: self.redo_action,
+                       EditorAction.cut: self.cut_action,
+                       EditorAction.copy: self.copy_action,
+                       EditorAction.paste: self.paste_action,
+                       EditorAction.delete: self.delete_action,
+                       EditorAction.select_all: self.select_all_action,
+                       EditorAction.comment: self.comment_action,
+                       EditorAction.search: self.search_action,
+                       EditorAction.replace: self.replace_action}
+        for action in action_dict.keys():
+            if edit_tool_bar_action_enable_status_dict[action] == enable_status:
+                action_dict[action].setEnabled(True)
+            elif edit_tool_bar_action_enable_status_dict[action] == disable_status:
+                action_dict[action].setEnabled(False)
 
     # 新建(可以选择文件/文件夹)
     def connect_new(self):
