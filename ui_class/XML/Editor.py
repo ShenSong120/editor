@@ -29,7 +29,7 @@ class Editor(QsciScintilla):
         # 屏幕显示的代码行数
         self.lines_on_screen = 0
         # 设置字体
-        self.setStyleSheet('font-family:Consolas')
+        self.setStyleSheet('font-family:Consolas; border:1px solid transparent;')
         self.setUtf8(True)
         self.setMarginWidth(0, 20)
         # 设置行号

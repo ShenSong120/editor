@@ -40,9 +40,9 @@ class ReplaceBox(QFrame):
         self.next_option_button.setToolTip('下一个搜索项')
         self.next_option_button.setStyleSheet('QToolButton{border-image: url(' + Icon.next + ')}')
         # 是否区分大小写
-        check_box_style = 'QCheckBox:indicator{background:transparent;border:1px solid #000000;width:18;height:18}\
-                                   QCheckBox::indicator:unchecked{image:url(' + Icon.unchecked + ')}\
-                                   QCheckBox::indicator:checked{image:url(' + Icon.checked + ')}'
+        check_box_style = 'QCheckBox::indicator{background:transparent;border:1px solid #000000;width:18;height:18}\
+                           QCheckBox::indicator:unchecked{image:url(' + Icon.unchecked + ')}\
+                           QCheckBox::indicator:checked{image:url(' + Icon.checked + ')}'
         self.match_case_check_box = QCheckBox(self)
         self.match_case_check_box.setStyleSheet(check_box_style)
         self.match_case_check_box.stateChanged.connect(self.match_case_check_box_state_changed)
