@@ -99,6 +99,8 @@ class MainWindow(QMainWindow):
         self.search_action.triggered.connect(self.connect_search)
         self.replace_action = QAction(QIcon(Icon.replace), '替换(Ctrl+R)', self)
         self.replace_action.triggered.connect(self.connect_replace)
+        # 非使能编辑操作动作
+        self.set_edit_tool_bar_enable(status=False)
         # 文件菜单栏
         self.file_menu_bar = self.menu_bar.addMenu('文件')
         self.file_menu_bar.addAction(self.new_action)
@@ -164,6 +166,19 @@ class MainWindow(QMainWindow):
         self.status_bar.addPermanentWidget(self.file_status_label, stretch=1)
         self.status_bar.addPermanentWidget(self.cursor_label, stretch=7)
 
+    # 设置编辑器动作是否使能(默认不使能)
+    def set_edit_tool_bar_enable(self, status=False):
+        self.undo_action.setEnabled(status)
+        self.redo_action.setEnabled(status)
+        self.cut_action.setEnabled(status)
+        self.copy_action.setEnabled(status)
+        self.paste_action.setEnabled(status)
+        self.delete_action.setEnabled(status)
+        self.select_all_action.setEnabled(status)
+        self.comment_action.setEnabled(status)
+        self.search_action.setEnabled(status)
+        self.replace_action.setEnabled(status)
+
     # 获取编辑器文本中发出的信号
     def get_signal_from_editor(self, signal_str):
         flag = signal_str.split('>')[0]
@@ -187,6 +202,9 @@ class MainWindow(QMainWindow):
         # 更新工具栏动作状态
         elif flag == 'action':
             self.update_tool_bar_enable_status(signal_str.split('>')[1])
+        # 关闭所有子tab信号
+        elif flag == 'close_all_tab':
+            self.set_edit_tool_bar_enable(status=False)
         else:
             pass
 

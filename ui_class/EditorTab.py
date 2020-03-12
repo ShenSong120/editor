@@ -126,6 +126,12 @@ class EditorTab(QTabWidget):
 
     # 切换tab事件
     def switch_tab(self, index):
+        # 更新工具栏动作状态
+        editor = self.currentWidget()
+        if editor is not None:
+            editor.judge_action_enable()
+        else:
+            self.signal.emit('close_all_tab>')
         file_path = self.file_list[index]
         self.signal.emit('file_path>' + file_path)
         self.signal.emit('file_status>')

@@ -48,6 +48,10 @@ class Editor(QWidget):
     def text(self):
         return self.editor.text()
 
+    # 更新动作使能(并发送信号给窗口动作)
+    def judge_action_enable(self):
+        self.editor.judge_action_enable()
+
     # editor行数更改事件
     def editor_lines_changed(self):
         self.editor_vertical_scroll_bar_value_changed(self.editor.verticalScrollBar().value())
