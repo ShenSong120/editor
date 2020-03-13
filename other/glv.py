@@ -35,6 +35,8 @@ class Icon:
     comment = 'config/icon/comment.png'
     search = 'config/icon/search.png'
     replace = 'config/icon/replace.png'
+    root_open = 'config/icon/root_open.png'
+    root_close = 'config/icon/root_close.png'
 
 
 # 样式

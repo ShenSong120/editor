@@ -366,7 +366,10 @@ class MainWindow(QMainWindow):
                 editor.mini_map.setHidden(True)
 
     def connect_structure_show(self):
-        pass
+        if self.structure_tree.isHidden():
+            self.structure_tree.setHidden(False)
+        else:
+            self.structure_tree.setHidden(True)
 
     # 窗口关闭事件
     def closeEvent(self, event):
