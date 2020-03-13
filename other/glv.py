@@ -37,6 +37,7 @@ class Icon:
     replace = 'config/icon/replace.png'
     root_open = 'config/icon/root_open.png'
     root_close = 'config/icon/root_close.png'
+    xml_tag = 'config/icon/xml_tag.png'
 
 
 # 样式
