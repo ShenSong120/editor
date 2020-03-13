@@ -35,6 +35,7 @@ class Editor(QWidget):
 
     # 信号传递
     def get_signal_from_editor(self, signal_str):
+        # 编辑器和mini_map宽度改变(需要重新调整所有mini_map)
         if signal_str.split('>')[0] == 'editor_width_changed':
             self.mini_map.change_slider_width()
         # 光标移动事件

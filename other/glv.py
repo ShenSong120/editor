@@ -65,6 +65,11 @@ class EditorAction:
     replace = 'replace'
 
 
+# 窗口控件的尺寸
+class WindowSize:
+    mini_map_width = 100
+
+
 # 文件格式统一
 class MergePath:
     merged_path = None
