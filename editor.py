@@ -9,6 +9,7 @@ from other.glv import Icon, Param, MergePath, BeautifyStyle, FileStatus, EditorA
 from ui_class.ProjectBar import ProjectBar
 from ui_class.EditorTab import EditorTab
 from ui_class.New import New
+from ui_class.TreeStructure import TreeStructure
 from other.CaseConfigParser import CaseConfigParser
 
 '''
@@ -39,6 +40,8 @@ class MainWindow(QMainWindow):
         # 编辑器设置
         self.editor_widget = EditorTab(self.central_widget)
         self.editor_widget.signal[str].connect(self.get_signal_from_editor)
+        # 结构树
+        self.structure_tree = TreeStructure(self.central_widget)
         # 全局竖直布局
         self.general_v_layout = QVBoxLayout(self.central_widget)
         self.general_v_layout.setContentsMargins(1, 0, 0, 0)
@@ -47,11 +50,14 @@ class MainWindow(QMainWindow):
         self.splitter_h_general.setHandleWidth(0)
         self.splitter_h_general.addWidget(self.project_bar)
         self.splitter_h_general.addWidget(self.editor_widget)
+
+        self.splitter_h_general.addWidget(self.structure_tree)
+
         # 按比例分割
         # self.splitter_h_general.setStretchFactor(0, 1)
         # self.splitter_h_general.setStretchFactor(1, 4)
         # 按尺寸分割
-        self.splitter_h_general.setSizes([200, 800])
+        self.splitter_h_general.setSizes([200, 800, 100])
         self.general_v_layout.addWidget(self.splitter_h_general)
         self.setLayout(self.general_v_layout)
         # 菜单栏
