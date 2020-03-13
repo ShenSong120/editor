@@ -1,11 +1,12 @@
-<?xml version="1.0" encoding="utf-8" ?>
-<case desc="车辆设置">
+<?xml version="1.0" encoding="UTF-8"?>
+<case desc="车辆设置" >
 	<action name="click">
 		<param name="nodeProp">
 			<map>
 				<entry key="id">com.android.systemui:id/img_setting_icon</entry>
 			</map>
 		</param>
+		<param name="sleep_ms">1000</param>
 	</action>
 	<!--车辆按钮-->
 	<action name="click">
@@ -16,6 +17,7 @@
 		</param>
 		<param name="sleep_ms">1000</param>
 	</action>
+	
 	<!--声音按钮-->
 	<action name="click">
 		<param name="nodeProp">
@@ -25,7 +27,7 @@
 		</param>
 		<param name="sleep_ms">1000</param>
 	</action>
-	<!--系统按钮-->
+	
 	<action name="seekBar">
 		<param name="nodeProp">
 			<map>
@@ -33,6 +35,101 @@
 			</map>
 		</param>
 		<param name="percent">random</param>
-		<param name="nodeProp">100</param>
+		<param name="sleep_ms">100</param>
 	</action>
+	
+	<action name="seekBar">
+		<param name="nodeProp">
+			<map>
+				<entry key="xpath">desc:媒体;id:com.chehejia.car.carsettings:id/seek_progress</entry>
+			</map>
+		</param>
+		<param name="percent">random</param>
+		<param name="sleep_ms">100</param>
+	</action>
+	<!--显示按钮-->
+	<action name="click">
+		<param name="nodeProp">
+			<map>
+				<entry key="xpath">desc:显示;id:com.chehejia.car.carsettings:id/setting_item_title</entry>
+			</map>
+		</param>
+		<param name="sleep_ms">1000</param>
+	</action>
+	
+	<action name="click">
+		<param name="nodeProp">
+			<map>
+				<entry key="id">com.chehejia.car.carsettings:id/cont_btn</entry>
+			</map>
+		</param>
+		<param name="sleep_ms">1000</param>
+	</action>
+	
+	<action name="seekBar">
+		<param name="nodeProp">
+			<map>
+				<entry key="id">com.chehejia.car.carsettings:id/seek_progress</entry>
+			</map>
+		</param>
+		<param name="percent">random</param>
+		<param name="sleep_ms">100</param>
+	</action>
+	
+		<!--蓝牙按钮-->
+	<action name="click">
+		<param name="nodeProp">
+			<map>
+				<entry key="xpath">desc:蓝牙;id:com.chehejia.car.carsettings:id/setting_item_title</entry>
+			</map>
+		</param>
+		<param name="sleep_ms">1000</param>
+	</action>
+	
+			<!--通用按钮-->
+	<action name="click">
+		<param name="nodeProp">
+			<map>
+				<entry key="xpath">desc:通用;id:com.chehejia.car.carsettings:id/setting_item_title</entry>
+			</map>
+		</param>
+		<param name="sleep_ms">1000</param>
+	</action>
+	
+	<action name="click">
+		<param name="nodeProp">
+			<map>
+				<entry key="text">24小时</entry>
+			</map>
+		</param>
+		<param name="sleep_ms">1000</param>
+	</action>
+	<action id="lin1" name="sendLin">
+		<param name="header">35</param>
+		<param name="message">00 00 00 01 00 00 00 00</param>
+		<param name="duration_s">1</param>
+		<param name="interval_ms">100</param>
+		<!--<param name="framecount"/>-->
+		<param name="sleep_ms">1000</param>
+	</action>
+	<action id="sendContinuousLin" name="sendContinuousLin">
+		<param name="header1">19</param>
+		<param name="interval_ms1">100</param>
+		<param name="message1">00 00 00 00 00 00 00 00</param>
+		<param name="framecount1">5</param>
+		<param name="message2">00 04 00 00 00 00 00 00</param>
+		<param name="sleep_ms">2000</param>
+	</action>
+
+	<finally>
+		<action name="click">
+			<param name="nodeProp">
+				<map>
+					<entry key="id">com.android.systemui:id/img_setting_icon</entry>
+				</map>
+			</param>
+			<param name="capture">false</param>
+			<param name="sleep_ms">100</param>
+		</action>
+	</finally>
 </case>
