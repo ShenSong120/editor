@@ -1,6 +1,6 @@
 from PyQt5.QtWidgets import QGraphicsOpacityEffect, QFrame
 from PyQt5.QtCore import QPropertyAnimation, Qt
-from PyQt5.Qsci import QsciScintilla
+from PyQt5.Qsci import *
 
 
 class MiniMap(QsciScintilla):
@@ -13,8 +13,11 @@ class MiniMap(QsciScintilla):
         self.editor = editor
         # 设置缩放(比原始大小缩小10个档)
         self.zoomIn(-10)
-        # 词法分析器
-        self.lexer = self.editor.lexer
+        # 词法分析器(根据父类的lexer类型确认导入哪个词法分析器)
+        # lexer_type = type(self.editor.lexer).split('.')[-1]
+        lexer_type = str(type(self.editor.lexer))
+        if 'QsciLexerXML' in lexer_type:
+            self.lexer = QsciLexerXML(self)
         self.setLexer(self.lexer)
         # 缩略图文本
         self.setText(self.editor.text())

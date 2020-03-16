@@ -39,6 +39,8 @@ class Icon:
     root_close = 'config/icon/root_close.png'
     xml_tag = 'config/icon/xml_tag.png'
     cursor = 'config/icon/cursor.png'
+    mini_map = 'config/icon/mini_map.png'
+    structure = 'config/icon/structure.png'
 
 
 # 样式

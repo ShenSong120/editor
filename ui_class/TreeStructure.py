@@ -46,21 +46,24 @@ class TreeStructure(QWidget):
 
     # 更新树形结构视图
     def update_structure(self, xml_file):
-        self.tree.clear()
         self.xml_file = xml_file
         # 重命名根节点名字(当前文件名)
         root_name = 'None' if self.xml_file == 'None' else os.path.split(self.xml_file)[1]
-        self.root = QTreeWidgetItem(self.tree)
         self.root.setText(0, root_name)
-        self.tree.addTopLevelItem(self.root)
         try:
             # 根据xml文本获取子节点
             tree = ET.ElementTree(file=self.xml_file)
-            root = tree.getroot()
+            self.tree.clear()
+            # 设置根节点
+            self.root = QTreeWidgetItem(self.tree)
+            self.root.setText(0, root_name)
+            self.tree.addTopLevelItem(self.root)
+            # 添加xml文件的根节点
+            xml_root = tree.getroot()
             # 添加xml根标签(文件名节点之下)
-            parent = self.add_item(self.root, root)
+            parent = self.add_item(self.root, xml_root)
             # 通过遍历添加子节点
-            for child_of_1 in root:
+            for child_of_1 in xml_root:
                 child_of_1_as_root = self.add_item(parent, child_of_1)
                 for child_of_2 in child_of_1:
                     child_of_2_as_root = self.add_item(child_of_1_as_root, child_of_2)
@@ -72,6 +75,7 @@ class TreeStructure(QWidget):
                                 child_of_5_as_root = self.add_item(child_of_4_as_root, child_of_5)
                                 for child_of_6 in child_of_5:
                                     self.add_item(child_of_5_as_root, child_of_6)
+            self.tree.expandAll()
         except ET.ParseError:
             pass
         except FileNotFoundError:

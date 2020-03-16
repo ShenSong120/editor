@@ -57,7 +57,7 @@ class MainWindow(QMainWindow):
         # self.splitter_h_general.setStretchFactor(0, 1)
         # self.splitter_h_general.setStretchFactor(1, 4)
         # 按尺寸分割
-        self.splitter_h_general.setSizes([200, 800, 100])
+        self.splitter_h_general.setSizes([150, 800, 150])
         self.general_v_layout.addWidget(self.splitter_h_general)
         self.setLayout(self.general_v_layout)
         # 菜单栏
@@ -106,9 +106,9 @@ class MainWindow(QMainWindow):
         self.replace_action = QAction(QIcon(Icon.replace), '替换(Ctrl+R)', self)
         self.replace_action.triggered.connect(self.connect_replace)
         # 视图动作
-        self.mini_map_switch_action = QAction('小地图', self)
+        self.mini_map_switch_action = QAction(QIcon(Icon.mini_map), '小地图', self)
         self.mini_map_switch_action.triggered.connect(self.connect_mini_map_switch)
-        self.structure_show_switch_action = QAction('结构', self)
+        self.structure_show_switch_action = QAction(QIcon(Icon.structure), '结构', self)
         self.structure_show_switch_action.triggered.connect(self.connect_structure_show)
         # 非使能编辑操作动作
         self.set_edit_tool_bar_enable(status=False)
