@@ -38,6 +38,7 @@ class Icon:
     root_open = 'config/icon/root_open.png'
     root_close = 'config/icon/root_close.png'
     xml_tag = 'config/icon/xml_tag.png'
+    cursor = 'config/icon/cursor.png'
 
 
 # 样式
@@ -46,12 +47,6 @@ class BeautifyStyle:
     font_size = 'font-size: 13pt;'
     file_dialog_qss = 'QFileDialog {font-family: Times New Roman; background-color: beige;}'
     label_qss = "QLabel{border: 1px solid #7A7A7A;}"
-
-
-# 文件状态
-class FileStatus:
-    save_status = '已保存'
-    not_save_status = '未保存'
 
 
 # 编辑器动作

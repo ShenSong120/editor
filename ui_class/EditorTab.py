@@ -1,7 +1,7 @@
 import os
 from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
-from other.glv import Icon, FileStatus
+from other.glv import Icon
 # from ui_class.XML.Editor import Editor
 from ui_class.XML.EditorWithMiniMap import Editor
 
@@ -16,8 +16,6 @@ class EditorTab(QTabWidget):
         self.parent = parent
         # 打开的文件列表(保存文件列表)
         self.file_list = []
-        # 文件状态列表
-        self.file_status_list = []
         # 设置tab可以关闭
         self.setTabsClosable(True)
         # 样式设置
@@ -48,7 +46,6 @@ class EditorTab(QTabWidget):
             self.setCurrentIndex(index)
         else:
             self.file_list.append(file)
-            self.file_status_list.append(FileStatus.save_status)
             tab_name = os.path.split(file)[1]
             editor = Editor(self, file=file)
             editor.signal[str].connect(self.get_editor_signal)
@@ -67,7 +64,6 @@ class EditorTab(QTabWidget):
                 self.setCurrentIndex(index)
             else:
                 self.file_list.append(file)
-                self.file_status_list.append(FileStatus.save_status)
                 tab_name = os.path.split(file)[1]
                 editor = Editor(self, file=file)
                 editor.signal[str].connect(self.get_editor_signal)
@@ -86,8 +82,6 @@ class EditorTab(QTabWidget):
             index = self.file_list.index(file)
             editor = self.widget(index)
             file = file
-        self.file_status_list[index] = FileStatus.save_status
-        self.signal.emit('file_status>')
         if os.path.exists(file):
             with open(file, 'w+', encoding='utf-8') as f:
                 text = editor.text()
@@ -109,14 +103,8 @@ class EditorTab(QTabWidget):
     # 获取编辑器信号
     def get_editor_signal(self, signal_str):
         flag = signal_str.split('>')[0]
-        # 文件保存状态
-        if flag == 'file_status':
-            file_status = signal_str.split('>')[1]
-            index = self.currentIndex()
-            self.file_status_list[index] = file_status
-            self.signal.emit(signal_str)
         # 光标信号
-        elif flag == 'cursor_position':
+        if flag == 'cursor_position':
             self.signal.emit(signal_str)
         # 函数跳转
         elif flag == 'dump_in_function':
@@ -140,35 +128,13 @@ class EditorTab(QTabWidget):
             self.signal.emit('close_all_tab>')
         file_path = self.file_list[index]
         self.signal.emit('file_path>' + file_path)
-        self.signal.emit('file_status>')
         self.signal.emit('update_structure>' + file_path)
 
     # 关闭标签页(需要判断)
     def close_tab(self, index):
-        save_file_flag = False
-        file_name = self.file_list[index]
-        if self.file_status_list[index] == FileStatus.not_save_status:
-            reply = QMessageBox.question(self, '文件保存', '%s未保存'%file_name+'\n是否保存此文件?',
-                                         QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel, QMessageBox.Yes)
-            if reply == QMessageBox.Yes:
-                save_status = self.save_edit_tab(file_name)
-                if save_status is True:
-                    self.removeTab(index)
-                    self.file_list.pop(index)
-                    self.file_status_list.pop(index)
-            elif reply == QMessageBox.No:
-                self.removeTab(index)
-                self.file_list.pop(index)
-                self.file_status_list.pop(index)
-            elif reply == QMessageBox.Cancel:
-                pass
-            else:
-                pass
-        else:
-            self.removeTab(index)
-            self.file_list.pop(index)
-            self.file_status_list.pop(index)
-            # 删除完tab后需要修改状态栏
+        self.removeTab(index)
+        self.file_list.pop(index)
+        # 删除完tab后需要修改状态栏
         tab_counts = self.count()
         if tab_counts > 0:
             new_index = self.currentIndex()

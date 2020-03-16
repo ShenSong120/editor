@@ -6,7 +6,7 @@ from PyQt5.Qsci import *
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from other.CaseConfigParser import CaseConfigParser
-from other.glv import Icon, Param, FileStatus, MergePath, EditorAction
+from other.glv import Icon, Param, MergePath, EditorAction
 from ui_class.Search import SearchBox
 from ui_class.Replace import ReplaceBox
 
@@ -333,15 +333,6 @@ class Editor(QsciScintilla):
         self.replace_box.search_line_edit.setFocus()
         self.replace_box.find_first_option()
 
-    # 文件状态更新
-    def file_status_update(self):
-        with open(self.file, 'r', encoding='utf-8') as f:
-            text = f.read()
-        if self.text() == text:
-            self.signal.emit('file_status>' + FileStatus.save_status)
-        else:
-            self.signal.emit('file_status>' + FileStatus.not_save_status)
-
     # 获取选中的item
     def get_selected_item(self, id, item):
         line, index = self.getCursorPosition()
@@ -391,8 +382,6 @@ class Editor(QsciScintilla):
         # 获取当前光标
         cursor_position = '[' + str(line+1) + ':' + str(index) + ']'
         self.signal.emit('cursor_position>' + cursor_position)
-        # 文件状态更新
-        self.file_status_update()
         # 更新工具栏动作使能状态
         self.judge_action_enable()
         # 自动保存代码
