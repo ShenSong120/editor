@@ -225,6 +225,11 @@ class MainWindow(QMainWindow):
         # 关闭所有子tab信号
         elif flag == 'close_all_tab':
             self.set_edit_tool_bar_enable(status=False)
+        # 更新update_structure
+        elif flag == 'update_structure':
+            index = self.editor_widget.currentIndex()
+            self.structure_tree.xml_file = self.editor_widget.file_list[index]
+            self.structure_tree.update_structure()
         else:
             pass
 
@@ -297,7 +302,9 @@ class MainWindow(QMainWindow):
 
     # 保存文件
     def connect_save_file(self):
-        self.editor_widget.save_edit_tab()
+        pass
+        # 改为自动保存
+        # self.editor_widget.save_edit_tab()
 
     # 另存文件为
     def connect_save_as_file(self):

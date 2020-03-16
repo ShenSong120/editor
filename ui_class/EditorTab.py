@@ -121,6 +121,11 @@ class EditorTab(QTabWidget):
         # 函数跳转
         elif flag == 'dump_in_function':
             self.signal.emit(signal_str)
+        # 保存文件
+        elif flag == 'save_file':
+            self.save_edit_tab()
+            # 更新structure-tree
+            self.signal.emit('update_structure>')
         else:
             self.signal.emit(signal_str)
 
