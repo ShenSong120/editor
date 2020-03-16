@@ -45,10 +45,11 @@ class TreeStructure(QWidget):
         self.setLayout(self.general_layout)
 
     # 更新树形结构视图
-    def update_structure(self):
+    def update_structure(self, xml_file):
         self.tree.clear()
+        self.xml_file = xml_file
         # 重命名根节点名字(当前文件名)
-        root_name = os.path.split(self.xml_file)[1] if self.xml_file else 'None'
+        root_name = 'None' if self.xml_file == 'None' else os.path.split(self.xml_file)[1]
         self.root = QTreeWidgetItem(self.tree)
         self.root.setText(0, root_name)
         self.tree.addTopLevelItem(self.root)
@@ -72,6 +73,8 @@ class TreeStructure(QWidget):
                                 for child_of_6 in child_of_5:
                                     self.add_item(child_of_5_as_root, child_of_6)
         except ET.ParseError:
+            pass
+        except FileNotFoundError:
             pass
 
     # 添加节点

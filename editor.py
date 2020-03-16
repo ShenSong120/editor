@@ -227,9 +227,9 @@ class MainWindow(QMainWindow):
             self.set_edit_tool_bar_enable(status=False)
         # 更新update_structure
         elif flag == 'update_structure':
-            index = self.editor_widget.currentIndex()
-            self.structure_tree.xml_file = self.editor_widget.file_list[index]
-            self.structure_tree.update_structure()
+            file_path = signal_str.split('>')[1]
+            self.structure_tree.xml_file = file_path
+            self.structure_tree.update_structure(file_path)
         else:
             pass
 
