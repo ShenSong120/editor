@@ -41,6 +41,8 @@ class Icon:
     cursor = 'config/icon/cursor.png'
     mini_map = 'config/icon/mini_map.png'
     structure = 'config/icon/structure.png'
+    collapse = 'config/icon/collapse.png'
+    expand = 'config/icon/expand.png'
 
 
 # 样式

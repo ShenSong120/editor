@@ -18,7 +18,21 @@ class TreeStructure(QWidget):
         self.setStyleSheet('background-color: #F0F0F0; font-family:Arial;')
         # 控件title
         self.title = QLineEdit('Structure', self)
+        self.title.setReadOnly(True)
         self.title.setStyleSheet('height:25px; background:#99CCFF; border:1px solid #646464;')
+        # 关闭节点action
+        self.collapse_action = QAction(self.title)
+        self.collapse_action.setToolTip('关闭所有节点')
+        self.collapse_action.setIcon(QIcon(Icon.collapse))
+        self.collapse_action.triggered.connect(self.collapse_all_node)
+        self.title.addAction(self.collapse_action, QLineEdit.TrailingPosition)
+        # 展开节点action
+        self.expand_action = QAction(self.title)
+        self.expand_action.setToolTip('展开所有节点')
+        self.expand_action.setIcon(QIcon(Icon.expand))
+        self.expand_action.triggered.connect(self.expand_all_node)
+        self.title.addAction(self.expand_action, QLineEdit.TrailingPosition)
+        # 树形结构
         self.tree = QTreeWidget(self)
         # transparent
         tree_qss = 'border:1px solid #646464; \
@@ -43,8 +57,15 @@ class TreeStructure(QWidget):
         self.general_layout.setSpacing(0)
         self.general_layout.addWidget(self.title)
         self.general_layout.addWidget(self.tree)
-
         self.setLayout(self.general_layout)
+
+    # 展开节点
+    def expand_all_node(self):
+        self.tree.expandAll()
+
+    # 关闭节点
+    def collapse_all_node(self):
+        self.tree.collapseAll()
 
     # 添加节点
     def add_node(self, parent=None, node_name=None):
@@ -145,4 +166,4 @@ class TreeStructure(QWidget):
             self.new_structure(current_tree_data)
         # 更新文件名
         self.root.setText(0, title)
-        self.tree.expandAll()
+        # self.tree.expandAll()
