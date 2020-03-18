@@ -1,9 +1,6 @@
 import os
-import sys
-from collections import OrderedDict
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
-from PyQt5.QtCore import *
 from other.glv import Icon
 import xml.etree.cElementTree as ET
 
@@ -13,8 +10,8 @@ class TreeStructure(QWidget):
         super(TreeStructure, self).__init__(parent)
         # 传入的文件
         self.xml_file = xml_file
-        # 保存上一次的树数据
-        self.old_tree_data = []
+        # structure是否需要更新
+        self.update_tree_flag = True
         # 子节点
         self.child_list = []
         # 设置背景色
@@ -104,6 +101,7 @@ class TreeStructure(QWidget):
 
     # 新建树结构
     def new_structure(self, tree_data):
+        self.child_list = []
         for note_data in tree_data:
             level, tag, attrib = note_data
             node_name = self.get_node_name(tag, attrib)
@@ -129,42 +127,22 @@ class TreeStructure(QWidget):
                 sixth_node = self.add_node(fifth_node, node_name)
                 self.child_list.append(sixth_node)
 
-    # 动态更新结构图
-    def dynamic_update_structure(self, current_tree_data):
-        old_tree_data_length = len(self.old_tree_data)
-        current_tree_data_length = len(current_tree_data)
-        # 增加标签
-        if current_tree_data_length > old_tree_data_length:
-            for i in range(current_tree_data_length):
-                if current_tree_data[i] not in self.old_tree_data:
-                    level, tag, attrib = current_tree_data[i]
-                    node_name = self.get_node_name(tag, attrib)
-                    child = self.add_node(node_name=node_name)
-                    if level == 1:
-                        previous_level = current_tree_data[i-1][0]
-                        if previous_level == 1:
-                            index = self.root.child(0).indexOfChild(self.child_list[i-1])
-                        self.root.child(0).insertChild(index+1, child)
-                        self.child_list.insert(i, child)
-        # 删除标签
-        elif current_tree_data_length < old_tree_data_length:
-            pass
-        # 更改标签
-        elif current_tree_data_length == old_tree_data_length:
-            pass
-
     # 更新树形结构视图
     def update_structure(self, xml_file):
         self.xml_file = xml_file
         title = 'None' if xml_file == 'None' else os.path.split(xml_file)[1]
-        self.root.setText(0, title)
         current_tree_data = self.get_tree_data(xml_file)
-        current_tree_data = self.old_tree_data if len(current_tree_data) == 0 else current_tree_data
-        if len(self.old_tree_data) == 0:
+        if len(current_tree_data) == 0:
+            self.update_tree_flag = False
+        else:
+            self.update_tree_flag = True
+        if self.update_tree_flag is True:
+            # 先清除树
+            self.tree.clear()
+            # 设置根节点
+            self.root = QTreeWidgetItem(self.tree)
+            self.tree.addTopLevelItem(self.root)
             self.new_structure(current_tree_data)
-            self.old_tree_data = current_tree_data
-            return
-        # 动态更新
-        self.dynamic_update_structure(current_tree_data)
-        # 保存数据
-        self.old_tree_data = current_tree_data
+        # 更新文件名
+        self.root.setText(0, title)
+        self.tree.expandAll()
