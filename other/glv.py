@@ -65,9 +65,10 @@ class EditorAction:
     replace = 'replace'
 
 
-# 窗口控件的尺寸
-class WindowSize:
-    mini_map_width = 100
+# 视图中的控件开关
+class View:
+    # mini_map开关
+    mini_map_switch = False
 
 
 # 文件格式统一

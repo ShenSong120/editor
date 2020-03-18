@@ -5,7 +5,7 @@ import json
 from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
-from other.glv import Icon, Param, MergePath, BeautifyStyle, EditorAction
+from other.glv import Icon, Param, MergePath, BeautifyStyle, EditorAction, View
 from ui_class.ProjectBar import ProjectBar
 from ui_class.EditorTab import EditorTab
 from ui_class.New import New
@@ -324,48 +324,77 @@ class MainWindow(QMainWindow):
             self.get_signal_from_editor('file_path>' + file_path)
             self.get_signal_from_editor('cursor_position>' + cursor_position)
 
+    # 获取当前编辑器
+    def get_current_editor(self):
+        editor = self.editor_widget.currentWidget()
+        return editor
+
     # 撤销上一次操作
     def connect_undo(self):
-        print('撤销上一次操作')
+        editor = self.get_current_editor()
+        editor.undo()
 
+    # 恢复上一次操作
     def connect_redo(self):
-        print('恢复上一次操作')
+        editor = self.get_current_editor()
+        editor.redo()
 
+    # 剪切
     def connect_cut(self):
-        print('剪切')
+        editor = self.get_current_editor()
+        editor.cut()
 
+    # 复制
     def connect_copy(self):
-        print('复制')
+        editor = self.get_current_editor()
+        editor.copy()
 
+    # 粘贴
     def connect_paste(self):
-        print('粘贴')
+        editor = self.get_current_editor()
+        editor.paste()
 
+    # 删除
     def connect_delete(self):
-        print('删除')
+        editor = self.get_current_editor()
+        editor.delete()
 
+    # 选取所有
     def connect_select_all(self):
-        print('全选')
+        editor = self.get_current_editor()
+        editor.select_all()
 
+    # 注释
     def connect_comment(self):
-        print('注释')
+        editor = self.get_current_editor()
+        editor.comment()
 
+    # 搜索
     def connect_search(self):
-        print('检索')
+        editor = self.get_current_editor()
+        editor.search()
 
+    # 替换
     def connect_replace(self):
-        print('替换')
+        editor = self.get_current_editor()
+        editor.replace()
 
     def connect_help(self):
         pass
 
+    # mini_map开关
     def connect_mini_map_switch(self):
-        editor = self.editor_widget.currentWidget()
-        if editor is not None:
-            if editor.mini_map.isHidden():
-                editor.mini_map.setHidden(False)
-            else:
-                editor.mini_map.setHidden(True)
+        tab_counts = self.editor_widget.count()
+        if tab_counts > 0:
+            View.mini_map_switch = bool(1 - View.mini_map_switch)
+            for i in range(tab_counts):
+                editor = self.editor_widget.widget(i)
+                if View.mini_map_switch is True:
+                    editor.mini_map.setHidden(False)
+                else:
+                    editor.mini_map.setHidden(True)
 
+    # structure_tree开关
     def connect_structure_show(self):
         if self.structure_tree.isHidden():
             self.structure_tree.setHidden(False)

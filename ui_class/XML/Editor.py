@@ -321,6 +321,10 @@ class Editor(QsciScintilla):
             self.replace_box.setHidden(True)
         self.search_box.get_current_position()
         self.search_box.setHidden(False)
+        clipboard = QApplication.clipboard()
+        search_text = clipboard.text()
+        self.search_box.search_line_edit.setText(search_text)
+        self.search_box.search_line_edit.selectAll()
         self.search_box.search_line_edit.setFocus()
         self.search_box.find_first_option()
 
@@ -330,6 +334,10 @@ class Editor(QsciScintilla):
             self.search_box.setHidden(True)
         self.replace_box.get_current_position()
         self.replace_box.setHidden(False)
+        clipboard = QApplication.clipboard()
+        search_text = clipboard.text()
+        self.replace_box.search_line_edit.setText(search_text)
+        self.replace_box.search_line_edit.selectAll()
         self.replace_box.search_line_edit.setFocus()
         self.replace_box.find_first_option()
 

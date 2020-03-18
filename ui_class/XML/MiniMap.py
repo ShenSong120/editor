@@ -1,6 +1,7 @@
 from PyQt5.QtWidgets import QGraphicsOpacityEffect, QFrame
 from PyQt5.QtCore import QPropertyAnimation, Qt
 from PyQt5.Qsci import *
+from other.glv import View
 
 
 class MiniMap(QsciScintilla):
@@ -46,6 +47,11 @@ class MiniMap(QsciScintilla):
         self.slider = Slider(self)
         # 设置鼠标样式(箭头光标)
         self.setCursor(Qt.ArrowCursor)
+        # mini_map开关
+        if View.mini_map_switch is True:
+            self.setHidden(False)
+        else:
+            self.setHidden(True)
 
     # 尺寸更改
     def resizeEvent(self, event):

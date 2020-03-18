@@ -49,6 +49,36 @@ class Editor(QWidget):
     def text(self):
         return self.editor.text()
 
+    def undo(self):
+        self.editor.undo_operate()
+
+    def redo(self):
+        self.editor.redo_operate()
+
+    def cut(self):
+        self.editor.cut_operate()
+
+    def copy(self):
+        self.editor.copy_operate()
+
+    def paste(self):
+        self.editor.paste_operate()
+
+    def delete(self):
+        self.editor.delete_operate()
+
+    def select_all(self):
+        self.editor.select_all_operate()
+
+    def comment(self):
+        self.editor.comment_operate()
+
+    def search(self):
+        self.editor.search_operate()
+
+    def replace(self):
+        self.editor.replace_operate()
+
     # 更新动作使能(并发送信号给窗口动作)
     def judge_action_enable(self):
         self.editor.judge_action_enable()
