@@ -44,6 +44,7 @@ class NewFile(QDialog):
         self.select_path_action.triggered.connect(self.select_path)
         self.path_text.addAction(self.select_path_action, QLineEdit.TrailingPosition)
         self.file_name_text = QLineEdit(self)
+        self.file_name_text.setFocus()
         self.file_name_text.setPlaceholderText(self.default_name)
         self.form_layout = QFormLayout()
         self.form_layout.setSpacing(20)
@@ -170,6 +171,7 @@ class NewFolder(QDialog):
         self.select_path_action.triggered.connect(self.select_path)
         self.path_text.addAction(self.select_path_action, QLineEdit.TrailingPosition)
         self.folder_name_text = QLineEdit(self)
+        self.folder_name_text.setFocus()
         self.folder_name_text.setPlaceholderText(self.default_name)
         self.form_layout = QFormLayout()
         self.form_layout.setSpacing(20)
@@ -270,6 +272,7 @@ class Paste(QDialog):
             self.source_path_text.setText(source_path)
             self.default_name = os.path.split(source_path)[1]
             self.new_name_text = QLineEdit(self)
+            self.new_name_text.setFocus()
             self.new_name_text.setPlaceholderText(self.default_name)
             self.new_name_text.selectAll()
             self.form_layout = QFormLayout()
@@ -408,6 +411,7 @@ class Rename(QDialog):
         self.title_layout.addWidget(self.h_line)
         # 源文件路径
         self.source_path_text = QLineEdit(self)
+        self.source_path_text.setReadOnly(True)
         self.source_path_text.setText(source_path)
         # 重命名文件路径选择以及文件名字输入
         self.rename_path_text = QLineEdit(self)
@@ -418,6 +422,7 @@ class Rename(QDialog):
         self.select_path_action.triggered.connect(self.select_path)
         self.rename_path_text.addAction(self.select_path_action, QLineEdit.TrailingPosition)
         self.rename_text = QLineEdit(self)
+        self.rename_text.setFocus()
         self.rename_text.setPlaceholderText(self.default_name)
         self.form_layout = QFormLayout()
         self.form_layout.setSpacing(20)
@@ -534,6 +539,7 @@ class Delete(QDialog):
         self.delete_warning_text.setText('确定要删除选中的'+str(len(self.path_list))+'个文件/文件夹吗？')
         # 确定和取消按钮
         self.sure_button = QPushButton('确定', self)
+        self.sure_button.setFocus()
         self.sure_button.clicked.connect(self.click_sure)
         self.sure_button.setFixedWidth(100)
         self.cancel_button = QPushButton('取消', self)
