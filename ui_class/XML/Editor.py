@@ -40,7 +40,8 @@ class Editor(QsciScintilla):
         # 设置光标宽度(0不显示光标)
         self.setCaretWidth(2)
         # 设置光标颜色
-        self.setCaretForegroundColor(QColor('#009966'))
+        # self.setCaretForegroundColor(QColor('#009966'))
+        self.setCaretForegroundColor(QColor('#333333'))
         # 高亮显示光标所在行
         self.setCaretLineVisible(True)
         # 选中行背景色(灰色背景)

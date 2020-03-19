@@ -12,14 +12,8 @@ from ui_class.New import New
 from ui_class.TreeStructure import TreeStructure
 from other.CaseConfigParser import CaseConfigParser
 
-'''
-需要增加的功能:
-1.块导入
-2.点击跳转
-'''
 
-
-# 窗口app
+# 编辑器窗口app
 class MainWindow(QMainWindow):
     def __init__(self, parent=None, title='未命名'):
         super(MainWindow, self).__init__(parent)
