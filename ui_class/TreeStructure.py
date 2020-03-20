@@ -1,11 +1,7 @@
-import os
-import operator
-from threading import Thread
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from other.glv import Icon
 from ui_class.TreeWidget import TreeWidget
-import xml.etree.cElementTree as ET
 
 
 class TreeStructure(QWidget):
@@ -79,3 +75,7 @@ class TreeStructure(QWidget):
             self.tree = current_tree
         else:
             self.load_tree(file)
+
+    def close_tree(self):
+        self.tree_list.clear()
+        self.tree.clear()

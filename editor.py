@@ -211,9 +211,16 @@ class MainWindow(QMainWindow):
         # 更新工具栏动作状态
         elif flag == 'action':
             self.update_tool_bar_enable_status(signal_str.split('>')[1])
+        # 关闭子tab
+        elif flag == 'remove_tab':
+            file_path = signal_str.split('>')[1]
+            index = [tree.file for tree in self.structure_tree.tree_list].index(file_path)
+            self.structure_tree.tree_list.pop(index)
         # 关闭所有子tab信号
         elif flag == 'close_all_tab':
             self.set_edit_tool_bar_enable(status=False)
+            # 关闭tree
+            self.structure_tree.close_tree()
         # 更新树
         elif flag == 'update_tree':
             file_path = signal_str.split('>')[1]
@@ -246,6 +253,8 @@ class MainWindow(QMainWindow):
             if path in self.editor_widget.file_list:
                 index = self.editor_widget.file_list.index(path)
                 self.close_tab(index)
+                index = [tree.file for tree in self.structure_tree.tree_list].index(path)
+                self.structure_tree.tree_list.pop(index)
         # 粘贴
         elif flag == 'paste_path':
             pass

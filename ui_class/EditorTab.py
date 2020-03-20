@@ -124,15 +124,19 @@ class EditorTab(QTabWidget):
         editor = self.currentWidget()
         if editor is not None:
             editor.judge_action_enable()
+            file_path = self.file_list[index]
+            self.signal.emit('file_path>' + file_path)
+            # 更新树
+            self.signal.emit('update_tree>' + file_path)
         else:
             self.signal.emit('close_all_tab>')
-        file_path = self.file_list[index]
-        self.signal.emit('file_path>' + file_path)
-        # 更新树
-        self.signal.emit('update_tree>' + file_path)
 
     # 关闭标签页(需要判断)
     def close_tab(self, index):
+        # 关闭标签页信号
+        file_path = self.file_list[index]
+        self.signal.emit('remove_tree>' + file_path)
+        # 溢出标签
         self.removeTab(index)
         self.file_list.pop(index)
         # 删除完tab后需要修改状态栏
@@ -143,10 +147,8 @@ class EditorTab(QTabWidget):
             cursor_position = '[0:0]'
             self.signal.emit('file_path>' + file_path)
             self.signal.emit('cursor_position>' + cursor_position)
-            self.signal.emit('update_structure>' + file_path)
         else:
             file_path = 'None'
             cursor_position = '[0:0]'
             self.signal.emit('file_path>' + file_path)
             self.signal.emit('cursor_position>' + cursor_position)
-            self.signal.emit('update_structure>' + file_path)
