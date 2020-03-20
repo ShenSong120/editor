@@ -214,11 +214,10 @@ class MainWindow(QMainWindow):
         # 关闭所有子tab信号
         elif flag == 'close_all_tab':
             self.set_edit_tool_bar_enable(status=False)
-        # 更新update_structure
-        elif flag == 'update_structure':
+        # 更新树
+        elif flag == 'update_tree':
             file_path = signal_str.split('>')[1]
-            self.structure_tree.xml_file = file_path
-            self.structure_tree.update_structure(file_path)
+            self.structure_tree.update_tree(file_path)
         else:
             pass
 

@@ -112,9 +112,9 @@ class EditorTab(QTabWidget):
         # 保存文件
         elif flag == 'save_file':
             self.save_edit_tab()
-            # 更新structure-tree
+            # 更新tree
             file_path = self.file_list[self.currentIndex()]
-            self.signal.emit('update_structure>' + file_path)
+            self.signal.emit('update_tree>' + file_path)
         else:
             self.signal.emit(signal_str)
 
@@ -128,7 +128,8 @@ class EditorTab(QTabWidget):
             self.signal.emit('close_all_tab>')
         file_path = self.file_list[index]
         self.signal.emit('file_path>' + file_path)
-        self.signal.emit('update_structure>' + file_path)
+        # 更新树
+        self.signal.emit('update_tree>' + file_path)
 
     # 关闭标签页(需要判断)
     def close_tab(self, index):

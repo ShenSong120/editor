@@ -393,8 +393,6 @@ class Editor(QsciScintilla):
         self.signal.emit('cursor_position>' + cursor_position)
         # 更新工具栏动作使能状态
         self.judge_action_enable()
-        # 自动保存代码
-        self.signal.emit('save_file>')
 
     # 判断动作是否使能(并发送信号给窗口动作)
     def judge_action_enable(self):

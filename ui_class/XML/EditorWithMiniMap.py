@@ -17,7 +17,7 @@ class Editor(QWidget):
         self.editor.verticalScrollBar().valueChanged.connect(self.editor_vertical_scroll_bar_value_changed)
         self.mini_map.verticalScrollBar().valueChanged.connect(self.mini_map_vertical_scroll_bar_value_changed)
 
-        self.editor.textChanged.connect(self.mini_map.update_code)
+        self.editor.textChanged.connect(self.editor_text_changed)
         self.editor.linesChanged.connect(self.editor_lines_changed)
 
         self.splitter_h_general = QSplitter(Qt.Horizontal)
@@ -82,6 +82,13 @@ class Editor(QWidget):
     # 更新动作使能(并发送信号给窗口动作)
     def judge_action_enable(self):
         self.editor.judge_action_enable()
+
+    # 编辑器文本改变
+    def editor_text_changed(self):
+        # mini_map更新
+        self.mini_map.update_code()
+        # 自动保存代码
+        self.signal.emit('save_file>')
 
     # editor行数更改事件
     def editor_lines_changed(self):
