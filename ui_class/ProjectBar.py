@@ -215,12 +215,21 @@ class ProjectBar(QWidget):
     def get_signal_from_file_dialog(self, signal_str):
         flag = signal_str.split('>')[0]
         path = signal_str.split('>')[1]
-        if os.path.exists(path):
-            self.update_select_item(path)
-            self.operation_file(path)
-        else:
-            # 路径不存在就是删除标志(需要删掉子tab)
-            self.signal.emit('delete_path>' + path)
+        # 重命名
+        if flag == 'rename_path':
+            self.signal.emit(signal_str)
+        # 删除
+        elif flag == 'delete_path':
+            self.signal.emit(signal_str)
+        # 粘贴
+        elif flag == 'paste_path':
+            self.signal.emit(signal_str)
+        # 新建文件
+        elif flag == 'new_file':
+            self.signal.emit(signal_str)
+        # 新建文件夹
+        elif flag == 'new_folder':
+            self.signal.emit(signal_str)
 
     # 更新选中item(也就是等待文件model更新完成, 延时时间不能太短)
     def update_select_item(self, path):

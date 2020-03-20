@@ -488,7 +488,7 @@ class Rename(QDialog):
                                 shutil.copyfile(current_path, MergePath(rename_path, name).merged_path)
                     os.removedirs(self.source_path)
                     # 发射重命名信号
-                    self.signal.emit('rename_path>' + rename_path)
+                    self.signal.emit('rename_path>' + self.source_path + '==' + rename_path)
             else:
                 pass
         else:
@@ -501,14 +501,14 @@ class Rename(QDialog):
                     shutil.copyfile(self.source_path, rename_path)
                     os.remove(self.source_path)
                     # 发射重命名信号
-                    self.signal.emit('rename_path>' + rename_path)
+                    self.signal.emit('rename_path>' + self.source_path + '==' + rename_path)
             else:
                 pass
 
     def deal_not_existed_file(self, rename_path):
         os.rename(self.source_path, rename_path)
         # 发射重命名信号
-        self.signal.emit('rename_path>' + rename_path)
+        self.signal.emit('rename_path>' + self.source_path + '==' + rename_path)
 
 
 # 删除文件

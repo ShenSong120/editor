@@ -225,12 +225,36 @@ class MainWindow(QMainWindow):
     def get_signal_from_project_bar(self, signal_str):
         flag = signal_str.split('>')[0]
         path = signal_str.split('>')[1]
+        # 打开文件
         if flag == 'open_xml':
             self.editor_widget.open_edit_tab(path)
+        # 重命名文件
+        elif flag == 'rename_path':
+            old_path = path.split('==')[0]
+            new_path = path.split('==')[1]
+            if old_path in self.editor_widget.file_list:
+                index = self.editor_widget.file_list.index(old_path)
+                tab_name = os.path.split(new_path)[1]
+                self.editor_widget.file_list[index] = new_path
+                self.editor_widget.setTabText(index, tab_name)
+                self.editor_widget.setTabToolTip(index, new_path)
+                index = [tree.file for tree in self.structure_tree.tree_list].index(old_path)
+                self.structure_tree.tree_list[index].file = old_path
+                self.structure_tree.tree_list[index].root.setText(0, tab_name)
+        # 删除
         elif flag == 'delete_path':
             if path in self.editor_widget.file_list:
                 index = self.editor_widget.file_list.index(path)
                 self.close_tab(index)
+        # 粘贴
+        elif flag == 'paste_path':
+            pass
+        # 新建文件
+        elif flag == 'new_file':
+            pass
+        # 新建文件夹
+        elif flag == 'new_folder':
+            pass
 
     # 获取New文件系统发出的信号
     def get_signal_from_new(self, signal_str):
