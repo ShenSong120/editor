@@ -26,6 +26,7 @@ class TreeWidget(QTreeWidget):
         self.root = QTreeWidgetItem(self)
         self.root_name = os.path.split(self.file)[1]
         self.root.setText(0, self.root_name)
+        self.root.setExpanded(True)
         # 设置根节点
         self.addTopLevelItem(self.root)
         # 当前修改后的xml信息
@@ -36,6 +37,8 @@ class TreeWidget(QTreeWidget):
         if current_tree_data[0] != -1:
             self.new_structure(current_tree_data)
             self.old_tree_data = current_tree_data
+        # 点击触发事件
+        self.itemClicked.connect(self.item_clicked)
 
     # 添加节点
     def add_node(self, parent=None, node_name=None):
@@ -251,3 +254,7 @@ class TreeWidget(QTreeWidget):
         # 更新树结构
         else:
             self.update_node(current_tree_data)
+
+    # item点击操作
+    def item_clicked(self, item, p_int):
+        print(p_int, item.text(0))
