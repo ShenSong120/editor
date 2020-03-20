@@ -43,6 +43,7 @@ class Icon:
     structure = 'config/icon/structure.png'
     collapse = 'config/icon/collapse.png'
     expand = 'config/icon/expand.png'
+    setting = 'config/icon/setting.png'
 
 
 # 样式

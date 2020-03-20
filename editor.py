@@ -10,6 +10,7 @@ from ui_class.ProjectBar import ProjectBar
 from ui_class.EditorTab import EditorTab
 from ui_class.New import New
 from ui_class.TreeStructure import TreeStructure
+from ui_class.SettingDialog import Setting
 from other.CaseConfigParser import CaseConfigParser
 
 
@@ -99,13 +100,16 @@ class MainWindow(QMainWindow):
         self.search_action.triggered.connect(self.connect_search)
         self.replace_action = QAction(QIcon(Icon.replace), '替换(Ctrl+R)', self)
         self.replace_action.triggered.connect(self.connect_replace)
+        # 非使能编辑操作动作
+        self.set_edit_tool_bar_enable(status=False)
         # 视图动作
         self.mini_map_switch_action = QAction(QIcon(Icon.mini_map), '小地图', self)
         self.mini_map_switch_action.triggered.connect(self.connect_mini_map_switch)
         self.structure_show_switch_action = QAction(QIcon(Icon.structure), '结构', self)
         self.structure_show_switch_action.triggered.connect(self.connect_structure_show)
-        # 非使能编辑操作动作
-        self.set_edit_tool_bar_enable(status=False)
+        # 设置动作
+        self.setting_action = QAction(QIcon(Icon.setting), '设置', self)
+        self.setting_action.triggered.connect(self.connect_setting)
         # 文件菜单栏
         self.file_menu_bar = self.menu_bar.addMenu('文件')
         self.file_menu_bar.addAction(self.new_action)
@@ -129,6 +133,9 @@ class MainWindow(QMainWindow):
         self.view_menu_bar = self.menu_bar.addMenu('视图')
         self.view_menu_bar.addAction(self.mini_map_switch_action)
         self.view_menu_bar.addAction(self.structure_show_switch_action)
+        # 设置菜单栏
+        self.setting_menu_bar = self.menu_bar.addMenu('设置')
+        self.setting_menu_bar.addAction(self.setting_action)
         # 帮助菜单栏
         self.help_menu_bar = self.menu_bar.addMenu('帮助')
         self.help_action = QAction('操作说明', self)
@@ -426,6 +433,11 @@ class MainWindow(QMainWindow):
             self.structure_tree.setHidden(False)
         else:
             self.structure_tree.setHidden(True)
+
+    # 设置动作
+    def connect_setting(self):
+        setting_dialog = Setting(None)
+        setting_dialog.exec()
 
     # 窗口关闭事件
     def closeEvent(self, event):
