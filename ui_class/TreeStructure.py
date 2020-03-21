@@ -5,14 +5,10 @@ from ui_class.TreeWidget import TreeWidget
 
 
 class TreeStructure(QWidget):
-    def __init__(self, parent, xml_file=None):
+    def __init__(self, parent, file=None):
         super(TreeStructure, self).__init__(parent)
         # 传入的文件
-        self.xml_file = xml_file
-        # 保存上次的节点信息
-        self.old_tree_data = []
-        # tree_list保存所有树
-        self.tree_list = []
+        self.file = file
         # 设置背景色
         self.setStyleSheet('background-color: #F0F0F0; font-family:Arial;')
         # 控件title
@@ -31,19 +27,16 @@ class TreeStructure(QWidget):
         self.expand_action.setIcon(QIcon(Icon.expand))
         self.expand_action.triggered.connect(self.expand_all_node)
         self.title.addAction(self.expand_action, QLineEdit.TrailingPosition)
-        # QFrame(用来放置tree)
-        frame_qss = 'border:1px solid #646464;'
-        self.frame = QFrame(self)
-        self.frame.setStyleSheet(frame_qss)
-        self.frame_layout = QVBoxLayout(self.frame)
-        self.frame_layout.setSpacing(0)
-        self.frame_layout.setContentsMargins(0, 0, 0, 0)
+        # 堆叠窗口
+        stacked_widget_qss = 'border:1px solid #646464;'
+        self.stacked_widget = QStackedWidget(self)
+        self.stacked_widget.setStyleSheet(stacked_widget_qss)
         # 布局
         self.general_layout = QVBoxLayout()
         self.general_layout.setContentsMargins(0, 0, 0, 0)
         self.general_layout.setSpacing(0)
         self.general_layout.addWidget(self.title)
-        self.general_layout.addWidget(self.frame)
+        self.general_layout.addWidget(self.stacked_widget)
         self.setLayout(self.general_layout)
 
     # 展开节点
@@ -56,26 +49,23 @@ class TreeStructure(QWidget):
 
     # 加载结构树
     def load_tree(self, file):
-        tree = TreeWidget(self, file)
-        self.tree_list.append(tree)
-        if self.frame_layout.count() != 0:
-            self.tree.setHidden(True)
-        self.frame_layout.addWidget(tree)
-        self.tree = tree
+        self.tree = TreeWidget(self, file)
+        self.stacked_widget.addWidget(self.tree)
+        self.stacked_widget.setCurrentWidget(self.tree)
 
     # 更新树
     def update_tree(self, file):
-        file_list = [tree.file for tree in self.tree_list]
+        file_list = [self.stacked_widget.widget(index).file for index in range(self.stacked_widget.count())]
         if file in file_list:
-            self.tree.setHidden(True)
             index = file_list.index(file)
-            current_tree = self.tree_list[index]
-            current_tree.setHidden(False)
-            current_tree.update_structure(file)
-            self.tree = current_tree
+            self.tree = self.stacked_widget.widget(index)
+            self.stacked_widget.setCurrentWidget(self.tree)
+            self.tree.update_structure(file)
         else:
             self.load_tree(file)
 
     def close_tree(self):
-        self.tree_list.clear()
+        tree_list = [self.stacked_widget.widget(index) for index in range(self.stacked_widget.count())]
+        for tree in tree_list:
+            self.stacked_widget.removeWidget(tree)
         self.tree.clear()

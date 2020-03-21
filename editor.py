@@ -221,8 +221,10 @@ class MainWindow(QMainWindow):
         # 关闭子tab
         elif flag == 'remove_tab':
             file_path = signal_str.split('>')[1]
-            index = [tree.file for tree in self.structure_tree.tree_list].index(file_path)
-            self.structure_tree.tree_list.pop(index)
+            index = [self.structure_tree.stacked_widget.widget(index).file for index in
+                     range(self.structure_tree.stacked_widget.count())].index(file_path)
+            tree = self.structure_tree.stacked_widget.widget(index)
+            self.structure_tree.stacked_widget.removeWidget(tree)
         # 关闭所有子tab信号
         elif flag == 'close_all_tab':
             self.set_edit_tool_bar_enable(status=False)
@@ -252,16 +254,19 @@ class MainWindow(QMainWindow):
                 self.editor_widget.file_list[index] = new_path
                 self.editor_widget.setTabText(index, tab_name)
                 self.editor_widget.setTabToolTip(index, new_path)
-                index = [tree.file for tree in self.structure_tree.tree_list].index(old_path)
-                self.structure_tree.tree_list[index].file = old_path
-                self.structure_tree.tree_list[index].root.setText(0, tab_name)
+                index = [self.structure_tree.stacked_widget.widget(index).file for index in
+                         range(self.structure_tree.stacked_widget.count())].index(old_path)
+                self.structure_tree.stacked_widget.widget(index).file = old_path
+                self.structure_tree.stacked_widget.widget(index).root.setText(0, tab_name)
         # 删除
         elif flag == 'delete_path':
             if path in self.editor_widget.file_list:
                 index = self.editor_widget.file_list.index(path)
                 self.close_tab(index)
-                index = [tree.file for tree in self.structure_tree.tree_list].index(path)
-                self.structure_tree.tree_list.pop(index)
+                index = [self.structure_tree.stacked_widget.widget(index).file for index in
+                         range(self.structure_tree.stacked_widget.count())].index(path)
+                tree = self.structure_tree.stacked_widget.widget(index)
+                self.structure_tree.stacked_widget.removeWidget(tree)
         # 粘贴
         elif flag == 'paste_path':
             pass
