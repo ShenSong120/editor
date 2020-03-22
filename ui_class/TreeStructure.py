@@ -41,26 +41,26 @@ class TreeStructure(QWidget):
 
     # 展开节点
     def expand_all_node(self):
-        self.tree.expandAll()
+        self.tree_eidget.tree.expandAll()
 
     # 关闭节点
     def collapse_all_node(self):
-        self.tree.collapseAll()
+        self.tree_eidget.tree.collapseAll()
 
     # 加载结构树
     def load_tree(self, file):
-        self.tree = TreeWidget(file)
-        self.stacked_widget.addWidget(self.tree)
-        self.stacked_widget.setCurrentWidget(self.tree)
+        self.tree_eidget = TreeWidget(file)
+        self.stacked_widget.addWidget(self.tree_eidget)
+        self.stacked_widget.setCurrentWidget(self.tree_eidget)
 
     # 更新树
     def update_tree(self, file):
         file_list = [self.stacked_widget.widget(index).file for index in range(self.stacked_widget.count())]
         if file in file_list:
             index = file_list.index(file)
-            self.tree = self.stacked_widget.widget(index)
-            self.stacked_widget.setCurrentWidget(self.tree)
-            self.tree.update_structure(file)
+            self.tree_eidget = self.stacked_widget.widget(index)
+            self.stacked_widget.setCurrentWidget(self.tree_eidget)
+            self.tree_eidget.update_structure(file)
         else:
             self.load_tree(file)
 
@@ -68,4 +68,3 @@ class TreeStructure(QWidget):
         tree_list = [self.stacked_widget.widget(index) for index in range(self.stacked_widget.count())]
         for tree in tree_list:
             self.stacked_widget.removeWidget(tree)
-        self.tree.clear()

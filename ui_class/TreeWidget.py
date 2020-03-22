@@ -69,9 +69,9 @@ class TreeWidget(QWidget):
         self.root = QTreeWidgetItem()
         self.root_name = os.path.split(self.file)[1]
         self.root.setText(0, self.root_name)
-        self.root.setExpanded(True)
         # 设置根节点
         self.tree.addTopLevelItem(self.root)
+        self.root.setExpanded(True)
         # 当前修改后的xml信息
         self.old_tree_data = []
         # 加载树结构
@@ -92,7 +92,6 @@ class TreeWidget(QWidget):
     # 添加节点
     def add_node(self, parent=None, node_name=None):
         child = CustomQTreeWidgetItem(Icon.xml_tag, node_name, parent)
-        self.tree.setItemWidget(child, 0, child.widget)
         return child
 
     # 获取节点name
@@ -195,6 +194,7 @@ class TreeWidget(QWidget):
             node_name = self.get_node_name(node[1], node[2])
             child = self.add_node(node_name=node_name)
             parent.insertChild(position[-1], child)
+            self.tree.setItemWidget(child, 0, child.widget)
 
     # 删除子控件
     def remove_child(self, node_list):
@@ -229,18 +229,25 @@ class TreeWidget(QWidget):
             node_name = self.get_node_name(tag, attrib)
             if level == 0:
                 xml_root = self.add_node(self.root, node_name)
+                self.tree.setItemWidget(xml_root, 0, xml_root.widget)
             elif level == 1:
                 first_node = self.add_node(xml_root, node_name)
+                self.tree.setItemWidget(first_node, 0, first_node.widget)
             elif level == 2:
                 second_node = self.add_node(first_node, node_name)
+                self.tree.setItemWidget(second_node, 0, second_node.widget)
             elif level == 3:
                 third_node = self.add_node(second_node, node_name)
+                self.tree.setItemWidget(third_node, 0, third_node.widget)
             elif level == 4:
                 fourth_node = self.add_node(third_node, node_name)
+                self.tree.setItemWidget(fourth_node, 0, fourth_node.widget)
             elif level == 5:
                 fifth_node = self.add_node(fourth_node, node_name)
+                self.tree.setItemWidget(fifth_node, 0, fifth_node.widget)
             elif level == 6:
                 sixth_node = self.add_node(fifth_node, node_name)
+                self.tree.setItemWidget(sixth_node, 0, sixth_node.widget)
 
     # 更新树信息
     def update_node(self, current_tree_data):
