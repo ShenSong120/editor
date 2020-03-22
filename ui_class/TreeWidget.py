@@ -51,7 +51,8 @@ class TreeWidget(QWidget):
     def __init__(self, file):
         super(TreeWidget, self).__init__()
         self.file = file
-        # self.setStyleSheet('background-color: #F0F0F0;')
+        # QWidget背景透明
+        self.setStyleSheet('background-color: transparent;')
         # transparent
         tree_qss = 'border:0px solid #646464; \
                     QTreeWidget::branch:closed:has-children:!has-siblings, \
