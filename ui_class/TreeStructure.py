@@ -10,7 +10,7 @@ class TreeStructure(QWidget):
         # 传入的文件
         self.file = file
         # 设置背景色
-        # self.setStyleSheet('background-color: #F0F0F0; font-family:Arial;')
+        self.setStyleSheet('font-family:Arial;')
         # 控件title
         self.title = QLineEdit('Structure', self)
         self.title.setReadOnly(True)

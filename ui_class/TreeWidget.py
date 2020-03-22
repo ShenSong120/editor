@@ -81,8 +81,8 @@ class TreeWidget(QWidget):
         if current_tree_data[0] != -1:
             self.new_structure(current_tree_data)
             self.old_tree_data = current_tree_data
-        # 点击触发事件
-        self.tree.itemClicked.connect(self.item_clicked)
+        # item选中项改变触发事件
+        self.tree.itemSelectionChanged.connect(self.item_selection_changed)
         # widget布局
         self.h_layout = QHBoxLayout()
         self.h_layout.setSpacing(0)
@@ -311,8 +311,9 @@ class TreeWidget(QWidget):
         else:
             self.update_node(current_tree_data)
 
-    # item点击操作
-    def item_clicked(self, item, p_int):
+    # item选中项改变触发事件
+    def item_selection_changed(self):
+        item = self.tree.currentItem()
         position = []
         for i in range(10):
             parent_item = item.parent()
