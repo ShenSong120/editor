@@ -69,6 +69,7 @@ class TreeWidget(QWidget):
         # 设置根节点(默认无任何节点)
         self.root = QTreeWidgetItem()
         self.root_name = os.path.split(self.file)[1]
+        self.root.setIcon(0, QIcon(Icon.file))
         self.root.setText(0, self.root_name)
         # 设置根节点
         self.tree.addTopLevelItem(self.root)
