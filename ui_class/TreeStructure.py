@@ -10,7 +10,7 @@ class TreeStructure(QWidget):
         # 传入的文件
         self.file = file
         # 设置背景色
-        self.setStyleSheet('background-color: #F0F0F0; font-family:Arial;')
+        # self.setStyleSheet('background-color: #F0F0F0; font-family:Arial;')
         # 控件title
         self.title = QLineEdit('Structure', self)
         self.title.setReadOnly(True)
@@ -49,7 +49,7 @@ class TreeStructure(QWidget):
 
     # 加载结构树
     def load_tree(self, file):
-        self.tree = TreeWidget(self, file)
+        self.tree = TreeWidget(file)
         self.stacked_widget.addWidget(self.tree)
         self.stacked_widget.setCurrentWidget(self.tree)
 

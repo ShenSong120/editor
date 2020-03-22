@@ -6,10 +6,52 @@ from other.glv import Icon
 import xml.etree.cElementTree as ET
 
 
-class TreeWidget(QTreeWidget):
-    def __init__(self, parent, file):
-        super(TreeWidget, self).__init__(parent=parent)
+# 自定义的item 继承自QListWidgetItem
+class CustomQTreeWidgetItem(QTreeWidgetItem):
+    def __init__(self, icon, text, parent=None):
+        super(CustomQTreeWidgetItem, self).__init__(parent)
+        # 自定义item中的widget 用来显示自定义的内容
+        self.widget = QWidget()
+        # 传递进来的文本(非富文本)
+        self.string_text = text
+        # 用来显示name
+        self.text_label = QLabel()
+        self.setText(0, self.string_text)
+        # 用来显示icon(图像)
+        self.icon_label = QLabel()
+        # 设置图像源 和 图像大小
+        self.icon_label.setPixmap(QPixmap(icon).scaled(16, 16))
+        # 设置布局用来对text_label和icon_abel进行布局
+        self.h_box = QHBoxLayout()
+        self.h_box.setSpacing(0)
+        self.h_box.setContentsMargins(0, 0, 0, 0)
+        self.h_box.addWidget(self.icon_label)
+        self.h_box.addWidget(self.text_label)
+        self.h_box.addStretch(1)
+        # 设置widget的布局
+        self.widget.setLayout(self.h_box)
+
+    def setText(self, p_int, p_str):
+        self.string_text = p_str
+        if ' ' in p_str:
+            first_half_text = p_str.split(' ')[0]
+            second_half_text = ' '.join(p_str.split(' ')[1:])
+        else:
+            first_half_text = p_str
+            second_half_text = ''
+        rich_text = first_half_text + ' ' + '<font color = "#646464"><i>' + second_half_text + '</i></font>'
+        self.text_label.setText(rich_text)
+
+    def text(self, p_int):
+        return self.string_text
+
+
+# QTreeWidget
+class TreeWidget(QWidget):
+    def __init__(self, file):
+        super(TreeWidget, self).__init__()
         self.file = file
+        # self.setStyleSheet('background-color: #F0F0F0;')
         # transparent
         tree_qss = 'border:0px solid #646464; \
                     QTreeWidget::branch:closed:has-children:!has-siblings, \
@@ -18,17 +60,18 @@ class TreeWidget(QTreeWidget):
                     QTreeWidget::branch:open:has-children:!has-siblings, \
                     QTreeWidget::branch:open:has-children:has-siblings \
                     {border-image: none; image: url(:/config/icon/root_open.png);}'
-        self.setStyleSheet(tree_qss)
-        self.setHeaderHidden(True)
+        self.tree = QTreeWidget()
+        self.tree.setStyleSheet(tree_qss)
+        self.tree.setHeaderHidden(True)
         # 设置列数
-        self.setColumnCount(1)
+        self.tree.setColumnCount(1)
         # 设置根节点(默认无任何节点)
-        self.root = QTreeWidgetItem(self)
+        self.root = QTreeWidgetItem()
         self.root_name = os.path.split(self.file)[1]
         self.root.setText(0, self.root_name)
         self.root.setExpanded(True)
         # 设置根节点
-        self.addTopLevelItem(self.root)
+        self.tree.addTopLevelItem(self.root)
         # 当前修改后的xml信息
         self.old_tree_data = []
         # 加载树结构
@@ -38,13 +81,18 @@ class TreeWidget(QTreeWidget):
             self.new_structure(current_tree_data)
             self.old_tree_data = current_tree_data
         # 点击触发事件
-        self.itemClicked.connect(self.item_clicked)
+        self.tree.itemClicked.connect(self.item_clicked)
+        # widget布局
+        self.h_layout = QHBoxLayout()
+        self.h_layout.setSpacing(0)
+        self.h_layout.setContentsMargins(0, 0, 0, 0)
+        self.h_layout.addWidget(self.tree)
+        self.setLayout(self.h_layout)
 
     # 添加节点
     def add_node(self, parent=None, node_name=None):
-        child = QTreeWidgetItem(parent)
-        child.setText(0, node_name)
-        child.setIcon(0, QIcon(Icon.xml_tag))
+        child = CustomQTreeWidgetItem(Icon.xml_tag, node_name, parent)
+        self.tree.setItemWidget(child, 0, child.widget)
         return child
 
     # 获取节点name
@@ -257,4 +305,16 @@ class TreeWidget(QTreeWidget):
 
     # item点击操作
     def item_clicked(self, item, p_int):
-        print(p_int, item.text(0))
+        position = []
+        for i in range(10):
+            parent_item = item.parent()
+            if parent_item:
+                index = parent_item.indexOfChild(item)
+                position.insert(0, index)
+                item = parent_item
+            else:
+                break
+        for item_info in self.old_tree_data:
+            if item_info[0] == position:
+                print(item_info)
+        print(position)
