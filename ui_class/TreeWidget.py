@@ -10,9 +10,9 @@ import xml.etree.cElementTree as ET
 class CustomQTreeWidgetItem(QTreeWidgetItem):
     def __init__(self, icon, text, parent=None):
         super(CustomQTreeWidgetItem, self).__init__(parent)
-        # 自定义item中的widget 用来显示自定义的内容
+        # 自定义item中的widget 用来显示自定义的内容 font-size: 11pt;
         self.widget = QWidget()
-        self.widget.setStyleSheet('font-family:Arial; font-size: 11pt;')
+        self.widget.setStyleSheet('font-family:Arial; font-weight: bold;')
         # 传递进来的文本(非富文本)
         self.string_text = text
         # 用来显示name
@@ -41,7 +41,7 @@ class CustomQTreeWidgetItem(QTreeWidgetItem):
             first_half_text = p_str
             second_half_text = ''
         rich_text = '<font color = "#242424">' + first_half_text + ' ' + '</font>' + \
-                    '<font color = "#646464"><i>' + second_half_text + '</i></font>'
+                    '<font color = "#808080"><i>' + second_half_text + '</i></font>'
         self.text_label.setText(rich_text)
 
     def text(self, p_int):
