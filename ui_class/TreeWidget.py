@@ -12,6 +12,7 @@ class CustomQTreeWidgetItem(QTreeWidgetItem):
         super(CustomQTreeWidgetItem, self).__init__(parent)
         # 自定义item中的widget 用来显示自定义的内容
         self.widget = QWidget()
+        self.widget.setStyleSheet('font-family:Arial; font-size: 11pt;')
         # 传递进来的文本(非富文本)
         self.string_text = text
         # 用来显示name
@@ -20,7 +21,7 @@ class CustomQTreeWidgetItem(QTreeWidgetItem):
         # 用来显示icon(图像)
         self.icon_label = QLabel()
         # 设置图像源 和 图像大小
-        self.icon_label.setPixmap(QPixmap(icon).scaled(16, 16))
+        self.icon_label.setPixmap(QPixmap(icon).scaled(24, 24))
         # 设置布局用来对text_label和icon_abel进行布局
         self.h_box = QHBoxLayout()
         self.h_box.setSpacing(0)
@@ -39,7 +40,8 @@ class CustomQTreeWidgetItem(QTreeWidgetItem):
         else:
             first_half_text = p_str
             second_half_text = ''
-        rich_text = first_half_text + ' ' + '<font color = "#646464"><i>' + second_half_text + '</i></font>'
+        rich_text = '<font color = "#000000">' + first_half_text + ' ' + '</font>' + \
+                    '<font color = "#646464"><i>' + second_half_text + '</i></font>'
         self.text_label.setText(rich_text)
 
     def text(self, p_int):
