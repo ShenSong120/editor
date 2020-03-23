@@ -40,7 +40,7 @@ class CustomQTreeWidgetItem(QTreeWidgetItem):
         else:
             first_half_text = p_str
             second_half_text = ''
-        rich_text = '<font color = "#000000">' + first_half_text + ' ' + '</font>' + \
+        rich_text = '<font color = "#242424">' + first_half_text + ' ' + '</font>' + \
                     '<font color = "#646464"><i>' + second_half_text + '</i></font>'
         self.text_label.setText(rich_text)
 
@@ -54,7 +54,7 @@ class TreeWidget(QWidget):
         super(TreeWidget, self).__init__()
         self.file = file
         # QWidget背景透明
-        self.setStyleSheet('background-color: transparent;')
+        self.setStyleSheet('background-color: transparent; font-family:Arial;')
         # transparent
         tree_qss = 'border:0px solid #646464; \
                     QTreeWidget::branch:closed:has-children:!has-siblings, \
@@ -69,12 +69,10 @@ class TreeWidget(QWidget):
         # 设置列数
         self.tree.setColumnCount(1)
         # 设置根节点(默认无任何节点)
-        self.root = QTreeWidgetItem()
         self.root_name = os.path.split(self.file)[1]
-        self.root.setIcon(0, QIcon(Icon.file))
-        self.root.setText(0, self.root_name)
-        # 设置根节点
+        self.root = CustomQTreeWidgetItem(Icon.file, self.root_name)
         self.tree.addTopLevelItem(self.root)
+        self.tree.setItemWidget(self.root, 0, self.root.widget)
         self.root.setExpanded(True)
         # 当前修改后的xml信息
         self.old_tree_data = []
