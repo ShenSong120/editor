@@ -167,6 +167,10 @@ class MainWindow(QMainWindow):
         self.view_tool_bar.setMaximumHeight(32)
         self.view_tool_bar.addAction(self.mini_map_switch_action)
         self.view_tool_bar.addAction(self.structure_show_switch_action)
+        # 设置工具栏
+        self.setting_tool_bar = self.addToolBar('setting_tool_bar')
+        self.setting_tool_bar.setMaximumHeight(32)
+        self.setting_tool_bar.addAction(self.setting_action)
         # 状态栏 & 状态栏显示
         self.status_bar = QStatusBar(self)
         self.status_bar.setObjectName('status_bar')
