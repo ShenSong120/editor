@@ -52,6 +52,10 @@ class TreeStructure(QWidget):
         self.tree_eidget = TreeWidget(file)
         self.stacked_widget.addWidget(self.tree_eidget)
         self.stacked_widget.setCurrentWidget(self.tree_eidget)
+        # (如果文件有错误, 返回一个-1元素, 将产生的信息生成structure-tree)
+        if self.tree_eidget.current_tree_data[0] != -1:
+            self.tree_eidget.insert_child(self.tree_eidget.current_tree_data)
+            self.tree_eidget.old_tree_data = self.tree_eidget.current_tree_data
 
     # 更新树
     def update_tree(self, file):

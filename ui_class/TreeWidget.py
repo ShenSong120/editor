@@ -12,7 +12,6 @@ class CustomQTreeWidgetItem(QTreeWidgetItem):
         super(CustomQTreeWidgetItem, self).__init__(parent)
         # 自定义item中的widget 用来显示自定义的内容 font-size: 11pt;
         self.widget = QWidget()
-        self.widget.setStyleSheet('font-family:Arial; font-weight: bold;')
         # 传递进来的文本(非富文本)
         self.string_text = text
         # 用来显示name
@@ -27,6 +26,7 @@ class CustomQTreeWidgetItem(QTreeWidgetItem):
         self.h_box.setSpacing(0)
         self.h_box.setContentsMargins(0, 0, 0, 0)
         self.h_box.addWidget(self.icon_label)
+        self.h_box.addSpacing(3)
         self.h_box.addWidget(self.text_label)
         self.h_box.addStretch(1)
         # 设置widget的布局
@@ -54,7 +54,7 @@ class TreeWidget(QWidget):
         super(TreeWidget, self).__init__()
         self.file = file
         # QWidget背景透明
-        self.setStyleSheet('background-color: transparent; font-family:Arial;')
+        self.setStyleSheet('background-color: transparent;')
         # transparent
         tree_qss = 'border:0px solid #646464; \
                     QTreeWidget::branch:closed:has-children:!has-siblings, \
@@ -70,18 +70,15 @@ class TreeWidget(QWidget):
         self.tree.setColumnCount(1)
         # 设置根节点(默认无任何节点)
         self.root_name = os.path.split(self.file)[1]
-        self.root = CustomQTreeWidgetItem(Icon.file, self.root_name)
+        self.root = QTreeWidgetItem()
+        self.root.setIcon(0, QIcon(Icon.file))
+        self.root.setText(0, self.root_name)
         self.tree.addTopLevelItem(self.root)
-        self.tree.setItemWidget(self.root, 0, self.root.widget)
         self.root.setExpanded(True)
         # 当前修改后的xml信息
         self.old_tree_data = []
         # 加载树结构
-        current_tree_data = self.get_tree_data(self.file)
-        # (如果文件有错误, 返回一个-1元素)
-        if current_tree_data[0] != -1:
-            self.new_structure(current_tree_data)
-            self.old_tree_data = current_tree_data
+        self.current_tree_data = self.get_tree_data(self.file)
         # item选中项改变触发事件
         self.tree.itemSelectionChanged.connect(self.item_selection_changed)
         # widget布局
@@ -222,34 +219,6 @@ class TreeWidget(QWidget):
             child = child.child(position[i])
         child_text = self.get_node_name(current_node[1], current_node[2])
         child.setText(0, child_text)
-
-    # 新建树结构
-    def new_structure(self, tree_data):
-        for note_data in tree_data:
-            level, tag, attrib = note_data
-            level = len(level) - 1
-            node_name = self.get_node_name(tag, attrib)
-            if level == 0:
-                xml_root = self.add_node(self.root, node_name)
-                self.tree.setItemWidget(xml_root, 0, xml_root.widget)
-            elif level == 1:
-                first_node = self.add_node(xml_root, node_name)
-                self.tree.setItemWidget(first_node, 0, first_node.widget)
-            elif level == 2:
-                second_node = self.add_node(first_node, node_name)
-                self.tree.setItemWidget(second_node, 0, second_node.widget)
-            elif level == 3:
-                third_node = self.add_node(second_node, node_name)
-                self.tree.setItemWidget(third_node, 0, third_node.widget)
-            elif level == 4:
-                fourth_node = self.add_node(third_node, node_name)
-                self.tree.setItemWidget(fourth_node, 0, fourth_node.widget)
-            elif level == 5:
-                fifth_node = self.add_node(fourth_node, node_name)
-                self.tree.setItemWidget(fifth_node, 0, fifth_node.widget)
-            elif level == 6:
-                sixth_node = self.add_node(fifth_node, node_name)
-                self.tree.setItemWidget(sixth_node, 0, sixth_node.widget)
 
     # 更新树信息
     def update_node(self, current_tree_data):
