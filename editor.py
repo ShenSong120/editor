@@ -295,6 +295,11 @@ class MainWindow(QMainWindow):
                 index = self.editor_widget.file_list.index(path)
                 self.close_tab(index)
 
+    # 获取设置窗口发出的信号
+    def get_signal_from_setting(self, signal_str):
+        for i in range(self.editor_widget.count()):
+            self.editor_widget.widget(i).editor.update_setting(signal_str)
+
     # 更新工具栏动作状态
     def update_tool_bar_enable_status(self, signal_str):
         edit_tool_bar_action_enable_status_dict = json.loads(signal_str)
@@ -446,6 +451,7 @@ class MainWindow(QMainWindow):
     # 设置动作
     def connect_setting(self):
         setting_dialog = Setting(self)
+        setting_dialog.signal[str].connect(self.get_signal_from_setting)
         setting_dialog.exec()
 
     # 窗口关闭事件

@@ -28,9 +28,13 @@ class Setting(QDialog):
             self.function_value_list.append(function_value)
         # 设置三个tab页
         self.tag_tab = OtherWindow('tags', self.tag_list)
+        self.tag_tab.signal[str].connect(self.get_signal)
         self.attrib_name_tab = OtherWindow('attributes', self.attribute_name_list)
+        self.attrib_name_tab.signal[str].connect(self.get_signal)
         self.attrib_value_tab = OtherWindow('attribute_values', self.attribute_value_list)
+        self.attrib_value_tab.signal[str].connect(self.get_signal)
         self.function_tab = FunctionWindow('function', self.function_name_list, self.function_value_list)
+        self.function_tab.signal[str].connect(self.get_signal)
         # tab_widget窗口
         self.tab_widget = QTabWidget(self)
         tab_widget_qss = 'QTabWidget:pane{border: 1px solid #7A7A7A; top: -1px;}\
@@ -51,9 +55,15 @@ class Setting(QDialog):
         self.general_layout.addWidget(self.tab_widget)
         self.setLayout(self.general_layout)
 
+    # 获取子窗口信号
+    def get_signal(self, signal_str):
+        self.signal.emit(signal_str)
+
 
 # 设置其他tab子窗口(tag, attrib, attrib_value等)
 class OtherWindow(QWidget):
+    signal = pyqtSignal(str)
+
     def __init__(self, section_type, option_list, parent=None):
         super(OtherWindow, self).__init__(parent=parent)
         # 传入的section_type, option和value
@@ -112,6 +122,7 @@ class OtherWindow(QWidget):
         config.set(self.section_type, option, value)  # 给type分组设置值
         with open(Param.config_file, 'w', encoding='utf-8') as f:
             config.write(f)
+        self.signal.emit('config_update_option>' + str([self.section_type, option, value]))
 
     # 配置文件删除项
     def config_remove_option(self, option):
@@ -122,6 +133,7 @@ class OtherWindow(QWidget):
         config.remove_option(self.section_type, option)  # 给type分组设置值
         with open(Param.config_file, 'w', encoding='utf-8') as f:
             config.write(f)
+        self.signal.emit('config_delete_option>' + str([self.section_type, option]))
 
     # 增加选项
     def add_option_and_value(self):
@@ -228,6 +240,7 @@ class FunctionWindow(QWidget):
         config.set(self.section_type, option, value)  # 给type分组设置值
         with open(Param.config_file, 'w', encoding='utf-8') as f:
             config.write(f)
+        self.signal.emit('config_update_option>' + str([self.section_type, option, value]))
 
     # 配置文件删除项
     def config_remove_option(self, option):
@@ -238,6 +251,7 @@ class FunctionWindow(QWidget):
         config.remove_option(self.section_type, option)  # 给type分组设置值
         with open(Param.config_file, 'w', encoding='utf-8') as f:
             config.write(f)
+        self.signal.emit('config_delete_option>' + str([self.section_type, option]))
 
     # 配置文件增加选项
     def add_option_and_value(self):

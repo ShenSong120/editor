@@ -174,6 +174,57 @@ class Editor(QsciScintilla):
         self.replace_box = ReplaceBox(self)
         self.replace_box.setHidden(True)
 
+    # 更新设置中的自定义关键词以及代码块
+    def update_setting(self, info_str):
+        flag = info_str.split('>')[0]
+        info_list = eval(info_str.split('>')[1])
+        section = info_list[0]
+        option = info_list[1]
+        value = info_list[2] if len(info_list) == 3 else None
+        if flag == 'config_update_option':
+            key_word = ''
+            if section == 'attributes':
+                self.attribute_list.append(value)
+                key_word = value + '?1'
+            elif section == 'attribute_values':
+                self.attribute_value_list.append(option)
+                key_word = option + '?1'
+            elif section == 'tags':
+                self.tag_list.append(option)
+                key_word = option + '?1'
+            elif section == 'function':
+                if option not in self.function_dict.keys():
+                    key_word = option + '?2'
+                self.function_dict[option] = value
+            elif section == 'words':
+                self.common_word_list.append(option)
+                key_word = option + '?1'
+            # 加载备选词
+            if key_word != '':
+                self.__api.add(key_word)
+                self.__api.prepare()
+        elif flag == 'config_delete_option':
+            key_word = ''
+            if section == 'attributes':
+                value = option + '=""'
+                self.attribute_list.remove(value)
+                key_word = value + '?1'
+            elif section == 'attribute_values':
+                self.attribute_value_list.remove(option)
+                key_word = option + '?1'
+            elif section == 'tags':
+                self.tag_list.remove(option)
+                key_word = option + '?1'
+            elif section == 'function':
+                self.function_dict.pop(option)
+                key_word = option + '?2'
+            elif section == 'words':
+                self.common_word_list.remove(option)
+                key_word = option + '?1'
+            if key_word != '':
+                self.__api.remove(key_word)
+                self.__api.prepare()
+
     # 右键菜单展示
     def show_menu(self, point):
         # 菜单样式(整体背景#4D4D4D,选中背景#1E90FF,选中字体#E8E8E8,选中边界#575757,分离器背景#757575)
