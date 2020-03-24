@@ -445,7 +445,7 @@ class MainWindow(QMainWindow):
 
     # 设置动作
     def connect_setting(self):
-        setting_dialog = Setting(None)
+        setting_dialog = Setting(self)
         setting_dialog.exec()
 
     # 窗口关闭事件
