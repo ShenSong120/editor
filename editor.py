@@ -37,6 +37,7 @@ class MainWindow(QMainWindow):
         self.editor_widget.signal[str].connect(self.get_signal_from_editor)
         # 结构树
         self.structure_tree = TreeStructure(self.central_widget)
+        self.structure_tree.signal[str].connect(self.get_signal_from_structure_tree)
         # 全局竖直布局
         self.general_v_layout = QVBoxLayout(self.central_widget)
         self.general_v_layout.setContentsMargins(1, 0, 0, 0)
@@ -280,6 +281,20 @@ class MainWindow(QMainWindow):
         # 新建文件夹
         elif flag == 'new_folder':
             pass
+
+    # 从structure-tree获取信号
+    def get_signal_from_structure_tree(self, signal_str):
+        # 分隔符变为'/', '>'存在传入的信号中，所以不用
+        flag = signal_str.split('/')[0]
+        if flag == 'find_current_item':
+            index, regex = eval(signal_str.split('/')[1])
+            # print(index, regex)
+            # 通过搜索定位(可能有多个item同样，只获取当前的index所在的item, 故而可能需要多次搜索, 第一次从开头搜索, 后面的从当前光标开始搜索)
+            self.editor_widget.currentWidget().editor.findFirst(regex, True, False, False, False, True, 0, 0, True, False)
+            for i in range(index - 1):
+                self.editor_widget.currentWidget().editor.findFirst(regex, True, False, False, True)
+            # line, index = self.editor_widget.currentWidget().editor.getCursorPosition()
+            # self.editor_widget.currentWidget().editor.setCursorPosition(line, index)
 
     # 获取New文件系统发出的信号
     def get_signal_from_new(self, signal_str):

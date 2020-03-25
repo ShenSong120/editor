@@ -2,6 +2,7 @@ import os
 import operator
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
+from PyQt5.QtCore import *
 from other.glv import Icon
 import xml.etree.cElementTree as ET
 
@@ -50,6 +51,8 @@ class CustomQTreeWidgetItem(QTreeWidgetItem):
 
 # QTreeWidget
 class TreeWidget(QWidget):
+    signal = pyqtSignal(str)
+
     def __init__(self, file):
         super(TreeWidget, self).__init__()
         self.file = file
@@ -293,7 +296,26 @@ class TreeWidget(QWidget):
                 item = parent_item
             else:
                 break
+        # 找到当前item的信息
         for item_info in self.old_tree_data:
             if item_info[0] == position:
-                print(item_info)
-        print(position)
+                target_item = item_info
+                break
+        # 获取相同item
+        same_item = []
+        for item_info in self.old_tree_data:
+            if target_item[1:] == item_info[1:]:
+                same_item.append(item_info)
+        # 需要find的次数
+        target_index = same_item.index(target_item) + 1
+        # 根据正则匹配
+        target_item = target_item
+        # print(target_index, target_item)
+        # 正则表达式
+        # <action\s+name\s?=\s?"inputText"\s+key\s?=\s?"click"\s?>
+        regex = '<\\s?' + target_item[1]
+        for key, value in target_item[2].items():
+            regex = regex + '\\s+' + key + '\\s?=\\s?"' + value + '"'
+        regex = regex + '\\s?>'
+        self.signal.emit('find_current_item/' + str([target_index, regex]))
+        # print(target_index, regex)

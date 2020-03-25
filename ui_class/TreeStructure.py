@@ -1,10 +1,13 @@
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
+from PyQt5.QtCore import *
 from other.glv import Icon
 from ui_class.TreeWidget import TreeWidget
 
 
 class TreeStructure(QWidget):
+    signal = pyqtSignal(str)
+
     def __init__(self, parent, file=None):
         super(TreeStructure, self).__init__(parent)
         # 传入的文件
@@ -50,6 +53,7 @@ class TreeStructure(QWidget):
     # 加载结构树
     def load_tree(self, file):
         self.tree_eidget = TreeWidget(file)
+        self.tree_eidget.signal[str].connect(self.get_signal_from_tree)
         self.stacked_widget.addWidget(self.tree_eidget)
         self.stacked_widget.setCurrentWidget(self.tree_eidget)
         # (如果文件有错误, 返回一个-1元素, 将产生的信息生成structure-tree)
@@ -72,3 +76,7 @@ class TreeStructure(QWidget):
         tree_list = [self.stacked_widget.widget(index) for index in range(self.stacked_widget.count())]
         for tree in tree_list:
             self.stacked_widget.removeWidget(tree)
+
+    # 从tree结构获取信号
+    def get_signal_from_tree(self, signal_str):
+        self.signal.emit(signal_str)
