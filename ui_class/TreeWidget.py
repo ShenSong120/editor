@@ -287,6 +287,8 @@ class TreeWidget(QWidget):
     # item选中项改变触发事件
     def item_selection_changed(self):
         item = self.tree.currentItem()
+        if item is self.root:
+            return
         position = []
         for i in range(10):
             parent_item = item.parent()
