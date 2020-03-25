@@ -228,6 +228,12 @@ class Editor(QsciScintilla):
         # 全部选中
         self.select_all_action = QAction('选中全部(Ctrl+A)', self)
         self.select_all_action.triggered.connect(self.select_all_operate)
+        # 点击跳转动作(针对函数)
+        self.click_dump_action = QAction('跳转到...(Ctrl+右键)', self)
+        self.click_dump_action.triggered.connect(self.indicator_clicked)
+        function_name = self.get_function_name()
+        if function_name is None:
+            self.click_dump_action.setEnabled(False)
         # 添加/去除-注释
         self.comment_action = QAction('添加/去除-注释(Ctrl+/)', self)
         self.comment_action.triggered.connect(self.comment_operate)
@@ -249,6 +255,7 @@ class Editor(QsciScintilla):
         self.menu.addAction(self.paste_action)
         self.menu.addAction(self.delete_action)
         self.menu.addAction(self.select_all_action)
+        self.menu.addAction(self.click_dump_action)
         self.menu.addAction(self.comment_action)
         self.menu.addAction(self.search_action)
         self.menu.addAction(self.replace_action)
@@ -790,10 +797,17 @@ class Editor(QsciScintilla):
 
     # 点击跳转功能处理
     def indicator_clicked(self):
+        function_name = self.get_function_name()
+        if function_name is not None:
+            self.open_function(function_name)
+
+    # 获取需要跳转的函数名字
+    def get_function_name(self):
+        function_name = None
         line, index = self.getCursorPosition()
         indicator_word = self.wordAtLineIndex(line, index)
         current_line = self.text(line)
-        if 'callFunction' in current_line:
+        if 'callFunction' in current_line and 'name' in current_line:
             name_value = current_line.split('name')[1]
             if ' ' in name_value:
                 name_value = name_value.split(' ')[0]
@@ -801,12 +815,13 @@ class Editor(QsciScintilla):
                 name_value = name_value.split('>')[0]
             if indicator_word in name_value:
                 function_name = indicator_word + '.xml'
-                self.open_function(function_name)
+        return function_name
 
     # Ctrl+点击 打开函数文件
     def open_function(self, function_name):
         current_path = os.path.dirname(self.file)
         current_path = os.path.dirname(current_path)
         current_path = MergePath(current_path, 'functions', function_name).merged_path
-        # 点击跳入到函数内部
-        self.signal.emit('dump_in_function>' + current_path)
+        if os.path.exists(current_path):
+            # 点击跳入到函数内部
+            self.signal.emit('dump_in_function>' + current_path)
