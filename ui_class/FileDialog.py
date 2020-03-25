@@ -101,7 +101,7 @@ class NewFile(QDialog):
         if self.file_type is None:
             if '.' not in file_name:
                 # 发出后缀警告
-                QMessageBox.warning(self,'消息框标题', '文件名后缀错误！\n请重新输入文件名',
+                QMessageBox.warning(self, '消息框标题', '文件名后缀错误！\n请重新输入文件名',
                                     QMessageBox.Yes | QMessageBox.No, QMessageBox.Yes)
                 self.setHidden(False)
                 return
