@@ -126,6 +126,7 @@ class Editor(QsciScintilla):
         self.tag_set_num = 1
         self.attribute_set_num = 2
         self.attribute_value_set_num = 3
+        self.function_set_num = 4
         '''新建文件还是导入文件'''
         self.file = file
         if file is None:
@@ -626,8 +627,22 @@ class Editor(QsciScintilla):
             elif current_char == '"' or current_char == "'":
                 line, index = self.getCursorPosition()
                 self.setCursorPosition(line, index - 1)
-                user_list = [attribute+'?1' for attribute in self.attribute_value_list]
-                self.showUserList(self.attribute_value_set_num, user_list)
+                current_line_text = self.text(line)
+                # 补全调用函数的便签属性
+                if '<callFunction' in current_line_text and self.wordAtLineIndex(line, index-4) == 'name':
+                    function_list = []
+                    parent_dir = os.path.abspath(os.path.join(self.file, '../..'))
+                    function_dir = os.path.join(parent_dir, 'functions')
+                    for name in os.listdir(function_dir):
+                        if os.path.isfile(os.path.join(function_dir, name)) and name.endswith('.xml'):
+                            function_list.append(name.split('.')[0])
+                    # 自动补全调用函数名
+                    user_list = [function + '?2' for function in function_list]
+                    self.showUserList(self.function_set_num, user_list)
+                # 补全其他标签属性值
+                else:
+                    user_list = [attribute+'?1' for attribute in self.attribute_value_list]
+                    self.showUserList(self.attribute_value_set_num, user_list)
 
     # 重写窗口缩放事件
     def resizeEvent(self, event):
