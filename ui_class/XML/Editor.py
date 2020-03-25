@@ -111,31 +111,12 @@ class Editor(QsciScintilla):
         self.SendScintilla(self.SCI_INDICSETFORE, self.WORD_INDICATOR, QColor("#FF0000"))
         self.SendScintilla(self.SCI_INDICSETSTYLE, self.WARNING_INDICATOR, self.INDIC_SQUIGGLE)
         self.SendScintilla(self.SCI_INDICSETFORE, self.WARNING_INDICATOR, QColor("#0000FF"))
-        '''获取配置文件'''
-        # self.cf = configparser.ConfigParser()
-        self.cf = CaseConfigParser()
-        self.cf.read(Param.config_file, encoding='utf-8')
-        # 首行文件
-        self.begin_line_label = self.cf.get('begin_line', 'label')
-        # 标签单词列表
-        self.tag_list = list(self.cf.options('tags'))
-        # 属性
-        self.attribute_list = []
-        for option in list(self.cf.options('attributes')):
-            value = self.cf.get('attributes', option)
-            self.attribute_list.append(value)
-        # 属性值
-        self.attribute_value_list = list(self.cf.options('attribute_values'))
-        # word(共用)
-        self.common_word_list = list(self.cf.options('words'))
-        # 函数代码块
-        self.function_dict = {}
-        for key in self.cf.options('function'):
-            function = str(self.cf.get('function', key))
-            function = function.replace('\\r', '\r')
-            function = function.replace('\\n', '\n')
-            function = function.replace('\\t', '\t')
-            self.function_dict[key] = function
+        '''自动补全'''
+        self.__api = QsciAPIs(self.lexer)
+        '''更新自动补全设置'''
+        # 存储所有自动补全候选项
+        self.auto_completions = []
+        self.update_setting()
         '''提示框选项图标(单词和函数的区分)'''
         word_image = QPixmap(Icon.word)
         function_image = QPixmap(Icon.function)
@@ -145,19 +126,6 @@ class Editor(QsciScintilla):
         self.tag_set_num = 1
         self.attribute_set_num = 2
         self.attribute_value_set_num = 3
-        '''自动补全'''
-        self.__api = QsciAPIs(self.lexer)
-        auto_completions = self.tag_list + self.attribute_list + self.attribute_value_list + self.common_word_list + list(self.function_dict.keys())
-        for item in auto_completions:
-            # 如果是函数(图标显示function)
-            if item in list(self.function_dict.keys()):
-                auto_completions[auto_completions.index(item)] = item + '?2'
-            # 如果是单词(图标显示word)
-            else:
-                auto_completions[auto_completions.index(item)] = item + '?1'
-        for ac in auto_completions:
-            self.__api.add(ac)
-        self.__api.prepare()
         '''新建文件还是导入文件'''
         self.file = file
         if file is None:
@@ -175,55 +143,45 @@ class Editor(QsciScintilla):
         self.replace_box.setHidden(True)
 
     # 更新设置中的自定义关键词以及代码块
-    def update_setting(self, info_str):
-        flag = info_str.split('>')[0]
-        info_list = eval(info_str.split('>')[1])
-        section = info_list[0]
-        option = info_list[1]
-        value = info_list[2] if len(info_list) == 3 else None
-        if flag == 'config_update_option':
-            key_word = ''
-            if section == 'attributes':
-                self.attribute_list.append(value)
-                key_word = value + '?1'
-            elif section == 'attribute_values':
-                self.attribute_value_list.append(option)
-                key_word = option + '?1'
-            elif section == 'tags':
-                self.tag_list.append(option)
-                key_word = option + '?1'
-            elif section == 'function':
-                if option not in self.function_dict.keys():
-                    key_word = option + '?2'
-                self.function_dict[option] = value
-            elif section == 'words':
-                self.common_word_list.append(option)
-                key_word = option + '?1'
-            # 加载备选词
-            if key_word != '':
-                self.__api.add(key_word)
-                self.__api.prepare()
-        elif flag == 'config_delete_option':
-            key_word = ''
-            if section == 'attributes':
-                value = option + '=""'
-                self.attribute_list.remove(value)
-                key_word = value + '?1'
-            elif section == 'attribute_values':
-                self.attribute_value_list.remove(option)
-                key_word = option + '?1'
-            elif section == 'tags':
-                self.tag_list.remove(option)
-                key_word = option + '?1'
-            elif section == 'function':
-                self.function_dict.pop(option)
-                key_word = option + '?2'
-            elif section == 'words':
-                self.common_word_list.remove(option)
-                key_word = option + '?1'
-            if key_word != '':
-                self.__api.remove(key_word)
-                self.__api.prepare()
+    def update_setting(self):
+        config = CaseConfigParser()
+        config.read(Param.config_file, encoding='utf-8')
+        # 首行文件
+        self.begin_line_label = config.get('begin_line', 'label')
+        # 标签单词列表
+        self.tag_list = list(config.options('tags'))
+        # 属性
+        self.attribute_list = []
+        for option in list(config.options('attributes')):
+            value = config.get('attributes', option)
+            self.attribute_list.append(value)
+        # 属性值
+        self.attribute_value_list = list(config.options('attribute_values'))
+        # word(共用)
+        self.common_word_list = list(config.options('words'))
+        # 函数代码块
+        self.function_dict = {}
+        for key in config.options('function'):
+            function = str(config.get('function', key))
+            function = function.replace('\\r', '\r')
+            function = function.replace('\\n', '\n')
+            function = function.replace('\\t', '\t')
+            self.function_dict[key] = function
+        # 清除自动补全框
+        for ac in self.auto_completions:
+            self.__api.remove(ac)
+        self.auto_completions = self.tag_list + self.attribute_list + self.attribute_value_list +\
+                                self.common_word_list + list(self.function_dict.keys())
+        for item in self.auto_completions:
+            # 如果是函数(图标显示function)
+            if item in list(self.function_dict.keys()):
+                self.auto_completions[self.auto_completions.index(item)] = item + '?2'
+            # 如果是单词(图标显示word)
+            else:
+                self.auto_completions[self.auto_completions.index(item)] = item + '?1'
+        for ac in self.auto_completions:
+            self.__api.add(ac)
+        self.__api.prepare()
 
     # 右键菜单展示
     def show_menu(self, point):

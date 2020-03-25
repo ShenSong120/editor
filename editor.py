@@ -297,8 +297,10 @@ class MainWindow(QMainWindow):
 
     # 获取设置窗口发出的信号
     def get_signal_from_setting(self, signal_str):
-        for i in range(self.editor_widget.count()):
-            self.editor_widget.widget(i).editor.update_setting(signal_str)
+        # 配置文件更新
+        if signal_str == 'config_update_option':
+            for i in range(self.editor_widget.count()):
+                self.editor_widget.widget(i).editor.update_setting()
 
     # 更新工具栏动作状态
     def update_tool_bar_enable_status(self, signal_str):
