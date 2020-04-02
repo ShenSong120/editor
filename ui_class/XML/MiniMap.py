@@ -1,7 +1,7 @@
 from PyQt5.QtWidgets import QGraphicsOpacityEffect, QFrame
 from PyQt5.QtCore import QPropertyAnimation, Qt
 from PyQt5.Qsci import *
-from other.glv import View
+from glv import View
 
 
 class MiniMap(QsciScintilla):

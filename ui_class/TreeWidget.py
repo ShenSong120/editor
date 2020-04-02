@@ -3,7 +3,7 @@ import operator
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
-from other.glv import Icon
+from glv import Icon
 import xml.etree.cElementTree as ET
 
 

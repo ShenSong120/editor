@@ -2,10 +2,12 @@
 import os
 import sys
 import json
+if hasattr(sys, 'frozen'):
+    os.environ['PATH'] = sys._MEIPASS + ";" + os.environ['PATH']
 from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
-from other.glv import Icon, Param, MergePath, BeautifyStyle, EditorAction, View
+from glv import Icon, Param, MergePath, BeautifyStyle, EditorAction, View
 from ui_class.ProjectBar import ProjectBar
 from ui_class.EditorTab import EditorTab
 from ui_class.New import New
@@ -482,7 +484,7 @@ if __name__ == '__main__':
     tran.load(Param.translator_file)
     app = QApplication(sys.argv)
     app.installTranslator(tran)
-    form = MainWindow(None, 'xml-editor')
+    form = MainWindow(None, '逐鹿平台->脚本编辑器')
     form.show()
     app.exec_()
 

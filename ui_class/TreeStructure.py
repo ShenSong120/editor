@@ -1,7 +1,7 @@
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
-from other.glv import Icon
+from glv import Icon
 from ui_class.TreeWidget import TreeWidget
 
 

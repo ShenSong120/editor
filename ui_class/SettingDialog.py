@@ -2,7 +2,7 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 from other.CaseConfigParser import CaseConfigParser
-from other.glv import Param
+from glv import Param
 
 
 class Setting(QDialog):

@@ -3,10 +3,11 @@ import re
 import json
 from PyQt5.QtCore import *
 from PyQt5.Qsci import *
+from PyQt5.QtPrintSupport import *
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from other.CaseConfigParser import CaseConfigParser
-from other.glv import Icon, Param, MergePath, EditorAction
+from glv import Icon, Param, MergePath, EditorAction
 from ui_class.Search import SearchBox
 from ui_class.Replace import ReplaceBox
 
