@@ -128,6 +128,7 @@ class Editor(QsciScintilla):
         self.attribute_set_num = 2
         self.attribute_value_set_num = 3
         self.function_set_num = 4
+        self.part_set_num = 5
         '''新建文件还是导入文件'''
         self.file = file
         if file is None:
@@ -232,8 +233,8 @@ class Editor(QsciScintilla):
         # 点击跳转动作(针对函数)
         self.click_dump_action = QAction('跳转到...(Ctrl+右键)', self)
         self.click_dump_action.triggered.connect(self.indicator_clicked)
-        function_name = self.get_function_name()
-        if function_name is None:
+        file_type, xml_file_name = self.get_click_name()
+        if xml_file_name is None:
             self.click_dump_action.setEnabled(False)
         # 添加/去除-注释
         self.comment_action = QAction('添加/去除-注释(Ctrl+/)', self)
@@ -647,6 +648,16 @@ class Editor(QsciScintilla):
                     # 自动补全调用函数名
                     user_list = [function + '?2' for function in function_list]
                     self.showUserList(self.function_set_num, user_list)
+                elif '<include' in current_line_text and self.wordAtLineIndex(line, index-4) == 'partId':
+                    part_list = []
+                    parent_dir = os.path.abspath(os.path.join(self.file, '../..'))
+                    part_dir = os.path.join(parent_dir, 'parts')
+                    for name in os.listdir(part_dir):
+                        if os.path.isfile(os.path.join(part_dir, name)) and name.endswith('.xml'):
+                            part_list.append(name.split('.')[0])
+                    # 自动补全调用函数名
+                    user_list = [part + '?2' for part in part_list]
+                    self.showUserList(self.part_set_num, user_list)
                 # 补全其他标签属性值
                 else:
                     user_list = [attribute+'?1' for attribute in self.attribute_value_list]
@@ -798,13 +809,14 @@ class Editor(QsciScintilla):
 
     # 点击跳转功能处理
     def indicator_clicked(self):
-        function_name = self.get_function_name()
-        if function_name is not None:
-            self.open_function(function_name)
+        click_name_type, click_name = self.get_click_name()
+        if click_name is not None:
+            self.open_xml_file(click_name_type, click_name)
 
     # 获取需要跳转的函数名字
-    def get_function_name(self):
-        function_name = None
+    def get_click_name(self):
+        click_name = None
+        click_name_type = None
         line, index = self.getCursorPosition()
         indicator_word = self.wordAtLineIndex(line, index)
         current_line = self.text(line)
@@ -815,14 +827,24 @@ class Editor(QsciScintilla):
             else:
                 name_value = name_value.split('>')[0]
             if indicator_word in name_value:
-                function_name = indicator_word + '.xml'
-        return function_name
+                click_name = indicator_word + '.xml'
+                click_name_type = 'functions'
+        elif 'include' in current_line and 'partId' in current_line:
+            name_value = current_line.split('partId')[1]
+            if ' ' in name_value:
+                name_value = name_value.split(' ')[0]
+            else:
+                name_value = name_value.split('>')[0]
+            if indicator_word in name_value:
+                click_name = indicator_word + '.xml'
+                click_name_type = 'parts'
+        return click_name_type, click_name
 
     # Ctrl+点击 打开函数文件
-    def open_function(self, function_name):
+    def open_xml_file(self, file_type, file_name):
         current_path = os.path.dirname(self.file)
         current_path = os.path.dirname(current_path)
-        current_path = MergePath(current_path, 'functions', function_name).merged_path
+        current_path = MergePath(current_path, file_type, file_name).merged_path
         if os.path.exists(current_path):
             # 点击跳入到函数内部
             self.signal.emit('dump_in_function>' + current_path)
